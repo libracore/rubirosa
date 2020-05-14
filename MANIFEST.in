@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include rubirosa *.css
+recursive-include rubirosa *.csv
+recursive-include rubirosa *.html
+recursive-include rubirosa *.ico
+recursive-include rubirosa *.js
+recursive-include rubirosa *.json
+recursive-include rubirosa *.md
+recursive-include rubirosa *.png
+recursive-include rubirosa *.py
+recursive-include rubirosa *.svg
+recursive-include rubirosa *.txt
+recursive-exclude rubirosa *.pyc
