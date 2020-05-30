@@ -7,7 +7,7 @@ def get_data():
 		{
 			"module_name": "Rubirosa",
 			"color": "black",
-			"icon": "octicon octicon-star",
+			"icon": "icon rubirosa-blue",
 			"type": "module",
 			"label": _("Rubirosa")
 		}

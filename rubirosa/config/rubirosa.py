@@ -88,6 +88,14 @@ def get_data():
                        "label": _("General Ledger"),
                        "description": _("General Ledger"),
                        "is_query_report": True
+				   },
+                   {
+                       "type": "report",
+                       "doctype": "GL Entry",
+                       "name": "Liquidity Plan",
+                       "label": _("Liquidity Plan"),
+                       "description": _("Liquidity Plan"),
+                       "is_query_report": True
 				   }
             ]
         }
