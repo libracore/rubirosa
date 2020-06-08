@@ -4,3 +4,4 @@
 *.swp
 tags
 rubirosa/docs/current
+__pycache__
