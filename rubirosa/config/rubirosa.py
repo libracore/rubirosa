@@ -74,6 +74,14 @@ def get_data():
                        "label": _("Advanced Sales Partners Commission"),
                        "description": _("Advanced Sales Partners Commission"),
                        "is_query_report": True
+				   },
+                   {
+                       "type": "report",
+                       "doctype": "Sales Invoice",
+                       "name": "Customer Statistics",
+                       "label": _("Customer Statistics"),
+                       "description": _("Customer Statistics"),
+                       "is_query_report": True
 				   }            
             ]
         },
