@@ -1,0 +1,33 @@
+{
+ "add_total_row": 0,
+ "creation": "2020-09-25 09:23:33.564372",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "idx": 0,
+ "is_standard": "Yes",
+ "modified": "2020-09-25 09:23:33.564372",
+ "modified_by": "Administrator",
+ "module": "Rubirosa",
+ "name": "Verkaufsanalyse Pivot",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Sales Invoice",
+ "report_name": "Verkaufsanalyse Pivot",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "Accounts User"
+  },
+  {
+   "role": "Accounts Manager"
+  },
+  {
+   "role": "Read-Only"
+  },
+  {
+   "role": "Sales Manager"
+  }
+ ]
+}
