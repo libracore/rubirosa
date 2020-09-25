@@ -28,7 +28,7 @@ def get_columns(filters):
             {"label": "{0} (Qty)".format(g['customer_group']), "fieldname": "qty_" + g['shortcode'], "fieldtype": "Float", "width": 100}
         )
         columns.append(
-            {"label": "{0} (Amount)".format(g['customer_group']), "fieldname": "amount_" + g['shortcode'], "fieldtype": "currency", "width": 100}
+            {"label": "{0} (Amount)".format(g['customer_group']), "fieldname": "amount_" + g['shortcode'], "fieldtype": "Currency", "width": 100}
         )        
     return columns
     
@@ -44,7 +44,7 @@ def get_data(filters):
                     AND `tSII`.`item_name` = `tabSales Invoice Item`.`item_name`
                     AND `tSI`.`posting_date` >= "{from_date}"
                     AND `tSI`.`posting_date` <= "{end_date}") AS `qty_{shortcode}`
-             , (SELECT SUM(`amount`)
+             , (SELECT SUM(`base_amount`)
                    FROM `tabSales Invoice Item` AS `tSII`
                    JOIN `tabSales Invoice` AS `tSI` ON `tSI`.`name` = `tSII`.`parent`
                    WHERE `tSI`.`customer_group` = "{customer_group}" 
@@ -67,6 +67,21 @@ def get_data(filters):
 
     data = frappe.db.sql(sql_query, as_dict=True)
 
+    if len(data) > 0:
+        total_row = {}
+        total_row['item_name'] = "Total"
+        
+        for k in data[0].keys():
+            if k != 'item_name':
+                total_row[k] = 0.0
+        
+        # add total row
+        for row in data:
+            for k,v in row.items():
+                if k != 'item_name':
+                    total_row[k] += (float(v or 0.0))
+        data.append(total_row)
+        
     return data
 
 def get_customer_groups(filters):
