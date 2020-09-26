@@ -30,7 +30,23 @@ def get_data():
                        "name": "Specification",
                        "label": _("Specification"),
                        "description": _("Specification")
-                   }
+                   },
+                   {
+                       "type": "report",
+                       "doctype": "Sales Order",
+                       "name": "Order Planning",
+                       "label": _("Order Planning"),
+                       "description": _("Order Planning"),
+                       "is_query_report": True
+				   },
+                   {
+                       "type": "report",
+                       "doctype": "Sales Order",
+                       "name": "Order Planning for Reorder",
+                       "label": _("Order Planning for Reorder"),
+                       "description": _("Order Planning for Reorder"),
+                       "is_query_report": True
+				   }
             ]
         },
         {
@@ -100,6 +116,36 @@ def get_data():
                    {
                        "type": "report",
                        "doctype": "GL Entry",
+                       "name": "Liquidity Plan",
+                       "label": _("Liquidity Plan"),
+                       "description": _("Liquidity Plan"),
+                       "is_query_report": True
+				   }
+            ]
+        },
+        {
+            "label": _("Business Intelligence"),
+            "icon": "fa fa-tools",
+            "items": [
+                   {
+                       "type": "report",
+                       "doctype": "Sales Invoice",
+                       "name": "Verkaufsanalyse Pivot",
+                       "label": _("Verkaufsanalyse Pivot"),
+                       "description": _("Verkaufsanalyse Pivot"),
+                       "is_query_report": True
+				   },
+                   {
+                       "type": "report",
+                       "doctype": "Customer",
+                       "name": "Customer Statistics",
+                       "label": _("Customer Statistics"),
+                       "description": _("Customer Statistics"),
+                       "is_query_report": True
+				   },
+                   {
+                       "type": "report",
+                       "doctype": "Account",
                        "name": "Liquidity Plan",
                        "label": _("Liquidity Plan"),
                        "description": _("Liquidity Plan"),
