@@ -64,6 +64,12 @@ def get_data():
                        "name": "sync_mailchimp",
                        "label": _("Sync MailChimp"),
                        "description": _("Sync MailChimp")                   
+                   },
+                   {
+                       "type": "doctype",
+                       "name": "MS Direct Settings",
+                       "label": _("MS Direct Settings"),
+                       "description": _("MS Direct Settings")
                    }
             ]
         },
