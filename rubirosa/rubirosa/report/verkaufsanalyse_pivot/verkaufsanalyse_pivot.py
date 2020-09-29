@@ -29,7 +29,14 @@ def get_columns(filters):
         )
         columns.append(
             {"label": "{0} (Amount)".format(g['customer_group']), "fieldname": "amount_" + g['shortcode'], "fieldtype": "Currency", "width": 100}
-        )        
+        )
+    # add total columns
+    columns.append(
+        {"label": "Total (Qty)", "fieldname": "total_qty", "fieldtype": "Float", "width": 100}
+    )
+    columns.append(
+        {"label": "Total (Amount)", "fieldname": "total_amount", "fieldtype": "Currency", "width": 100}
+    )
     return columns
     
 def get_data(filters):
@@ -67,6 +74,20 @@ def get_data(filters):
 
     data = frappe.db.sql(sql_query, as_dict=True)
 
+    # add total columns
+    if len(data) > 0:
+        for row in data:
+            total_qty = 0
+            total_amount = 0
+            for k,v in row.items():
+                if "qty_" in k:
+                    total_qty += (v or 0)
+                elif "amount_" in k:
+                    total_amount += (v or 0)
+            row['total_qty'] = total_qty
+            row['total_amount'] = total_amount
+            
+    # add total row
     if len(data) > 0:
         total_row = {}
         total_row['item_name'] = "Total"
