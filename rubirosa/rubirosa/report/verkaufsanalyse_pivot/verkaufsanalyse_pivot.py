@@ -50,14 +50,16 @@ def get_data(filters):
                    WHERE `tSI`.`customer_group` = "{customer_group}" 
                     AND `tSII`.`item_name` = `tabSales Invoice Item`.`item_name`
                     AND `tSI`.`posting_date` >= "{from_date}"
-                    AND `tSI`.`posting_date` <= "{end_date}") AS `qty_{shortcode}`
+                    AND `tSI`.`posting_date` <= "{end_date}"
+                    AND `tSI`.`docstatus` = 1) AS `qty_{shortcode}`
              , (SELECT SUM(`base_amount`)
                    FROM `tabSales Invoice Item` AS `tSII`
                    JOIN `tabSales Invoice` AS `tSI` ON `tSI`.`name` = `tSII`.`parent`
                    WHERE `tSI`.`customer_group` = "{customer_group}" 
                     AND `tSII`.`item_name` = `tabSales Invoice Item`.`item_name`
                     AND `tSI`.`posting_date` >= "{from_date}"
-                    AND `tSI`.`posting_date` <= "{end_date}") AS `amount_{shortcode}`
+                    AND `tSI`.`posting_date` <= "{end_date}"
+                    AND `tSI`.`docstatus` = 1) AS `amount_{shortcode}`
         """.format(from_date=filters.from_date, end_date=filters.end_date,
             customer_group=g['customer_group'], shortcode=g['shortcode'])     
     
@@ -69,6 +71,7 @@ def get_data(filters):
                     WHERE 
                       `tabSales Invoice`.`posting_date` >= "{from_date}"
                       AND `tabSales Invoice`.`posting_date` <= "{end_date}"
+                      AND `tabSales Invoice`.`docstatus` = 1
                     GROUP BY `tabSales Invoice Item`.`item_name`
       """.format(from_date=filters.from_date, end_date=filters.end_date, pivot=pivot)
 
@@ -111,6 +114,7 @@ def get_customer_groups(filters):
                     FROM `tabSales Invoice`
                     WHERE `tabSales Invoice`.`posting_date` >= "{from_date}"
                       AND `tabSales Invoice`.`posting_date` <= "{end_date}"
+                      AND `tabSales Invoice`.`docstatus` = 1
                     GROUP BY `tabSales Invoice`.`customer_group`;""".format(from_date=filters.from_date, end_date=filters.end_date)
     customer_groups = frappe.db.sql(customer_group_query, as_dict=True)
     for g in customer_groups:
