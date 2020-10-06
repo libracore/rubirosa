@@ -11,7 +11,7 @@
             <msd:order>
                <msd:orderDate>{{ date }}</msd:orderDate>
                <msd:orderLines>
-                  {% for item in items %}
+                  {%- for item in items %}
                   <msd:OrderLine>
                      <msd:itemDescription>{{ item.item_name }}</msd:itemDescription>
                      <msd:itemNo>{{ item.item_code }}</msd:itemNo>
@@ -21,7 +21,7 @@
                      <msd:unitOfMeasure>{{ item.uom }}</msd:unitOfMeasure>
                      <msd:unitPrice>{{ item.rate }}</msd:unitPrice>
                   </msd:OrderLine>
-                  {% endfor %}
+                  {%- endfor %}
                </msd:orderLines>
                <msd:orderNo>{{ name }}</msd:orderNo>
                <msd:payment>
@@ -38,9 +38,9 @@
                      <msd:country>{{ customer.country_code }}</msd:country>
                      <msd:language>{{ language }}</msd:language>
                      <msd:postCode>{{ customer.pincode }}</msd:postCode>
-                     <msd:address>{{ customer.address }}</msd:address>
-                     <msd:name>{{ customer_name }}</msd:name>
-                     {% if customer.address_additional %}<msd:name>{{ customer.address_additional }}</msd:name>{% endif %}
+                     <msd:street>{{ customer.address }}</msd:street>
+                     <msd:surname>{{ customer_name }}</msd:surname>
+                     {%- if customer.address_additional %}<msd:address_additional>{{ customer.address_additional }}</msd:address_additional>{% endif %}
                   </msd:customer>
                   <msd:customerNo>{{ customer_code }}</msd:customerNo>
                </msd:sellTo>
@@ -50,7 +50,7 @@
                   <msd:country>{{ shipment.country_code }}</msd:country>
                   <msd:name>{{ customer_name }}</msd:name>
                   <msd:postCode>{{ shipment.pincode }}</msd:postCode>
-                  {% if shipment.address_additional %}<msd:name>{{ shipment.address_additional }}</msd:name>{% endif %}
+                  {%- if shipment.address_additional %}<msd:address2>{{ shipment.address_additional }}</msd:address2>{% endif %}
                </msd:shipTo>
                <msd:shipment>
                    <msd:shipmentMethod>{{ shipment_method }}</msd:shipmentMethod>

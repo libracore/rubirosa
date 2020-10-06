@@ -16,7 +16,7 @@
                   <msd:email>{{ email_id }}</msd:email>
                   <msd:languageCode>{{ language }}</msd:languageCode>
                   <msd:lines>
-                     {% for item in items %}
+                     {%- for item in items %}
                      <msd:Line>
                         <msd:description1>{{ item.item_name }}</msd:description1>
                         <msd:directUnitCost>{{ item.rate }}</msd:directUnitCost>
@@ -28,7 +28,7 @@
                         <msd:unitOfMeasureCode>{{ item.uom }}</msd:unitOfMeasureCode>
                         <msd:vendorItemNo>{{ item.barcode }}</msd:vendorItemNo>
                      </msd:Line>
-                     {% endfor %}
+                     {%- endfor %}
                   </msd:lines>
                   <msd:orderDate>{{ date }}</msd:orderDate>
                   <msd:purchaseOrderNo>{{ name }}</msd:purchaseOrderNo>

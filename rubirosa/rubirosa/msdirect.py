@@ -22,8 +22,8 @@ def write_item(item_code):
         'blocked': item.disabled,
         'currency': html.escape(settings.item_currency),
         'item_name': html.escape(item.item_name),
-        'description': html.escape(item.description),
-        'item_code': html.escape(item.item_code),
+        'description': html.escape(item.item_code),
+        'item_code': html.escape(item.barcode or "{0}".format(abs(hash(item.item_code)))),
         'not_stock_item': 0 if item.is_stock_item else 1,
         'return_location': html.escape(settings.default_return_location),
         'barcode': html.escape(item.barcode or ""),
@@ -59,6 +59,18 @@ def write_delivery_note(delivery_note):
         customer_address = frappe.get_doc("Address", dn.customer_address)
     else:
         customer_address = shipping_address
+    # extend item dict
+    items = []
+    for item in dn.items:
+        items.append({
+            'item_name': item.item_name,
+            'item_code': html.escape(frappe.get_value("Item", item.item_code, "barcode") or "{0}".format(abs(hash(item.item_code)))),
+            'rate': item.rate,
+            'idx': item.idx,
+            'qty': item.qty,
+            'uom': item.uom,
+            'barcode': frappe.get_value("Item", item.item_code, "barcode")
+        })
     # prepare content
     data = {
         'header': get_header(),
@@ -71,7 +83,7 @@ def write_delivery_note(delivery_note):
         'language': dn.language,
         'customer_name': html.escape(dn.customer_name),
         'customer_code': abs(hash(dn.customer_name)),
-        'shipment_method': dn.shipment_method,
+        'shipment_method': dn.shipping_method,
         'customer': {
             'address': html.escape(customer_address.address_line1),
             'address_additional': html.escape(customer_address.address_line2) if customer_address.address_line2 else None,
@@ -99,7 +111,7 @@ def write_delivery_note(delivery_note):
         result = "Error"
         
     # add log
-    add_log("delivery Note {0} sent to MS Direct".format(delivery_note), request=xml, response=response.text, result=result)
+    add_log("Delivery Note {0} sent to MS Direct".format(delivery_note), request=xml, response=response.text, result=result)
     return
     
 def write_purchase_order(purchase_order):
@@ -112,22 +124,32 @@ def write_purchase_order(purchase_order):
     else:
         frappe.throw("Supplier address missing in purchase order {0}".format(purchase_order), "MS Direct write_purchase_order")
     # extend warehouse code and barcode
+    items = []
     for item in po.items:
-        item['warehouse_code'] = frappe.get_value("Warehouse", item.warehouse, "warehouse_code")
-        item['barcode'] = frappe.get_value("Item", item.item_code, "barcode")
+        items.append({
+            'item_name': item.item_name,
+            'item_code': html.escape(frappe.get_value("Item", item.item_code, "barcode") or "{0}".format(abs(hash(item.item_code)))),
+            'rate': item.rate,
+            'idx': item.idx,
+            'schedule_date': item.schedule_date,
+            'qty': item.qty,
+            'uom': item.uom,
+            'warehouse_code': frappe.get_value("Warehouse", item.warehouse, "warehouse_code"),
+            'barcode': frappe.get_value("Item", item.item_code, "barcode")
+        })
     # prepare content
     data = {
         'header': get_header(),
-        'date': dn.posting_date,
+        'date': po.transaction_date,
         'name': purchase_order,
         'currency': html.escape(settings.item_currency),
         'email_id': po.contact_email,
-        'language': dn.language,
+        'language': po.language,
         'supplier_name': html.escape(po.supplier_name),
         'tax_id': frappe.get_value("Supplier", po.supplier, "tax_id"),
-        'items': po.items,
+        'items': items,
         'address': {
-            'address': html.escape(shipping_address.address_line1),
+            'address': html.escape(supplier_address.address_line1),
             'city': html.escape(supplier_address.city),
             'country_code': get_country_code(supplier_address.country)
         }
@@ -168,7 +190,7 @@ def post_request(content):
     auth = HTTPBasicAuth(settings.user, settings.password)
     url = settings.endpoint
     # send request
-    response = requests.post(url=url, auth=auth, data=content)
+    response = requests.post(url=url, auth=auth, data=content.encode('utf-8'))
     return response
 
 def add_log(title, request=None, response=None, result="None"):
