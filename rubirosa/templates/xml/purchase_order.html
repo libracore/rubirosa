@@ -1,0 +1,43 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:msd="http://systinet.com/wsdl/com/magicsoftware/magicxpi/msDataHandling/">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <msd:purchaseOrder>
+         <msd:purchaseOrderRequest>
+            <msd:messageHeader>
+               <msd:clientId>{{ header.client_id }}</msd:clientId>
+               <msd:clientName>{{ header.client_name }}</msd:clientName>
+               <msd:token>{{ header.token }}</msd:token>
+            </msd:messageHeader>
+            <msd:purchaseOrder>
+               <msd:Header>
+                  <msd:city>{{ address.city }}</msd:city>
+                  <msd:countryCode>{{ address.country_code }}</msd:countryCode>
+                  <msd:currencyCode>{{ currency }}</msd:currencyCode>
+                  <msd:email>{{ email_id }}</msd:email>
+                  <msd:languageCode>{{ language }}</msd:languageCode>
+                  <msd:lines>
+                     {% for item in items %}
+                     <msd:Line>
+                        <msd:description1>{{ item.item_name }}</msd:description1>
+                        <msd:directUnitCost>{{ item.rate }}</msd:directUnitCost>
+                        <msd:itemNo>{{ item.item_code }}</msd:itemNo>
+                        <msd:lineNo>{{ item.idx }}</msd:lineNo>
+                        <msd:locationCode>{{ item.warehouse_code }}</msd:locationCode>
+                        <msd:plannedReceiptDate>{{ item.schedule_date }}</msd:plannedReceiptDate>
+                        <msd:quantity>{{ item.qty }}</msd:quantity>
+                        <msd:unitOfMeasureCode>{{ item.uom }}</msd:unitOfMeasureCode>
+                        <msd:vendorItemNo>{{ item.barcode }}</msd:vendorItemNo>
+                     </msd:Line>
+                     {% endfor %}
+                  </msd:lines>
+                  <msd:orderDate>{{ date }}</msd:orderDate>
+                  <msd:purchaseOrderNo>{{ name }}</msd:purchaseOrderNo>
+                  <msd:vendorAddress1>{{ address.street }}</msd:vendorAddress1>
+                  <msd:vendorName>{{ supplier_name }}</msd:vendorName>
+                  <msd:vendorNo>{{ tax_id }}</msd:vendorNo>
+               </msd:Header>
+            </msd:purchaseOrder>
+         </msd:purchaseOrderRequest>
+      </msd:purchaseOrder>
+   </soapenv:Body>
+</soapenv:Envelope>

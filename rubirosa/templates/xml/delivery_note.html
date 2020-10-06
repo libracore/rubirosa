@@ -1,0 +1,60 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:msd="http://systinet.com/wsdl/com/magicsoftware/magicxpi/msDataHandling/">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <msd:order>
+         <msd:orderRequest>
+            <msd:messageHeader>
+               <msd:clientId>{{ header.client_id }}</msd:clientId>
+               <msd:clientName>{{ header.client_name }}</msd:clientName>
+               <msd:token>{{ header.token }}</msd:token>
+            </msd:messageHeader>
+            <msd:order>
+               <msd:orderDate>{{ date }}</msd:orderDate>
+               <msd:orderLines>
+                  {% for item in items %}
+                  <msd:OrderLine>
+                     <msd:itemDescription>{{ item.item_name }}</msd:itemDescription>
+                     <msd:itemNo>{{ item.item_code }}</msd:itemNo>
+                     <msd:orderLineNo>{{ item.idx }}</msd:orderLineNo>
+                     <msd:orderNo>{{ name }}</msd:orderNo>
+                     <msd:quantity>{{ item.qty }}</msd:quantity>
+                     <msd:unitOfMeasure>{{ item.uom }}</msd:unitOfMeasure>
+                     <msd:unitPrice>{{ item.rate }}</msd:unitPrice>
+                  </msd:OrderLine>
+                  {% endfor %}
+               </msd:orderLines>
+               <msd:orderNo>{{ name }}</msd:orderNo>
+               <msd:payment>
+                  <msd:amount>{{ rounded_total }}</msd:amount>
+                  <msd:currency>{{ currency }}</msd:currency>
+                  <msd:separateInvoice>{{ separate_invoice }}</msd:separateInvoice>
+                  <msd:typeOfPayment>R</msd:typeOfPayment>
+               </msd:payment>
+               <msd:processingId>0</msd:processingId>
+               <msd:responseCode>SHOP01</msd:responseCode>
+               <msd:sellTo>
+                  <msd:customer>
+                     <msd:city>{{ customer.city }}</msd:city>
+                     <msd:country>{{ customer.country_code }}</msd:country>
+                     <msd:language>{{ language }}</msd:language>
+                     <msd:postCode>{{ customer.pincode }}</msd:postCode>
+                     <msd:street>{{ customer.street }}</msd:street>
+                     <msd:name>{{ customer_name }}</msd:name>
+                  </msd:customer>
+                  <msd:customerNo>123a45ef6</msd:customerNo>
+               </msd:sellTo>
+               <msd:shipTo>
+                  <msd:address>{{ shipment.address }}</msd:address>
+                  <msd:city>{{ shipment.city }}</msd:city>
+                  <msd:country>{{ shipment.country_code }}</msd:country>
+                  <msd:name>{{ customer_name }}</msd:name>
+                  <msd:postCode>{{ shipment.pincode }}</msd:postCode>
+               </msd:shipTo>
+               <msd:shipment>
+                   <msd:shipmentMethod>{{ shipment_method }}</msd:shipmentMethod>
+               </msd:shipment>
+            </msd:order>
+         </msd:orderRequest>
+      </msd:order>
+   </soapenv:Body>
+</soapenv:Envelope>
