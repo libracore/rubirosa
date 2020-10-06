@@ -40,8 +40,9 @@
                      <msd:postCode>{{ customer.pincode }}</msd:postCode>
                      <msd:street>{{ customer.street }}</msd:street>
                      <msd:name>{{ customer_name }}</msd:name>
+                     {% if customer.address_additional %}<msd:name>{{ customer.address_additional }}</msd:name>{% endif %}
                   </msd:customer>
-                  <msd:customerNo>123a45ef6</msd:customerNo>
+                  <msd:customerNo>{{ customer_code }}</msd:customerNo>
                </msd:sellTo>
                <msd:shipTo>
                   <msd:address>{{ shipment.address }}</msd:address>
@@ -49,6 +50,7 @@
                   <msd:country>{{ shipment.country_code }}</msd:country>
                   <msd:name>{{ customer_name }}</msd:name>
                   <msd:postCode>{{ shipment.pincode }}</msd:postCode>
+                  {% if shipment.address_additional %}<msd:name>{{ shipment.address_additional }}</msd:name>{% endif %}
                </msd:shipTo>
                <msd:shipment>
                    <msd:shipmentMethod>{{ shipment_method }}</msd:shipmentMethod>
