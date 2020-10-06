@@ -1,3 +1,5 @@
 Report: Liquidity Plan,Liquidity Plan,Liquiditätsplan
 Doctype: Customer,Statistics,Statistik
 Report: Customer Statistics,Customer Statistics,Kundenstatistik
+DocType: Delivery Note,Shipment method,Versandart
+DocType: Warehouse,Warehouse Code,Lagercode

@@ -38,7 +38,7 @@ def get_data():
                        "label": _("Order Planning"),
                        "description": _("Order Planning"),
                        "is_query_report": True
-				   },
+                   },
                    {
                        "type": "report",
                        "doctype": "Sales Order",
@@ -46,7 +46,7 @@ def get_data():
                        "label": _("Order Planning for Reorder"),
                        "description": _("Order Planning for Reorder"),
                        "is_query_report": True
-				   }
+                   }
             ]
         },
         {
@@ -70,6 +70,12 @@ def get_data():
                        "name": "MS Direct Settings",
                        "label": _("MS Direct Settings"),
                        "description": _("MS Direct Settings")
+                   },
+                   {
+                       "type": "doctype",
+                       "name": "MS Direct Log",
+                       "label": _("MS Direct Log"),
+                       "description": _("MS Direct Log")
                    }
             ]
         },
@@ -96,7 +102,7 @@ def get_data():
                        "label": _("Advanced Sales Partners Commission"),
                        "description": _("Advanced Sales Partners Commission"),
                        "is_query_report": True
-				   },
+                   },
                    {
                        "type": "report",
                        "doctype": "Sales Invoice",
@@ -104,7 +110,7 @@ def get_data():
                        "label": _("Customer Statistics"),
                        "description": _("Customer Statistics"),
                        "is_query_report": True
-				   }            
+                   }            
             ]
         },
         {
@@ -118,7 +124,7 @@ def get_data():
                        "label": _("General Ledger"),
                        "description": _("General Ledger"),
                        "is_query_report": True
-				   },
+                   },
                    {
                        "type": "report",
                        "doctype": "GL Entry",
@@ -126,7 +132,7 @@ def get_data():
                        "label": _("Liquidity Plan"),
                        "description": _("Liquidity Plan"),
                        "is_query_report": True
-				   }
+                   }
             ]
         },
         {
@@ -140,7 +146,7 @@ def get_data():
                        "label": _("Verkaufsanalyse Pivot"),
                        "description": _("Verkaufsanalyse Pivot"),
                        "is_query_report": True
-				   },
+                   },
                    {
                        "type": "report",
                        "doctype": "Customer",
@@ -148,7 +154,7 @@ def get_data():
                        "label": _("Customer Statistics"),
                        "description": _("Customer Statistics"),
                        "is_query_report": True
-				   },
+                   },
                    {
                        "type": "report",
                        "doctype": "Account",
@@ -156,7 +162,7 @@ def get_data():
                        "label": _("Liquidity Plan"),
                        "description": _("Liquidity Plan"),
                        "is_query_report": True
-				   }
+                   }
             ]
         }
 ]
