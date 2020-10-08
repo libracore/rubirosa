@@ -12,6 +12,7 @@ import html
 import hashlib
 
 # write an item to MS Direct
+@frappe.whitelist()
 def write_item(item_code):
     # get settings
     settings = frappe.get_doc("MS Direct Settings")
@@ -45,7 +46,9 @@ def write_item(item_code):
     # add log
     add_log("Item {0} sent to MS Direct".format(item_code), request=xml, response=response.text, result=result)
     return
-    
+
+# write delivery note to MS Direct
+@frappe.whitelist()
 def write_delivery_note(delivery_note):
     # get settings
     settings = frappe.get_doc("MS Direct Settings")
@@ -113,7 +116,9 @@ def write_delivery_note(delivery_note):
     # add log
     add_log("Delivery Note {0} sent to MS Direct".format(delivery_note), request=xml, response=response.text, result=result)
     return
-    
+
+# write purchase order to MS Direct
+@frappe.whitelist()
 def write_purchase_order(purchase_order):
     # get settings
     settings = frappe.get_doc("MS Direct Settings")
