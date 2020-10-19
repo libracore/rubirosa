@@ -81,7 +81,7 @@ def write_delivery_note(delivery_note):
         'header': get_header(),
         'date': dn.posting_date,
         'name': delivery_note,
-        'items': dn.items,
+        'items': items,
         'rounded_total': dn.rounded_total,
         'currency': html.escape(settings.item_currency),
         'separate_invoice': 0,
