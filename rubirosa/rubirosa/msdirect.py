@@ -10,6 +10,7 @@ import requests
 from requests.auth import HTTPBasicAuth 
 import html
 import hashlib
+from frappe.utils.password import get_decrypted_password
 
 # write an item to MS Direct
 @frappe.whitelist()
@@ -28,7 +29,7 @@ def write_item(item_code):
         'not_stock_item': 0 if item.is_stock_item else 1,
         'return_location': html.escape(settings.default_return_location),
         'barcode': html.escape(item.barcode or ""),
-        'stock_uom': html.escape(item.stock_uom),
+        'stock_uom': html.escape(ms_uom = frappe.get_value("UOM", item.stock_uom, "ms_direct_uom")),
         'valuation_rate': html.escape("{0}".format(item.valuation_rate or 0)),
         'vat_code': html.escape(settings.item_vat_code),
         'header': get_header()
@@ -65,13 +66,14 @@ def write_delivery_note(delivery_note):
     # extend item dict
     items = []
     for item in dn.items:
+        ms_uom = frappe.get_value("UOM", item.uom, "ms_direct_uom")
         items.append({
             'item_name': item.item_name,
             'item_code': html.escape(frappe.get_value("Item", item.item_code, "barcode") or "{0}".format(abs(hash(item.item_code)))),
             'rate': item.rate,
             'idx': item.idx,
             'qty': item.qty,
-            'uom': item.uom,
+            'uom': ms_uom,
             'barcode': frappe.get_value("Item", item.item_code, "barcode")
         })
     # prepare content
@@ -131,6 +133,7 @@ def write_purchase_order(purchase_order):
     # extend warehouse code and barcode
     items = []
     for item in po.items:
+        ms_uom = frappe.get_value("UOM", item.uom, "ms_direct_uom")
         items.append({
             'item_name': item.item_name,
             'item_code': html.escape(frappe.get_value("Item", item.item_code, "barcode") or "{0}".format(abs(hash(item.item_code)))),
@@ -138,7 +141,7 @@ def write_purchase_order(purchase_order):
             'idx': item.idx,
             'schedule_date': item.schedule_date,
             'qty': item.qty,
-            'uom': item.uom,
+            'uom': ms_uom,
             'warehouse_code': frappe.get_value("Warehouse", item.warehouse, "warehouse_code"),
             'barcode': frappe.get_value("Item", item.item_code, "barcode")
         })
@@ -191,8 +194,9 @@ def get_country_code(country):
 def post_request(content):
     # get settings
     settings = frappe.get_doc("MS Direct Settings")
+    password = get_decrypted_password("MS Direct Settings", "MS Direct Settings", 'password')
     # prepare connection
-    auth = HTTPBasicAuth(settings.user, settings.password)
+    auth = HTTPBasicAuth(settings.user, password)
     url = settings.endpoint
     # send request
     response = requests.post(url=url, auth=auth, data=content.encode('utf-8'))
