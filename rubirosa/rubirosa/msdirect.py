@@ -76,6 +76,12 @@ def write_delivery_note(delivery_note):
             'uom': ms_uom,
             'barcode': frappe.get_value("Item", item.item_code, "barcode")
         })
+    # rewrite shipping method (see ./custom/delivery_note.json)
+    shipping = "B"  # default is B-Post
+    if dn.shipping_method == "A-Post":
+        shipping = "A"
+    elif dn.shipping_method == "Express":
+        shipping = "E"
     # prepare content
     data = {
         'header': get_header(),
@@ -88,7 +94,7 @@ def write_delivery_note(delivery_note):
         'language': dn.language,
         'customer_name': html.escape(dn.customer_name),
         'customer_code': abs(hash(dn.customer_name)),
-        'shipment_method': dn.shipping_method,
+        'shipment_method': shipping,
         'customer': {
             'address': html.escape(customer_address.address_line1),
             'address_additional': html.escape(customer_address.address_line2) if customer_address.address_line2 else None,

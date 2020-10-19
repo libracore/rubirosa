@@ -46,6 +46,12 @@ def get_data():
                        "label": _("Order Planning for Reorder"),
                        "description": _("Order Planning for Reorder"),
                        "is_query_report": True
+                   },
+                   {
+                       "type": "doctype",
+                       "name": "Etikettenbogen",
+                       "label": _("Etikettenbogen"),
+                       "description": _("Etikettenbogen")
                    }
             ]
         },
