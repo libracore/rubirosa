@@ -29,7 +29,7 @@ def write_item(item_code):
         'not_stock_item': 0 if item.is_stock_item else 1,
         'return_location': html.escape(settings.default_return_location),
         'barcode': html.escape(item.barcode or ""),
-        'stock_uom': html.escape(ms_uom = frappe.get_value("UOM", item.stock_uom, "ms_direct_uom")),
+        'stock_uom': html.escape(frappe.get_value("UOM", item.stock_uom, "ms_direct_uom")),
         'valuation_rate': html.escape("{0}".format(item.valuation_rate or 0)),
         'vat_code': html.escape(settings.item_vat_code),
         'header': get_header()
@@ -142,7 +142,7 @@ def write_purchase_order(purchase_order):
             'schedule_date': item.schedule_date,
             'qty': item.qty,
             'uom': ms_uom,
-            'warehouse_code': frappe.get_value("Warehouse", item.warehouse, "warehouse_code"),
+            'warehouse_code': frappe.get_value("Warehouse", item.warehouse, "warehouse_code") or "LA",
             'barcode': frappe.get_value("Item", item.item_code, "barcode")
         })
     # prepare content
