@@ -1,0 +1,17 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:msd="http://systinet.com/wsdl/com/magicsoftware/magicxpi/msDataHandling/">
+   <soapenv:Header/>
+   <soapenv:Body>
+    <msd:productStock>
+        <msd:productStockRequest>
+            <msd:messageHeader>
+               <msd:clientId>{{ header.client_id }}</msd:clientId>
+               <msd:clientName>{{ header.client_name }}</msd:clientName>
+               <msd:token>{{ header.token }}</msd:token>
+            </msd:messageHeader>
+            <msd:request>
+                <msd:onlyStockItems>1</msd:onlyStockItems>
+            </msd:request>
+        </msd:productStockRequest>
+    </msd:productStock>
+</soapenv:Body>
+</soapenv:Envelope>
