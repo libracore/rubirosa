@@ -14,7 +14,7 @@
                   {%- for item in items %}
                   <msd:OrderLine>
                      <msd:itemDescription>{{ item.item_name }}</msd:itemDescription>
-                     <msd:itemNo>{{ item.item_code }}</msd:itemNo>
+                     <msd:itemNo>{{ item.item_code[:20] }}</msd:itemNo>
                      <msd:orderLineNo>{{ item.idx }}</msd:orderLineNo>
                      <msd:orderNo>{{ name }}</msd:orderNo>
                      <msd:quantity>{{ item.qty }}</msd:quantity>
