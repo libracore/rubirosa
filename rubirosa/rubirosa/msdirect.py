@@ -5,12 +5,12 @@
 # Interface module for MS Direct
 
 import frappe
-# import requests module for http interaction with API
-import requests 
+import requests     # import requests module for http interaction with API
 from requests.auth import HTTPBasicAuth 
-import html
-import hashlib
+import html         # for escaping
+import hashlib      # for hashing item codes
 from frappe.utils.password import get_decrypted_password
+from bs4 import BeautifulSoup   # for xml parsing responses
 
 # write an item to MS Direct
 @frappe.whitelist()
@@ -181,6 +181,184 @@ def write_purchase_order(purchase_order):
     # add log
     add_log("Purchase Order {0} sent to MS Direct".format(purchase_order), request=xml, response=response.text, result=result)
     return
+
+# get purchase orders from MS Direct
+@frappe.whitelist()
+def get_purchase_orders():
+    # get settings
+    settings = frappe.get_doc("MS Direct Settings")
+    # prepare content
+    data = {
+        'header': get_header()
+    }
+    # render content
+    xml = frappe.render_template('rubirosa/templates/xml/purchase_receipt.html', data)
+    # get request
+    response = get_request(xml)
+    # parse orders
+    result = parse_purchase_orders(response)
+    # add log (only if there has been new docs)
+    if result:
+        add_log("Purchase receipts pulled from MS Direct", request=xml, response=response.text, result=result)
+    return
+    
+def parse_purchase_orders(response):
+    # create soup container
+    soup = BeautifulSoup(response, 'lxml')
+    # prepare purchase receipts
+    purchase_receipts = {}
+    # find all item transactions
+    items = soup.find_all('wn1:purchasereceiptdata')
+    for item in items:
+        try:
+            po = item.find('wn1:purchaseorderno').getText()
+        except:
+            po = ""
+        # create item record
+        # find item code from barcode
+        barcode = item.find('wn1:itemno').getText()
+        item_match = frappe.get_all("Item", filters={'barcode': barcode}, fields=['name'])
+        if len(item_match) == 0:
+            frappe.throw("Item not found for barcode {0}".format(barcode))
+        received_item = {
+            'item_code': item_match[0]['name'],
+            'qty': float(item.find('wn1:deliveredquantity').getText())
+        }
+        if po != "":
+            po_doc = frappe.get_doc("Purchase Order", po)
+            received_item['purchase_order'] = po
+            for i in po_doc.items:
+                if i.item_code == item_match[0]['name']:
+                    received_item['purchase_order_item'] = i.name
+                    break
+        # check if this po is in the purche receipt keys
+        if po not in purchase_receipts:
+            purchase_receipts[po] = {}
+            purchase_receipts[po]['items'] = []
+        purchase_receipts[po]['items'].append(received_item)
+        if po != "":
+            purchase_receipts[po]['supplier'] = po_doc.supplier
+        else:
+            purchase_receipts[po]['supplier'] = None
+    # insert purchase receipts
+    if len(purchase_receipts) > 0:
+        result = "Inserted "
+        for key, value in purchase_receipts.items():
+            pr_doc = frappe.get_doc({
+                'doctype': "Purchase Receipt",
+                'supplier': value['supplier'],
+                'items': value['items']
+            })
+            pr_doc.insert()
+            frappe.db.commit()
+            result += pr_doc.name + " "
+    else:
+        result = None
+    return result
+
+# get order state from MS Direct
+@frappe.whitelist()
+def get_order_state():
+    # get settings
+    settings = frappe.get_doc("MS Direct Settings")
+    # prepare content
+    data = {
+        'header': get_header()
+    }
+    # render content
+    xml = frappe.render_template('rubirosa/templates/xml/order_state.html', data)
+    # get request
+    response = get_request(xml)
+    # parse orders
+    result = parse_order_state(response)
+    # add log (only if there has been new docs)
+    if result:
+        add_log("Order states pulled from MS Direct", request=xml, response=response.text, result=result)
+    return
+    
+def parse_order_state(response):
+    # create soup container
+    soup = BeautifulSoup(response, 'lxml')
+    # find all item transactions
+    orders = soup.find_all('wn1:order')
+    result = None
+    for order in orders:
+        try:
+            dn = order.find('wn1:orderno').getText()
+        except:
+            dn = None
+        try:
+            state = order.find('wn1:orderstate').getText()
+        except:
+            state = None
+        try:
+            tracking_id = order.find('wn1:linetrackandtraceid').getText()
+        except:
+            tracking_id = None
+        # match delivery note
+        if dn:
+            dn_doc = frappe.get_doc("Delivery Note", dn)
+            dn_doc.sendungsnummer = tracking_id
+            if state == "0":
+                state = "Open"
+            elif state == "1":
+                state = "Shipped"
+            elif state == "2":
+                state = "Cancelled"
+            elif state == "3":
+                state = "Parital Delivery"
+            elif state == "4":
+                state = "In Process"
+            elif state == "5":
+                state = "Delivery to Store in Process"
+            elif state == "6":
+                state = "Delivered to Store"
+            elif state == "7":
+                state = "Picked up from Store by Customer"
+            elif state == "8":
+                state = "Partial return"
+            elif state == "9":
+                state = "Full return"
+            dn.shipping_status = state
+            dn.save()
+            result = "DN updated"
+    return result
+
+# get item stock from MS Direct
+@frappe.whitelist()
+def get_item_stock():
+    # get settings
+    settings = frappe.get_doc("MS Direct Settings")
+    # prepare content
+    data = {
+        'header': get_header()
+    }
+    # render content
+    xml = frappe.render_template('rubirosa/templates/xml/item_stock.html', data)
+    # get request
+    response = get_request(xml)
+    # parse orders
+    result = parse_item_stock(response)
+    # add log (only if there has been new docs)
+    if result:
+        add_log("Item stock pulled from MS Direct", request=xml, response=response.text, result=result)
+    return
+    
+def parse_item_stock(response):
+    # create soup container
+    soup = BeautifulSoup(response, 'lxml')
+    # find all item transactions
+    items = soup.find_all('wn1:productstockdata')
+    item_stock = {}
+    for item in items:
+        barcode = item.find('wn1:itemno').getText()
+        item_match = frappe.get_all("Item", filters={'barcode': barcode}, fields=['name'])
+        if len(item_match) == 0:
+            frappe.throw("Item not found for barcode {0}".format(barcode))
+        qty = float(item.find('wn1:calculatetquantity').getText())
+        item_stock[item_match[0]['name']] = qty
+        
+    return item_stock
     
 def get_header():
     # get settings
@@ -208,6 +386,18 @@ def post_request(content):
     response = requests.post(url=url, auth=auth, data=content.encode('utf-8'))
     return response
 
+# create a get request to the API
+def get_request(content):
+    # get settings
+    settings = frappe.get_doc("MS Direct Settings")
+    password = get_decrypted_password("MS Direct Settings", "MS Direct Settings", 'password')
+    # prepare connection
+    auth = HTTPBasicAuth(settings.user, password)
+    url = settings.endpoint
+    # send request
+    response = requests.get(url=url, auth=auth, data=content.encode('utf-8'))
+    return response
+    
 def add_log(title, request=None, response=None, result="None"):
     log = frappe.get_doc({
         'doctype': "MS Direct Log",
