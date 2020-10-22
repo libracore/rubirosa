@@ -11,6 +11,8 @@ import html         # for escaping
 import hashlib      # for hashing item codes
 from frappe.utils.password import get_decrypted_password
 from bs4 import BeautifulSoup   # for xml parsing responses
+from frappe import get_print   # for pdf creation
+import base64
 
 # write an item to MS Direct
 @frappe.whitelist()
@@ -108,6 +110,9 @@ def write_delivery_note(delivery_note):
             'city': html.escape(shipping_address.city),
             'pincode': html.escape(shipping_address.pincode),
             'country_code': get_country_code(shipping_address.country)
+        },
+        'documents': {
+            'invoice_pdf': get_pdf_base64(delivery_note)
         }
     }
     # render content
@@ -409,3 +414,13 @@ def add_log(title, request=None, response=None, result="None"):
     log.insert()
     frappe.db.commit()
     return
+
+def get_pdf_base64(delivery_note):
+    # get settings
+    settings = frappe.get_doc("MS Direct Settings")  
+    # generate pdf
+    pdf = get_print(doctype="Delivery Note", name=delivery_note, print_format=settings.dn_print_format, as_pdf=True)
+    # encode base64
+    encoded = base64.b64encode(pdf)
+    # return as string b'BHGhju...'
+    return str(encoded)
