@@ -79,11 +79,17 @@ def write_delivery_note(delivery_note):
             'barcode': frappe.get_value("Item", item.item_code, "barcode")
         })
     # rewrite shipping method (see ./custom/delivery_note.json)
-    shipping = "B"  # default is B-Post
+    shipping = "PCH_ECO"  # default is eco
     if dn.shipping_method == "A-Post":
-        shipping = "A"
+        shipping = "PCH_PRI"
+    elif dn.shipping_method == "B-Post":
+        shipping = "PCH-ECO"
     elif dn.shipping_method == "Express":
-        shipping = "E"
+        shipping = "PCH-EXP"
+    elif dn.shipping_method == "Kurier":
+        shipping = "DHL-EXP"
+    elif dn.shipping_method == "DHL":
+        shipping = "DHL"
     # prepare content
     data = {
         'header': get_header(),
