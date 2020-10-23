@@ -395,6 +395,7 @@ def post_request(content):
     url = settings.endpoint
     # send request
     response = requests.post(url=url, auth=auth, data=content.encode('utf-8'))
+    print("Response {0}".format(response))
     return response
 
 # create a get request to the API
