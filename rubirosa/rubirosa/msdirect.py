@@ -91,7 +91,7 @@ def write_delivery_note(delivery_note):
     elif dn.shipping_method == "DHL":
         shipping = "DHL"
     elif dn.shipping_method == "Post AT":
-        shipping = "PAT-STD"
+        shipping = "PAT_STD"
     elif dn.shipping_method == "Post LI":
         shipping = "PLI_ECO"        
     # prepare content
@@ -122,8 +122,8 @@ def write_delivery_note(delivery_note):
             'country_code': get_country_code(shipping_address.country)
         },
         'documents': {
-            'invoice_pdf': get_pdf_base64(delivery_note, print_format=settings.sinv_print_format),
-            'delivery_pdf': get_pdf_base64(delivery_note, print_format=settings.dn_print_format)
+            'invoice_pdf': get_pdf_base64(delivery_note, print_format=settings.sinv_print_format) if settings.sinv_print_format else None,
+            'delivery_pdf': get_pdf_base64(delivery_note, print_format=settings.dn_print_format) if settings.dn_print_format else None
         }
     }
     # render content
