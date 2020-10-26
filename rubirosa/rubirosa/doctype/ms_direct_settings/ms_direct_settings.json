@@ -14,7 +14,11 @@
   "section_defaults",
   "item_currency",
   "item_vat_code",
-  "default_return_location"
+  "default_return_location",
+  "column_defaults",
+  "default_supplier",
+  "section_print",
+  "dn_print_format"
  ],
  "fields": [
   {
@@ -84,10 +88,31 @@
    "fieldname": "default_return_location",
    "fieldtype": "Data",
    "label": "Default return location"
+  },
+  {
+   "fieldname": "column_defaults",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_supplier",
+   "fieldtype": "Link",
+   "label": "Default Supplier",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "section_print",
+   "fieldtype": "Section Break",
+   "label": "Print"
+  },
+  {
+   "fieldname": "dn_print_format",
+   "fieldtype": "Link",
+   "label": "Delivery Note Print Format",
+   "options": "Print Format"
   }
  ],
  "issingle": 1,
- "modified": "2020-09-29 19:53:45.515615",
+ "modified": "2020-10-22 15:07:30.390286",
  "modified_by": "Administrator",
  "module": "Rubirosa",
  "name": "MS Direct Settings",

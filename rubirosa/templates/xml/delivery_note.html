@@ -9,6 +9,22 @@
                <msd:token>{{ header.token }}</msd:token>
             </msd:messageHeader>
             <msd:order>
+               <msd:documents>
+               {%- if documents.invoice_pdf %}
+               <msd:Document>
+                   <msd:content>{{ documents.invoice_pdf[2:-1] }}</msd:content>
+                   <msd:format>pdf</msd:format>
+                   <msd:type>Invoice</msd:type>
+               </msd:Document>
+               {%- endif %}
+               {%- if documents.delivery_pdf %}
+               <msd:Document>
+                   <msd:content>{{ documents.delivery_pdf[2:-1] }}</msd:content>
+                   <msd:format>pdf</msd:format>
+                   <msd:type>DeliveryNote</msd:type>
+               </msd:Document>
+               {%- endif %}
+               </msd:documents>
                <msd:orderDate>{{ date }}</msd:orderDate>
                <msd:orderLines>
                   {%- for item in items %}

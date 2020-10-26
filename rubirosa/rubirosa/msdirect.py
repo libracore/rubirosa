@@ -11,6 +11,8 @@ import html         # for escaping
 import hashlib      # for hashing item codes
 from frappe.utils.password import get_decrypted_password
 from bs4 import BeautifulSoup   # for xml parsing responses
+from frappe import get_print   # for pdf creation
+import base64
 
 # write an item to MS Direct
 @frappe.whitelist()
@@ -77,11 +79,17 @@ def write_delivery_note(delivery_note):
             'barcode': frappe.get_value("Item", item.item_code, "barcode")
         })
     # rewrite shipping method (see ./custom/delivery_note.json)
-    shipping = "B"  # default is B-Post
+    shipping = "PCH_ECO"  # default is eco
     if dn.shipping_method == "A-Post":
-        shipping = "A"
+        shipping = "PCH_PRI"
+    elif dn.shipping_method == "B-Post":
+        shipping = "PCH-ECO"
     elif dn.shipping_method == "Express":
-        shipping = "E"
+        shipping = "PCH-EXP"
+    elif dn.shipping_method == "Kurier":
+        shipping = "DHL-EXP"
+    elif dn.shipping_method == "DHL":
+        shipping = "DHL"
     # prepare content
     data = {
         'header': get_header(),
@@ -108,6 +116,9 @@ def write_delivery_note(delivery_note):
             'city': html.escape(shipping_address.city),
             'pincode': html.escape(shipping_address.pincode),
             'country_code': get_country_code(shipping_address.country)
+        },
+        'documents': {
+            'invoice_pdf': get_pdf_base64(delivery_note)
         }
     }
     # render content
@@ -384,6 +395,7 @@ def post_request(content):
     url = settings.endpoint
     # send request
     response = requests.post(url=url, auth=auth, data=content.encode('utf-8'))
+    print("Response {0}".format(response))
     return response
 
 # create a get request to the API
@@ -409,3 +421,13 @@ def add_log(title, request=None, response=None, result="None"):
     log.insert()
     frappe.db.commit()
     return
+
+def get_pdf_base64(delivery_note):
+    # get settings
+    settings = frappe.get_doc("MS Direct Settings")  
+    # generate pdf
+    pdf = get_print(doctype="Delivery Note", name=delivery_note, print_format=settings.dn_print_format, as_pdf=True)
+    # encode base64
+    encoded = base64.b64encode(pdf)
+    # return as string b'BHGhju...'
+    return str(encoded)

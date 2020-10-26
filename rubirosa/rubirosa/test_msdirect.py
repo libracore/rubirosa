@@ -3,9 +3,9 @@
 # For license information, please see license.txt
 #
 # Test functions for interface module for MS Direct
-import msdirect
+from rubirosa.rubirosa.msdirect import parse_purchase_orders
 
-def test_get_purchase_receipts()
+def test_get_purchase_receipts():
     response = """<?xml version="1.0" encoding="UTF-8"?><e:Envelope xmlns:d="http://www.w3.org/2001/XMLSchema" xmlns:e="http://schemas.xmlsoap.org/soap/envelope/" xmlns:wn1="http://systinet.com/wsdl/com/magicsoftware/magicxpi/msDataHandling/" xmlns:wn2="http://systinet.com/xsd/SchemaTypes/" xmlns:wn0="http://idoox.com/interface" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
     <e:Envelope xmlns:d="http://www.w3.org/2001/XMLSchema" xmlns:e="http://schemas.xmlsoap.org/soap/envelope/" xmlns:wn1="http://systinet.com/wsdl/com/magicsoftware/magicxpi/msDataHandling/" xmlns:wn2="http://systinet.com/xsd/SchemaTypes/" xmlns:wn0="http://idoox.com/interface" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
     <e:Body>
@@ -40,7 +40,7 @@ def test_get_purchase_receipts()
               <wn1:orderDate i:type="d:date">2020-09-17</wn1:orderDate>
               <wn1:orderQuantity i:type="d:decimal">15.00</wn1:orderQuantity>
               <wn1:purchaseOrderLineNo i:type="d:string">1</wn1:purchaseOrderLineNo>
-              <wn1:purchaseOrderNo i:type="d:string">PO-00002</wn1:purchaseOrderNo>
+              <wn1:purchaseOrderNo i:type="d:string">PO-00003</wn1:purchaseOrderNo>
               <wn1:unitOfMeasure i:type="d:string">PAA</wn1:unitOfMeasure>
               <wn1:vendorItemNo i:type="d:string">556655</wn1:vendorItemNo>
               <wn1:vendorName i:type="d:string">Stark Industires</wn1:vendorName>
@@ -55,7 +55,7 @@ def test_get_purchase_receipts()
               <wn1:orderDate i:type="d:date">2020-09-17</wn1:orderDate>
               <wn1:orderQuantity i:type="d:decimal">200.00</wn1:orderQuantity>
               <wn1:purchaseOrderLineNo i:type="d:string">2</wn1:purchaseOrderLineNo>
-              <wn1:purchaseOrderNo i:type="d:string">PO-00002</wn1:purchaseOrderNo>
+              <wn1:purchaseOrderNo i:type="d:string">PO-00003</wn1:purchaseOrderNo>
               <wn1:unitOfMeasure i:type="d:string">STK</wn1:unitOfMeasure>
               <wn1:vendorItemNo i:type="d:string">556655</wn1:vendorItemNo>
               <wn1:vendorName i:type="d:string">Stark Industires</wn1:vendorName>
@@ -67,5 +67,5 @@ def test_get_purchase_receipts()
         </wn1:response>
       </wn1:purchaseReceiptResponse>
     </e:Body></e:Envelope>"""
-    result = msdirect.parse_purchase_orders(response)
+    result = parse_purchase_orders(response)
     print(result)
