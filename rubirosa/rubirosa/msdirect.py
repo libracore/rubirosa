@@ -195,7 +195,7 @@ def write_purchase_order(purchase_order):
 
 # get purchase orders from MS Direct
 @frappe.whitelist()
-def get_purchase_orders():
+def get_purchase_orders(debug=False):
     # get settings
     settings = frappe.get_doc("MS Direct Settings")
     # prepare content
@@ -205,12 +205,14 @@ def get_purchase_orders():
     # render content
     xml = frappe.render_template('rubirosa/templates/xml/purchase_receipt.html', data)
     # get request
-    response = get_request(xml)
+    response = post_request(xml)
     # parse orders
-    result = parse_purchase_orders(response)
+    result = parse_purchase_orders(response.text)
     # add log (only if there has been new docs)
     if result:
         add_log("Purchase receipts pulled from MS Direct", request=xml, response=response.text, result=result)
+    elif debug:
+        add_log("No purchase receipts pulled from MS Direct", request=xml, response=response.text, result="Nothing found")
     return
     
 def parse_purchase_orders(response):
@@ -249,6 +251,7 @@ def parse_purchase_orders(response):
         purchase_receipts[po]['items'].append(received_item)
         if po != "":
             purchase_receipts[po]['supplier'] = po_doc.supplier
+            purchase_receipts[po]['currency'] = po_doc.currency
         else:
             purchase_receipts[po]['supplier'] = None
     # insert purchase receipts
@@ -258,9 +261,11 @@ def parse_purchase_orders(response):
             pr_doc = frappe.get_doc({
                 'doctype': "Purchase Receipt",
                 'supplier': value['supplier'],
+                'currency': value['currency'],
                 'items': value['items']
             })
             pr_doc.insert()
+            pr_doc.submit()
             frappe.db.commit()
             result += pr_doc.name + " "
     else:
@@ -269,7 +274,7 @@ def parse_purchase_orders(response):
 
 # get order state from MS Direct
 @frappe.whitelist()
-def get_order_state():
+def get_order_state(debug=False):
     # get settings
     settings = frappe.get_doc("MS Direct Settings")
     # prepare content
@@ -279,12 +284,15 @@ def get_order_state():
     # render content
     xml = frappe.render_template('rubirosa/templates/xml/order_state.html', data)
     # get request
-    response = get_request(xml)
+    response = post_request(xml)
     # parse orders
-    result = parse_order_state(response)
+    result = parse_order_state(response.text)
     # add log (only if there has been new docs)
     if result:
         add_log("Order states pulled from MS Direct", request=xml, response=response.text, result=result)
+    elif debug:
+        add_log("No order states pulled from MS Direct", request=xml, response=response.text, result="Nothing found")
+
     return
     
 def parse_order_state(response):
@@ -295,49 +303,64 @@ def parse_order_state(response):
     result = None
     for order in orders:
         try:
-            dn = order.find('wn1:orderno').getText()
+            dn = None
+            dns = order.find_all('wn1:orderno')
+            for d in dns:
+                if d.getText():
+                    dn = d.getText()
         except:
             dn = None
         try:
-            state = order.find('wn1:orderstate').getText()
+            state = None
+            states = order.find_all('wn1:orderstate')
+            for s in states:
+                if s.getText():
+                    state = s.getText()
         except:
             state = None
         try:
-            tracking_id = order.find('wn1:linetrackandtraceid').getText()
+            tracking_id = None
+            tracking_ids = order.find_all('wn1:linetrackandtraceid')
+            for t in tracking_ids:
+                if t.getText():
+                    tracking_id = t.getText()
         except:
             tracking_id = None
         # match delivery note
         if dn:
-            dn_doc = frappe.get_doc("Delivery Note", dn)
-            dn_doc.sendungsnummer = tracking_id
-            if state == "0":
-                state = "Open"
-            elif state == "1":
-                state = "Shipped"
-            elif state == "2":
-                state = "Cancelled"
-            elif state == "3":
-                state = "Parital Delivery"
-            elif state == "4":
-                state = "In Process"
-            elif state == "5":
-                state = "Delivery to Store in Process"
-            elif state == "6":
-                state = "Delivered to Store"
-            elif state == "7":
-                state = "Picked up from Store by Customer"
-            elif state == "8":
-                state = "Partial return"
-            elif state == "9":
-                state = "Full return"
-            dn.shipping_status = state
-            dn.save()
-            result = "DN updated"
+            try:
+                dn_doc = frappe.get_doc("Delivery Note", dn)
+                dn_doc.sendungsnummer = tracking_id
+                if state == "0":
+                    state = "Open"
+                elif state == "1":
+                    state = "Shipped"
+                elif state == "2":
+                    state = "Cancelled"
+                elif state == "3":
+                    state = "Parital Delivery"
+                elif state == "4":
+                    state = "In Process"
+                elif state == "5":
+                    state = "Delivery to Store in Process"
+                elif state == "6":
+                    state = "Delivered to Store"
+                elif state == "7":
+                    state = "Picked up from Store by Customer"
+                elif state == "8":
+                    state = "Partial return"
+                elif state == "9":
+                    state = "Full return"
+                dn_doc.shipping_status = state
+                dn_doc.save()
+                result = "DN updated"
+            except Exception as err:
+                frappe.log_error("{0}".format(err), "MS direct: DN reading failed")
     return result
 
 # get item stock from MS Direct
 @frappe.whitelist()
-def get_item_stock():
+def get_item_stock(debug=False):
     # get settings
     settings = frappe.get_doc("MS Direct Settings")
     # prepare content
@@ -347,12 +370,15 @@ def get_item_stock():
     # render content
     xml = frappe.render_template('rubirosa/templates/xml/item_stock.html', data)
     # get request
-    response = get_request(xml)
+    response = post_request(xml)
     # parse orders
-    result = parse_item_stock(response)
+    result = parse_item_stock(response.text)
     # add log (only if there has been new docs)
     if result:
-        add_log("Item stock pulled from MS Direct", request=xml, response=response.text, result=result)
+        add_log("Item stock pulled from MS Direct", request=xml, response=response.text, result=html.escape("{0}".format(result)))
+    elif debug:
+        add_log("No item stock pulled from MS Direct", request=xml, response=response.text, result="Nothing found")
+
     return
     
 def parse_item_stock(response):
@@ -363,11 +389,17 @@ def parse_item_stock(response):
     item_stock = {}
     for item in items:
         barcode = item.find('wn1:itemno').getText()
+        #sql_query = """SELECT `name`
+        #               FROM `tabItem`
+        #               WHERE `barcode` = "{0}" AND `disabled` = 0;""".format(barcode.replace("`", "'"))
+        #print(sql_query)
+        #item_match = frappe.db.sql(sql_query, as_dict=True)
         item_match = frappe.get_all("Item", filters={'barcode': barcode}, fields=['name'])
         if len(item_match) == 0:
-            frappe.throw("Item not found for barcode {0}".format(barcode))
-        qty = float(item.find('wn1:calculatetquantity').getText())
-        item_stock[item_match[0]['name']] = qty
+            frappe.log_error("Item not found for barcode {0}".format(barcode), "MS Direct item stock issue")
+        else:
+            qty = float(item.find('wn1:calculatetquantity').getText())
+            item_stock[item_match[0]['name']] = qty
         
     return item_stock
     
@@ -395,7 +427,6 @@ def post_request(content):
     url = settings.endpoint
     # send request
     response = requests.post(url=url, auth=auth, data=content.encode('utf-8'))
-    print("Response {0}".format(response))
     return response
 
 # create a get request to the API
