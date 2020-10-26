@@ -11,5 +11,12 @@ frappe.ui.form.on('MS Direct Settings', {
                  }
              }
         }
+        cur_frm.fields_dict['sinv_print_format'].get_query = function(doc) {
+             return {
+                 filters: {
+                     "doc_type": "Delivery Note"
+                 }
+             }
+        }
     }
 });

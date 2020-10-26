@@ -118,7 +118,8 @@ def write_delivery_note(delivery_note):
             'country_code': get_country_code(shipping_address.country)
         },
         'documents': {
-            'invoice_pdf': get_pdf_base64(delivery_note)
+            'invoice_pdf': get_pdf_base64(delivery_note, print_format=settings.sinv_print_format),
+            'delivery_pdf': get_pdf_base64(delivery_note, print_format=settings.dn_print_format)
         }
     }
     # render content
@@ -453,11 +454,11 @@ def add_log(title, request=None, response=None, result="None"):
     frappe.db.commit()
     return
 
-def get_pdf_base64(delivery_note):
+def get_pdf_base64(delivery_note, print_format):
     # get settings
     settings = frappe.get_doc("MS Direct Settings")  
     # generate pdf
-    pdf = get_print(doctype="Delivery Note", name=delivery_note, print_format=settings.dn_print_format, as_pdf=True)
+    pdf = get_print(doctype="Delivery Note", name=delivery_note, print_format=print_format, as_pdf=True)
     # encode base64
     encoded = base64.b64encode(pdf)
     # return as string b'BHGhju...'

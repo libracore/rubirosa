@@ -18,7 +18,9 @@
   "column_defaults",
   "default_supplier",
   "section_print",
-  "dn_print_format"
+  "dn_print_format",
+  "column_print_format",
+  "sinv_print_format"
  ],
  "fields": [
   {
@@ -109,10 +111,20 @@
    "fieldtype": "Link",
    "label": "Delivery Note Print Format",
    "options": "Print Format"
+  },
+  {
+   "fieldname": "column_print_format",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sinv_print_format",
+   "fieldtype": "Link",
+   "label": "Sales Invoice Print Format",
+   "options": "Print Format"
   }
  ],
  "issingle": 1,
- "modified": "2020-10-22 15:07:30.390286",
+ "modified": "2020-10-26 16:03:32.935893",
  "modified_by": "Administrator",
  "module": "Rubirosa",
  "name": "MS Direct Settings",
