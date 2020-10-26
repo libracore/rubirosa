@@ -83,13 +83,17 @@ def write_delivery_note(delivery_note):
     if dn.shipping_method == "A-Post":
         shipping = "PCH_PRI"
     elif dn.shipping_method == "B-Post":
-        shipping = "PCH-ECO"
+        shipping = "PCH_ECO"
     elif dn.shipping_method == "Express":
-        shipping = "PCH-EXP"
+        shipping = "PCH_EXP"
     elif dn.shipping_method == "Kurier":
-        shipping = "DHL-EXP"
+        shipping = "DHL_EXP"
     elif dn.shipping_method == "DHL":
         shipping = "DHL"
+    elif dn.shipping_method == "Post AT":
+        shipping = "PAT-STD"
+    elif dn.shipping_method == "Post LI":
+        shipping = "PLI_ECO"        
     # prepare content
     data = {
         'header': get_header(),
