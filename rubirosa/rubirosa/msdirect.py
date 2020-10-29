@@ -93,7 +93,9 @@ def write_delivery_note(delivery_note):
     elif dn.shipping_method == "Post AT":
         shipping = "PAT_STD"
     elif dn.shipping_method == "Post LI":
-        shipping = "PLI_ECO"        
+        shipping = "PLI_ECO"
+    elif dn.shipping_method == "Andere":
+        shipping = "DUMMY" 
     # prepare content
     data = {
         'header': get_header(),
