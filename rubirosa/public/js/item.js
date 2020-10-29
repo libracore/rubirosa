@@ -3,6 +3,7 @@ frappe.ui.form.on("Item", {
       if ((!frm.doc.__islocal) && (frm.doc.is_stock_item) && (frm.doc.barcode) && (frm.doc.barcode.length <= 17)) {
           write_to_msdirect(frm);
       }
+    }
 });
 
 function write_to_msdirect(frm) {
