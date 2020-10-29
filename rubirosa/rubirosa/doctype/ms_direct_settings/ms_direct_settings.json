@@ -1,0 +1,148 @@
+{
+ "creation": "2020-09-29 19:35:21.383224",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "endpoint",
+  "user",
+  "password",
+  "column_connection",
+  "client_name",
+  "client_id",
+  "token",
+  "section_defaults",
+  "item_currency",
+  "item_vat_code",
+  "default_return_location",
+  "column_defaults",
+  "default_supplier",
+  "section_print",
+  "dn_print_format",
+  "column_print_format",
+  "sinv_print_format"
+ ],
+ "fields": [
+  {
+   "fieldname": "endpoint",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Endpoint",
+   "reqd": 1
+  },
+  {
+   "fieldname": "user",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "password",
+   "fieldtype": "Password",
+   "in_list_view": 1,
+   "label": "Password",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_connection",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "token",
+   "fieldtype": "Data",
+   "label": "Token",
+   "reqd": 1
+  },
+  {
+   "fieldname": "client_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Client Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "client_id",
+   "fieldtype": "Data",
+   "label": "Client ID",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_defaults",
+   "fieldtype": "Section Break",
+   "label": "Defaults"
+  },
+  {
+   "default": "CHF",
+   "fieldname": "item_currency",
+   "fieldtype": "Link",
+   "label": "Item currency",
+   "options": "Currency"
+  },
+  {
+   "default": "NORMAL",
+   "fieldname": "item_vat_code",
+   "fieldtype": "Data",
+   "label": "Default VAT code"
+  },
+  {
+   "default": "Location",
+   "fieldname": "default_return_location",
+   "fieldtype": "Data",
+   "label": "Default return location"
+  },
+  {
+   "fieldname": "column_defaults",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_supplier",
+   "fieldtype": "Link",
+   "label": "Default Supplier",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "section_print",
+   "fieldtype": "Section Break",
+   "label": "Print"
+  },
+  {
+   "fieldname": "dn_print_format",
+   "fieldtype": "Link",
+   "label": "Delivery Note Print Format",
+   "options": "Print Format"
+  },
+  {
+   "fieldname": "column_print_format",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sinv_print_format",
+   "fieldtype": "Link",
+   "label": "Sales Invoice Print Format",
+   "options": "Print Format"
+  }
+ ],
+ "issingle": 1,
+ "modified": "2020-10-26 16:03:32.935893",
+ "modified_by": "Administrator",
+ "module": "Rubirosa",
+ "name": "MS Direct Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -1,0 +1,29 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:msd="http://systinet.com/wsdl/com/magicsoftware/magicxpi/msDataHandling/">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <msd:item>
+         <msd:itemRequest>
+            <msd:item>
+               <msd:ItemFields>
+                  <msd:blocked>{{ blocked }}</msd:blocked>
+                  <msd:currency>{{ currency }}</msd:currency>
+                  <msd:itemDescription>{{ item_name }}</msd:itemDescription>
+                  <msd:itemDescription2>{{ description }}</msd:itemDescription2>
+                  <msd:itemNo>{{ item_code[:17] }}</msd:itemNo>
+                  <msd:noStockkeeping>{{ not_stock_item }}</msd:noStockkeeping>
+                  <msd:returnDefaultCd>{{ return_location }}</msd:returnDefaultCd>
+                  <msd:singleBarcode>{{ barcode }}</msd:singleBarcode>
+                  <msd:unitOfMeasureCd>{{ stock_uom }}</msd:unitOfMeasureCd>
+                  <msd:unitPrice>{{ valuation_rate }}</msd:unitPrice>
+                  <msd:vatPostingGroup>{{ vat_code }}</msd:vatPostingGroup>
+               </msd:ItemFields>
+            </msd:item>
+            <msd:messageHeader>
+               <msd:clientId>{{ header.client_id }}</msd:clientId>
+               <msd:clientName>{{ header.client_name }}</msd:clientName>
+               <msd:token>{{ header.token }}</msd:token>
+            </msd:messageHeader>
+         </msd:itemRequest>
+      </msd:item>
+   </soapenv:Body>
+</soapenv:Envelope>

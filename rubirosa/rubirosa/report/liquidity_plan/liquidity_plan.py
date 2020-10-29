@@ -234,4 +234,21 @@ def get_data(filters):
 
     data = frappe.db.sql(sql_query, as_dict=1)
 
+    # add differential amount as row
+    data.append({
+        'label': 'Differenz',
+        'jan': (data[0]['jan'] or 0) - (data[2]['jan'] or 0),
+        'feb': (data[0]['feb'] or 0) - (data[2]['feb'] or 0),
+        'mar': (data[0]['mar'] or 0) - (data[2]['mar'] or 0),
+        'apr': (data[0]['apr'] or 0) - (data[2]['apr'] or 0),
+        'may': (data[0]['may'] or 0) - (data[2]['may'] or 0),
+        'jun': (data[0]['jun'] or 0) - (data[2]['jun'] or 0),
+        'jul': (data[0]['jul'] or 0) - (data[2]['jul'] or 0),
+        'aug': (data[0]['aug'] or 0) - (data[2]['aug'] or 0),
+        'sep': (data[0]['sep'] or 0) - (data[2]['sep'] or 0),
+        'oct': (data[0]['oct'] or 0) - (data[2]['oct'] or 0),
+        'nov': (data[0]['nov'] or 0) - (data[2]['nov'] or 0),
+        'dec': (data[0]['dec'] or 0) - (data[2]['dec'] or 0)
+    })
+    
     return data
