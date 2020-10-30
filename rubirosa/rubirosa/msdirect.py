@@ -69,15 +69,17 @@ def write_delivery_note(delivery_note):
     items = []
     for item in dn.items:
         ms_uom = frappe.get_value("UOM", item.uom, "ms_direct_uom")
-        items.append({
-            'item_name': item.item_name,
-            'item_code': html.escape(frappe.get_value("Item", item.item_code, "barcode") or "{0}".format(abs(hash(item.item_code)))),
-            'rate': item.rate,
-            'idx': item.idx,
-            'qty': item.qty,
-            'uom': ms_uom,
-            'barcode': frappe.get_value("Item", item.item_code, "barcode")
-        })
+        barcode = frappe.get_value("Item", item.item_code, "barcode")
+        if barcode and len(barcode) <= 17:          # ignore items with barcodes longer than 17 characters
+            items.append({
+                'item_name': item.item_name,
+                'item_code': html.escape(barcode),
+                'rate': item.rate,
+                'idx': item.idx,
+                'qty': item.qty,
+                'uom': ms_uom,
+                'barcode': barcode
+            })
     # rewrite shipping method (see ./custom/delivery_note.json)
     shipping = "PCH_ECO"  # default is eco
     if dn.shipping_method == "A-Post":
@@ -158,17 +160,19 @@ def write_purchase_order(purchase_order):
     items = []
     for item in po.items:
         ms_uom = frappe.get_value("UOM", item.uom, "ms_direct_uom")
-        items.append({
-            'item_name': item.item_name,
-            'item_code': html.escape(frappe.get_value("Item", item.item_code, "barcode") or "{0}".format(abs(hash(item.item_code)))),
-            'rate': item.rate,
-            'idx': item.idx,
-            'schedule_date': item.schedule_date,
-            'qty': item.qty,
-            'uom': ms_uom,
-            'warehouse_code': frappe.get_value("Warehouse", item.warehouse, "warehouse_code") or "LA",
-            'barcode': frappe.get_value("Item", item.item_code, "barcode")
-        })
+        barcode = frappe.get_value("Item", item.item_code, "barcode")
+        if barcode and len(barcode) <= 17:          # ignore items with barcodes longer than 17 characters
+            items.append({
+                'item_name': item.item_name,
+                'item_code': html.escape(barcode),
+                'rate': item.rate,
+                'idx': item.idx,
+                'schedule_date': item.schedule_date,
+                'qty': item.qty,
+                'uom': ms_uom,
+                'warehouse_code': frappe.get_value("Warehouse", item.warehouse, "warehouse_code") or "LA",
+                'barcode': barcode
+            })
     # prepare content
     data = {
         'header': get_header(),
