@@ -11,6 +11,8 @@
                   <msd:itemDescription2>{{ description }}</msd:itemDescription2>
                   <msd:itemNo>{{ item_code[:20] }}</msd:itemNo>
                   <msd:noStockkeeping>{{ not_stock_item }}</msd:noStockkeeping>
+                  {%- if customs_tariff_number %}<msd:tariffNo>{{ customs_tariff_number }}</msd:tariffNo>{% endif %}
+                  {%- if country_of_origin %}<msd:countryOriginCd>{{ country_of_origin }}</msd:countryOriginCd>{% endif %}
                   <msd:returnDefaultCd>{{ return_location }}</msd:returnDefaultCd>
                   <msd:singleBarcode>{{ barcode }}</msd:singleBarcode>
                   <msd:unitOfMeasureCd>{{ stock_uom }}</msd:unitOfMeasureCd>
