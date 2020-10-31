@@ -35,7 +35,7 @@ def write_item(item_code):
         'valuation_rate': html.escape("{0}".format(item.valuation_rate or 0)),
         'vat_code': html.escape(settings.item_vat_code),
         'header': get_header(),
-        'customs_tariff_number': item.customs_tariff_number) if item.customs_tariff_number else None,
+        'customs_tariff_number': item.customs_tariff_number if item.customs_tariff_number else None,
         'country_of_origin': get_country_code(item.country_of_origin) if item.country_of_origin else None
     }
     # render content

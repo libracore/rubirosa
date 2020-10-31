@@ -6,15 +6,19 @@
             <msd:item>
                <msd:ItemFields>
                   <msd:blocked>{{ blocked }}</msd:blocked>
+                  {%- if country_of_origin %}
+                  <msd:countryOriginCd>{{ country_of_origin }}</msd:countryOriginCd>
+                  {%- endif %}
                   <msd:currency>{{ currency }}</msd:currency>
                   <msd:itemDescription>{{ item_name }}</msd:itemDescription>
                   <msd:itemDescription2>{{ description }}</msd:itemDescription2>
                   <msd:itemNo>{{ item_code[:17] }}</msd:itemNo>
                   <msd:noStockkeeping>{{ not_stock_item }}</msd:noStockkeeping>
-                  {%- if customs_tariff_number %}<msd:tariffNo>{{ customs_tariff_number }}</msd:tariffNo>{% endif %}
-                  {%- if country_of_origin %}<msd:countryOriginCd>{{ country_of_origin }}</msd:countryOriginCd>{% endif %}
                   <msd:returnDefaultCd>{{ return_location }}</msd:returnDefaultCd>
                   <msd:singleBarcode>{{ barcode }}</msd:singleBarcode>
+                  {%- if customs_tariff_number %}
+                  <msd:tariffNo>{{ customs_tariff_number }}</msd:tariffNo>
+                  {%- endif %}
                   <msd:unitOfMeasureCd>{{ stock_uom }}</msd:unitOfMeasureCd>
                   <msd:unitPrice>{{ valuation_rate }}</msd:unitPrice>
                   <msd:vatPostingGroup>{{ vat_code }}</msd:vatPostingGroup>
