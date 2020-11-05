@@ -392,14 +392,14 @@ def get_item_stock(debug=False, stock_reconciliation=None, warehouse=None, creat
     elif debug:
         add_log("No item stock pulled from MS Direct", request=xml, response=response.text, result="Nothing found")
     # insert items in stock reconciliation
-    if stock_reconciliation:
+    if create_new or stock_reconciliation:
         if create_new:
             # create a new record
             sr = frappe.get_doc({'doctype': "Stock Reconciliation"})
         else:
             sr = frappe.get_doc("Stock Reconciliation", stock_reconciliation)
         sr.items = []
-        for key, value in result:
+        for key, value in result.items():
             row = sr.append('items', {
                 'item_code': key,
                 'qty': value,
