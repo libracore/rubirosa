@@ -388,7 +388,7 @@ def get_item_stock(debug=False):
     result = parse_item_stock(response.text)
     # add log (only if there has been new docs)
     if result:
-        add_log("Item stock pulled from MS Direct", request=xml, response=response.text, result=html.escape("{0}".format(result[:140])))
+        add_log("Item stock pulled from MS Direct", request=xml, response=response.text, result=html.escape("{0}".format(result))[:140])
     elif debug:
         add_log("No item stock pulled from MS Direct", request=xml, response=response.text, result="Nothing found")
 
