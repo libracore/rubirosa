@@ -392,7 +392,7 @@ def get_item_stock(debug=False):
     elif debug:
         add_log("No item stock pulled from MS Direct", request=xml, response=response.text, result="Nothing found")
 
-    return
+    return result
     
 def parse_item_stock(response):
     # create soup container
