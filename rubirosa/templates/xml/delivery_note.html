@@ -63,10 +63,10 @@
                   <msd:customerNo>{{ customer_code }}</msd:customerNo>
                </msd:sellTo>
                <msd:shipTo>
+                  <msd:address>{{ shipment.address }}</msd:address>
                   {%- if shipment.address_additional %}
                   <msd:address2>{{ shipment.address_additional }}</msd:address2>
                   {%- endif %} 
-                  <msd:address>{{ shipment.address }}</msd:address>
                   <msd:city>{{ shipment.city }}</msd:city>
                   <msd:country>{{ shipment.country_code }}</msd:country>
                   <msd:name>{{ customer_name }}</msd:name>
