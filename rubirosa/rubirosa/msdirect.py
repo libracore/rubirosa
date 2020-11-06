@@ -373,7 +373,7 @@ def parse_order_state(response):
 
 # get item stock from MS Direct
 @frappe.whitelist()
-def get_item_stock(debug=False, stock_reconciliation=None, warehouse=None):
+def get_item_stock(debug=False, stock_reconciliation=None, warehouse=None, create_new=False):
     # get settings
     settings = frappe.get_doc("MS Direct Settings")
     # prepare content
@@ -392,20 +392,20 @@ def get_item_stock(debug=False, stock_reconciliation=None, warehouse=None):
     elif debug:
         add_log("No item stock pulled from MS Direct", request=xml, response=response.text, result="Nothing found")
     # insert items in stock reconciliation
-    if stock_reconciliation:
-        if stock_reconciliation == 1:
+    if create_new or stock_reconciliation:
+        if create_new:
             # create a new record
             sr = frappe.get_doc({'doctype': "Stock Reconciliation"})
         else:
             sr = frappe.get_doc("Stock Reconciliation", stock_reconciliation)
         sr.items = []
-        for key, value in result:
+        for key, value in result.items():
             row = sr.append('items', {
                 'item_code': key,
                 'qty': value,
                 'warehouse': warehouse
             })
-        if stock_reconciliation == 1:
+        if create_new:
             sr.insert()
             result['stock_reconciliation'] = sr.name
         else:
