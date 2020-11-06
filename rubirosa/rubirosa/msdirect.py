@@ -116,15 +116,15 @@ def write_delivery_note(delivery_note):
         'customer': {
             'address': html.escape(customer_address.address_line1),
             'address_additional': html.escape(customer_address.address_line2) if customer_address.address_line2 else None,
-            'city': html.escape(customer_address.city),
-            'pincode': html.escape(customer_address.pincode),
+            'city': html.escape(customer_address.city or ""),
+            'pincode': html.escape(customer_address.pincode or ""),
             'country_code': get_country_code(customer_address.country)
         },
         'shipment': {
             'address': html.escape(shipping_address.address_line1),
             'address_additional': html.escape(shipping_address.address_line2) if shipping_address.address_line2 else None,
-            'city': html.escape(shipping_address.city),
-            'pincode': html.escape(shipping_address.pincode),
+            'city': html.escape(shipping_address.city or ""),
+            'pincode': html.escape(shipping_address.pincode or ""),
             'country_code': get_country_code(shipping_address.country)
         },
         'documents': {
