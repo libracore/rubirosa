@@ -85,11 +85,11 @@ def write_delivery_note(delivery_note):
     # rewrite shipping method (see ./custom/delivery_note.json)
     shipping = "PCH_ECO"  # default is eco
     if dn.shipping_method == "A-Post":
-        shipping = "PCH_PRI"
+        shipping = "PLI_PRI"
     elif dn.shipping_method == "B-Post":
-        shipping = "PCH_ECO"
+        shipping = "PLI_ECO"
     elif dn.shipping_method == "Express":
-        shipping = "PCH_EXP"
+        shipping = "PLI_EXP"
     elif dn.shipping_method == "Kurier":
         shipping = "DHL_EXP"
     elif dn.shipping_method == "DHL":
