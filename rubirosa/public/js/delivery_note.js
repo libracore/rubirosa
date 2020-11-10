@@ -1,7 +1,7 @@
 frappe.ui.form.on("Delivery Note", {
     on_submit: function(frm) {
         var warehouse = frm.doc.items[0].warehouse;
-        if (warehouse === "Stock EU - RMG") {
+        if ((frm.doc.is_return === 0) && (warehouse === "Stock EU - RMG")) {
             send_to_msdirect(frm);
         }
     }
