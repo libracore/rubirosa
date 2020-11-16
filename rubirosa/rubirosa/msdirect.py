@@ -13,6 +13,7 @@ from frappe.utils.password import get_decrypted_password
 from bs4 import BeautifulSoup   # for xml parsing responses
 from frappe import get_print   # for pdf creation
 import base64
+from frappe.defaults import get_global_default
 
 # write an item to MS Direct
 @frappe.whitelist()
@@ -38,6 +39,10 @@ def write_item(item_code):
         'customs_tariff_number': item.customs_tariff_number if item.customs_tariff_number else None,
         'country_of_origin': get_country_code(item.country_of_origin) if item.country_of_origin else None
     }
+    # add last purchase rate if available
+    if item.last_purchase_rate:
+        data['purchase_price'] = item.last_purchase_rate
+        data['purchase_price_currency'] = get_global_default('currency')
     # render content
     xml = frappe.render_template('rubirosa/templates/xml/item.html', data)
     # post request

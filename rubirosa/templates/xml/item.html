@@ -14,6 +14,10 @@
                   <msd:itemDescription2>{{ description }}</msd:itemDescription2>
                   <msd:itemNo>{{ item_code[:17] }}</msd:itemNo>
                   <msd:noStockkeeping>{{ not_stock_item }}</msd:noStockkeeping>
+                  {%- if purchase_price %}
+                  <msd:purchasePrice>{{ purchase_price }}</msd:purchasePrice>
+                  <msd:purchasePriceCurrency>{{ purchase_price_currency }}</msd:purchasePriceCurrency>
+                  {%- endif %}
                   <msd:returnDefaultCd>{{ return_location }}</msd:returnDefaultCd>
                   <msd:singleBarcode>{{ barcode }}</msd:singleBarcode>
                   {%- if customs_tariff_number %}
