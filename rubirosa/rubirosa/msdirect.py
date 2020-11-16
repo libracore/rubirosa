@@ -14,6 +14,7 @@ from bs4 import BeautifulSoup   # for xml parsing responses
 from frappe import get_print   # for pdf creation
 import base64
 from frappe.defaults import get_global_default
+import time
 
 # write an item to MS Direct
 @frappe.whitelist()
@@ -209,6 +210,10 @@ def write_purchase_order(purchase_order):
         result = "Error"
     # add log
     add_log("Purchase Order {0} sent to MS Direct".format(purchase_order), request=xml, response=response.text, result=result)
+    # update all item records to make sure that the used
+    for item in po.items:
+        write_item(item.item_code)
+        time.sleep(1)           # delay sending items for 1 sec per item to allow the server to process the item
     return
 
 # get purchase orders from MS Direct
