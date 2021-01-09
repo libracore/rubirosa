@@ -116,7 +116,15 @@ def get_data():
                        "label": _("Customer Statistics"),
                        "description": _("Customer Statistics"),
                        "is_query_report": True
-                   }            
+                   },
+                   {
+                       "type": "report",
+                       "doctype": "Sales Invoice",
+                       "name": "Order Overview",
+                       "label": _("Order Overview"),
+                       "description": _("Order Overview"),
+                       "is_query_report": True
+                   }         
             ]
         },
         {

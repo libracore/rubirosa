@@ -4,3 +4,4 @@ Report: Customer Statistics,Customer Statistics,Kundenstatistik
 DocType: Delivery Note,Shipment method,Versandart
 DocType: Warehouse,Warehouse Code,Lagercode
 DocType: Delivery Note,Only for customs purpose,Nur für Zollzwecke
+Report: Order Overview,Order Overview,Bestell-Übersicht
