@@ -72,6 +72,7 @@ def get_data(filters):
                       `tabSales Invoice`.`posting_date` >= "{from_date}"
                       AND `tabSales Invoice`.`posting_date` <= "{end_date}"
                       AND `tabSales Invoice`.`docstatus` = 1
+                      AND `tabSales Invoice Item`.`item_group` IN (SELECT `name` FROM `tabItem Group` WHERE `tabItem Group`.`parent_item_group` IN ('Accessories', 'Shoes'))
                     GROUP BY `tabSales Invoice Item`.`item_name`
       """.format(from_date=filters.from_date, end_date=filters.end_date, pivot=pivot)
 
