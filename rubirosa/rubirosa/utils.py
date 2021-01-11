@@ -42,3 +42,47 @@ def bulk_set_prices(item_code_pattern, price_list, rate):
     # write changes to database
     frappe.db.commit()
     return updated_item_prices
+
+@frappe.whitelist()
+def consolidate_po_items(purchase_order):
+    # load source PO
+    po = frappe.get_doc("Purchase Order", purchase_order)
+    # collect consolidated items
+    items = {}
+    for i in po.items:
+        if not i.item_code in items:
+            items[i.item_code] = {
+                'qty': i.qty,
+                'sales_order_trace': i.sales_order_trace,
+                'item_name': i.item_name,
+                'schedule_date': i.schedule_date, 
+                'description': i.description,
+                'stock_uom': i.stock_uom, 
+                'uom': i.uom, 
+                'conversion_factor': i.conversion_factor, 
+                'base_rate': i.base_rate
+            }
+        else:
+            items[i.item_code]['qty'] += i.qty
+            if i.sales_order_trace not in items[i.item_code]['sales_order_trace']:
+                items[i.item_code]['sales_order_trace'] += ";{0}".format(i.sales_order_trace)
+    # clear po items
+    po.items = []
+    # add consolidated items
+    for i in sorted(items):
+        row = po.append('items', {
+            'item_code': i,
+            'qty': items[i]['qty'],
+            'sales_order_trace': items[i]['sales_order_trace'],
+            'item_name': items[i]['item_name'],
+            'schedule_date': items[i]['schedule_date'],
+            'description': items[i]['description'],
+            'stock_uom': items[i]['stock_uom'],
+            'uom': items[i]['uom'],
+            'conversion_factor': items[i]['conversion_factor'],
+            'base_rate': items[i]['base_rate'],
+            'base_amount': items[i]['base_rate'] * items[i]['qty']
+        })
+    # save changes
+    po.save()
+    return
