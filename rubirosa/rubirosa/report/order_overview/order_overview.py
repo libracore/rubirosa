@@ -61,7 +61,7 @@ def get_data(filters):
                                                         AND `tDL`.`parenttype` = "Address"
                     LEFT JOIN `tabAddress` ON `tabAddress`.`name` = `tDL`.`parent`
                     WHERE `tabAddress`.`is_primary_address` = 1
-                      AND `tabCustomer`.`customer_group` LIKE "%Retail%"
+                      AND (`tabCustomer`.`customer_group` LIKE "%Retail%" AND `tabCustomer`.`customer_group` NOT LIKE "%inaktiv%")
                       AND `tabCustomer`.`disabled` = 0
                       {conditions}
                    ) AS `raw`     
