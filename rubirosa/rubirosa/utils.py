@@ -64,7 +64,7 @@ def consolidate_po_items(purchase_order):
             }
         else:
             items[i.item_code]['qty'] += i.qty
-            if i.sales_order_trace not in items[i.item_code]['sales_order_trace']:
+            if i.sales_order_trace and i.sales_order_trace not in items[i.item_code]['sales_order_trace']:
                 items[i.item_code]['sales_order_trace'] += ";{0}".format(i.sales_order_trace)
     # clear po items
     po.items = []
