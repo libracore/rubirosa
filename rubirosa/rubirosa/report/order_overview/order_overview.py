@@ -45,10 +45,12 @@ def get_data(filters):
                      (SELECT `tabPurchase Order Item`.`parent`
                       FROM `tabPurchase Order Item`
                       WHERE `tabPurchase Order Item`.`sales_order_trace` LIKE CONCAT("%", `tabSales Order`.`name`, "%")
+                        AND `tabPurchase Order Item`.`docstatus` < 2
                       LIMIT 1) AS `purchase_order`,
                      (SELECT IF(IFNULL(`tabSales Order`.`total_qty`, 0) <= IFNULL(SUM(`tabPurchase Order Item`.`qty`), 0), "<span style='color:green; '>OK</span>", "<b><span style='color:red; '>NOK</span></b>")
                       FROM `tabPurchase Order Item`
                       WHERE `tabPurchase Order Item`.`sales_order_trace` LIKE CONCAT("%", `tabSales Order`.`name`, "%")
+                        AND `tabPurchase Order Item`.`docstatus` < 2
                       ) AS `check`
                    FROM (
                     SELECT `tabCustomer`.`name`, 
@@ -68,6 +70,7 @@ def get_data(filters):
                    LEFT JOIN `tabAddress` ON `tabAddress`.`name` = `raw`.`address`
                    LEFT JOIN `tabSales Order` ON `tabSales Order`.`customer` = `raw`.`name`
                                              AND `tabSales Order`.`sales_season` = "{season}"
+                                             AND `tabSales Order`.`docstatus` < 2
                      ;
       """.format(season=filters.sales_season, conditions=conditions)
     data = frappe.db.sql(sql_query, as_dict=1)
