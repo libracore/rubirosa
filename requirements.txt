@@ -1,5 +1,4 @@
 frappe
-base64
 bs4
 requests
 requests.auth
