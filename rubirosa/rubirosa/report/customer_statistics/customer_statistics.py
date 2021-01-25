@@ -16,6 +16,8 @@ def get_columns():
     return [
         {"label": _("Customer"), "fieldname": "customer", "fieldtype": "Link", "options": "Customer", "width": 200},
         {"label": _("Customer name"), "fieldname": "customer_name", "fieldtype": "Data", "width": 100},
+        {"label": _("Email"), "fieldname": "email", "fieldtype": "Data", "width": 120},
+        {"label": _("Customer Group"), "fieldname": "customer_group", "fieldtype": "Link", "options": "Customer Group", "width": 120},
         {"label": _("Total revenue"), "fieldname": "total_revenue", "fieldtype": "Currency", "width": 100},
         {"label": _("Total qty"), "fieldname": "total_qty", "fieldtype": "Float", "precision": 2, "width": 100},
         {"label": _("First sale"), "fieldname": "first_sale", "fieldtype": "Date", "width": 100}
@@ -26,16 +28,19 @@ def get_data(filters):
         filters.customer = "%"
         
     sql_query = """SELECT
-                `customer`,
-                `customer_name`,
-                SUM(`base_net_total`) AS `total_revenue`,
-                SUM(`total_qty`) AS `total_qty`,
-                MIN(`posting_date`) AS `first_sale`
+                `tabSales Invoice`.`customer`,
+                `tabSales Invoice`.`customer_name`,
+                `tabCustomer`.`customer_group`,
+                IFNULL(`tabCustomer`.`email_id`, "-") AS `email`,
+                SUM(`tabSales Invoice`.`base_net_total`) AS `total_revenue`,
+                SUM(`tabSales Invoice`.`total_qty`) AS `total_qty`,
+                MIN(`tabSales Invoice`.`posting_date`) AS `first_sale`
             FROM `tabSales Invoice`
-            WHERE `docstatus` = 1
-                AND `customer` LIKE '{customer}'
-            GROUP BY `customer`
-            ORDER BY SUM(`base_net_total`) DESC;
+            LEFT JOIN `tabCustomer` ON `tabSales Invoice`.`customer` = `tabCustomer`.`name`
+            WHERE `tabSales Invoice`.`docstatus` = 1
+                AND `tabSales Invoice`.`customer` LIKE '{customer}'
+            GROUP BY `tabSales Invoice`.`customer`
+            ORDER BY SUM(`tabSales Invoice`.`base_net_total`) DESC;
       """.format(customer=filters.customer)
 
     data = frappe.db.sql(sql_query, as_dict=1)
