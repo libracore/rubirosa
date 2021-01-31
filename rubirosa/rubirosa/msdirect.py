@@ -403,7 +403,7 @@ def get_item_stock(debug=False, stock_reconciliation=None, warehouse=None, creat
         add_log("No item stock pulled from MS Direct", request=xml, response=response.text, result="Nothing found")
     # items at 0 are not in transfer file: identify
     all_on_stock = frappe.get_all("Bin", 
-        filters=[['warehouse', "=", warehouse], ["actual_qty", ">", 0]]
+        filters=[['warehouse', "=", warehouse], ["actual_qty", ">", 0]],
         fields=["item_code"])
     for item in all_on_stock:
         if item['item_code'] not in result:
