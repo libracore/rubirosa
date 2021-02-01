@@ -86,3 +86,16 @@ def consolidate_po_items(purchase_order):
     # save changes
     po.save()
     return
+
+@frappe.whitelist()
+def get_payment_days(customer):
+    default_days = 10
+    sql_query = """SELECT IFNULL(`tabPayment Terms Template Detail`.`credit_days`, {default}) AS `days`
+            FROM `tabCustomer`
+            LEFT JOIN `tabPayment Terms Template Detail` ON `tabPayment Terms Template Detail`.`parent` = `tabCustomer`.`payment_terms` 
+            WHERE `tabCustomer`.`name` = "{customer}";""".format(customer=customer, default=default_days)
+    days = frappe.db.sql(sql_query, as_dict=True)
+    if len(days) > 0:
+        return days[0]['days']
+    else:
+        return default_days
