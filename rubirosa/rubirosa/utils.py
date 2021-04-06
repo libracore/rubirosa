@@ -3,6 +3,7 @@
 
 import frappe
 from frappe import _
+from datetime import datetime
 
 """
    :params:
@@ -99,3 +100,45 @@ def get_payment_days(customer):
         return days[0]['days']
     else:
         return default_days
+
+@frappe.whitelist()
+def add_items_to_purchase_order(sales_order):
+    so = frappe.get_doc("Sales Order", sales_order)
+    log = ""
+    for i in so.items:
+        if i.supplier:
+            supplier = i.supplier
+        else:
+            item = frappe.get_doc("Item", i.item_code)
+            if item.item_defaults and len(item.item_defaults) > 0:
+                supplier = item.item_defaults[0].default_supplier
+        if supplier:
+            # check if there is a draft purchase order
+            po_drafts = frappe.get_all("Purchase Order",
+                filters={'docstatus': 0, 'supplier': supplier},
+                fields=['name'])
+            if po_drafts and len(po_drafts) > 0:
+                # enrich existing po
+                po = frappe.get_doc("Purchase Order", po_drafts[0]['name'])
+                row = po.append('items', {
+                    'item_code': i.item_code,
+                    'qty': i.qty
+                })
+                po.save()
+                log += "(+){p}: {q}x {i}<br>".format(p=po_drafts[0]['name'], q=i.qty, i=i.item_code)
+            else:
+                # create a new po
+                new_po = frappe.get_doc({
+                    'doctype': 'Purchase Order',
+                    'supplier': supplier,
+                    'schedule_date': datetime.now()
+                })
+                row = new_po.append('items', {
+                    'item_code': i.item_code,
+                    'qty': i.qty
+                })
+                new_po.insert()
+                log += "(*){p}: {q}x {i}<br>".format(p=new_po.name, q=i.qty, i=i.item_code)
+    if log == "":
+        log = "No action"
+    return log
