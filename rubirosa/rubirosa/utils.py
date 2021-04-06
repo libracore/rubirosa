@@ -141,4 +141,18 @@ def add_items_to_purchase_order(sales_order):
                 log += "(*){p}: {q}x {i}<br>".format(p=new_po.name, q=i.qty, i=i.item_code)
     if log == "":
         log = "No action"
+    else:
+        add_comment(sales_order, log)
     return log
+
+def add_comment(sales_order, text):
+    new_comment = frappe.get_doc({
+        'doctype': 'Communication',
+        'comment_type': "Comment",
+        'content': "Ordered:<br>{0}".format(text),
+        'reference_doctype': "Sales Order",
+        'status': "Linked",
+        'reference_name': sales_order
+    })
+    new_comment.insert()
+    return
