@@ -122,7 +122,8 @@ def add_items_to_purchase_order(sales_order):
                 po = frappe.get_doc("Purchase Order", po_drafts[0]['name'])
                 row = po.append('items', {
                     'item_code': i.item_code,
-                    'qty': i.qty
+                    'qty': i.qty,
+                    'sales_order_trace': sales_order
                 })
                 po.save()
                 log += "(+){p}: {q}x {i}<br>".format(p=po_drafts[0]['name'], q=i.qty, i=i.item_code)
@@ -137,7 +138,8 @@ def add_items_to_purchase_order(sales_order):
                 })
                 row = new_po.append('items', {
                     'item_code': i.item_code,
-                    'qty': i.qty
+                    'qty': i.qty,
+                    'sales_order_trace': sales_order
                 })
                 new_po.insert()
                 log += "(*){p}: {q}x {i}<br>".format(p=new_po.name, q=i.qty, i=i.item_code)
