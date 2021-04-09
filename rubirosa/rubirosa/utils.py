@@ -4,7 +4,7 @@
 import frappe
 from frappe import _
 from datetime import datetime
-
+from frappe.utils.background_jobs import enqueue
 """
    :params:
    item_code_pattern: "CAI%": item_code mask to find items
@@ -102,6 +102,19 @@ def get_payment_days(customer):
         return default_days
 
 @frappe.whitelist()
+def enqueue_add_items_to_purchase_order(sales_order):
+    # enqueue adding purchase order items (potential long worker)
+    kwargs = {
+        'sales_order': sales_order
+    }
+    
+    enqueue('rubirosa.rubirosa.utils.add_items_to_purchase_order', 
+        queue='long',
+        timeout=15000,
+        **kwargs)
+    return
+    
+@frappe.whitelist()
 def add_items_to_purchase_order(sales_order):
     so = frappe.get_doc("Sales Order", sales_order)
     log = ""
@@ -141,6 +154,7 @@ def add_items_to_purchase_order(sales_order):
                 log += "(*){p}: {q}x {i}<br>".format(p=new_po.name, q=i.qty, i=i.item_code)
     if log == "":
         log = "No action"
+        frappe.log_error("Order items: no suppliers found", "Create orders from sales orders")
     else:
         add_comment(sales_order, log)
     return log
