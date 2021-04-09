@@ -1,4 +1,4 @@
-# Copyright (c) 2019-2020, libracore and contributors
+# Copyright (c) 2019-2021, libracore and contributors
 # For license information, please see license.txt
 
 import frappe
@@ -135,20 +135,24 @@ def add_items_to_purchase_order(sales_order):
                 po = frappe.get_doc("Purchase Order", po_drafts[0]['name'])
                 row = po.append('items', {
                     'item_code': i.item_code,
-                    'qty': i.qty
+                    'qty': i.qty,
+                    'sales_order_trace': sales_order
                 })
                 po.save()
                 log += "(+){p}: {q}x {i}<br>".format(p=po_drafts[0]['name'], q=i.qty, i=i.item_code)
             else:
                 # create a new po
+                s = frappe.get_doc("Supplier", supplier)
                 new_po = frappe.get_doc({
                     'doctype': 'Purchase Order',
                     'supplier': supplier,
-                    'schedule_date': datetime.now()
+                    'schedule_date': datetime.now(),
+                    'currency': s.default_currency
                 })
                 row = new_po.append('items', {
                     'item_code': i.item_code,
-                    'qty': i.qty
+                    'qty': i.qty,
+                    'sales_order_trace': sales_order
                 })
                 new_po.insert()
                 log += "(*){p}: {q}x {i}<br>".format(p=new_po.name, q=i.qty, i=i.item_code)
