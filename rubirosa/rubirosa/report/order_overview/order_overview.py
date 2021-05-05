@@ -24,7 +24,16 @@ def get_columns():
         {"label": _("Amount"), "fieldname": "order_amount", "fieldtype": "Currency", "width": 100},
         {"label": _("Sales Order"), "fieldname": "sales_order", "fieldtype": "Link", "options": "Sales Order", "width": 100},
         {"label": _("Purchase Order"), "fieldname": "purchase_order", "fieldtype": "Link", "options": "Purchase Order", "width": 100},
-        {"label": _("Check"), "fieldname": "check", "fieldtype": "Data", "width": 100}
+        {"label": _("Check"), "fieldname": "check", "fieldtype": "Data", "width": 100},
+        {"label": _("Sales Invoice"), "fieldname": "sales_invoice", "fieldtype": "Link", "options": "Sales Invoice", "width": 100},
+        {"label": _("Net total"), "fieldname": "base_net_total", "fieldtype": "Currency", "width": 100},
+        {"label": _("Currency"), "fieldname": "currency", "fieldtype": "Data", "width": 50},
+        {"label": _("Net total"), "fieldname": "net_total", "fieldtype": "Float", "precision": 2, "width": 80},
+        {"label": _("Freight"), "fieldname": "freight", "fieldtype": "Float", "precision": 2, "width": 80},
+        {"label": _("Commission Base"), "fieldname": "commission_base", "fieldtype": "Float", "precision": 2, "width": 80},
+        {"label": _("Sales Partner"), "fieldname": "sales_partner", "fieldtype": "Link", "options": "Sales Partner", "width": 100},
+        {"label": _("Commission Rate"), "fieldname": "commission_rate", "fieldtype": "Percent", "width": 50},
+        {"label": _("Commission"), "fieldname": "commission", "fieldtype": "Float", "precision": 2, "width": 80}
     ]
     
 def get_data(filters):
@@ -131,4 +140,50 @@ def get_data(filters):
             'check': ""
         })
     
+    # find sales invoices and commissions
+    output = []
+    for row in data:
+        output.append(row)
+        if row['sales_order']:
+            sales_invoices = get_sinv_for_so(row['sales_order'])
+            first_row = True
+            for sales_invoice in sales_invoices:
+                if first_row:
+                    first_row = False
+                else:
+                    output.append({})
+                output[-1]['sales_invoice'] = sales_invoice['sales_invoice']
+                output[-1]['base_net_total'] = sales_invoice['base_net_total']
+                output[-1]['currency'] = sales_invoice['currency']
+                output[-1]['net_total'] = sales_invoice['net_total']
+                output[-1]['freight'] = sales_invoice['freight']
+                output[-1]['commission_base'] = sales_invoice['net_total'] - sales_invoice['freight']
+                output[-1]['sales_partner'] = sales_invoice['sales_partner']
+                output[-1]['commission_rate'] = sales_invoice['commission_rate']
+                output[-1]['commission'] = (sales_invoice['commission_rate'] / 100) * (sales_invoice['net_total'] - sales_invoice['freight'])
+        
+    return output
+
+def get_sinv_for_so(sales_order):
+    sql_query = """SELECT 
+          `tabSales Invoice Item`.`parent` AS `sales_invoice`, 
+          `tabSales Invoice Item`.`sales_order` AS `sales_order`,
+          `tabSales Invoice`.`sales_partner` AS `sales_partner`,
+          IFNULL(`tabSales Invoice`.`base_net_total`, 0) AS `base_net_total`,
+          IFNULL(`tabSales Invoice`.`net_total`, 0) AS `net_total`,
+          IFNULL(`tabSales Invoice`.`commission_rate`, 0) AS `commission_rate`,
+          `tabSales Invoice`.`currency` AS `currency`,
+          IFNULL((SELECT SUM(`amount`)
+           FROM `tabSales Invoice Item` AS `tabFreight`
+           WHERE `tabFreight`.`parent` = `tabSales Invoice`.`name`
+             AND (`tabFreight`.`item_name` LIKE "%Fracht%"
+              OR `tabFreight`.`item_name` LIKE "%Shipping%")
+          ), 0) AS `freight`
+        FROM `tabSales Invoice Item` 
+        LEFT JOIN `tabSales Invoice` ON `tabSales Invoice Item`.`parent` = `tabSales Invoice`.`name`
+        WHERE `tabSales Invoice`.`docstatus` = 1
+          AND `tabSales Invoice Item`.`sales_order` = "{sales_order}"
+        GROUP BY `tabSales Invoice`.`name`""".format(sales_order=sales_order)
+        
+    data = frappe.db.sql(sql_query, as_dict=True)
     return data
