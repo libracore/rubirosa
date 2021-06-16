@@ -175,73 +175,73 @@ def get_data(filters):
               WHERE `posting_date` >= "{year}-01-01" 
                 AND `posting_date` <= "{year}-01-31"
                 AND (`account` LIKE "1023%%" OR `account` LIKE "1024%%")
-                AND `against` IN (SELECT `name` FROM `tabSupplier` WHERE `supplier_group` IN ("Shoeproducers", "Raw Material"))) AS `jan`,
+                AND `against` IN (SELECT `name` FROM `tabSupplier` WHERE `supplier_group` IN ("Shoeproducer", "Raw Material"))) AS `jan`,
              (SELECT SUM(`credit`) 
               FROM `tabGL Entry`
               WHERE `posting_date` >= "{year}-02-01" 
                 AND `posting_date` < "{year}-03-01"
                 AND (`account` LIKE "1023%%" OR `account` LIKE "1024%%")
-                AND `against` IN (SELECT `name` FROM `tabSupplier` WHERE `supplier_group` IN ("Shoeproducers", "Raw Material"))) AS `feb`,
+                AND `against` IN (SELECT `name` FROM `tabSupplier` WHERE `supplier_group` IN ("Shoeproducer", "Raw Material"))) AS `feb`,
              (SELECT SUM(`credit`) 
               FROM `tabGL Entry`
               WHERE `posting_date` >= "{year}-03-01" 
                 AND `posting_date` <= "{year}-03-31"
                 AND (`account` LIKE "1023%%" OR `account` LIKE "1024%%")
-                AND `against` IN (SELECT `name` FROM `tabSupplier` WHERE `supplier_group` IN ("Shoeproducers", "Raw Material"))) AS `mar`,
+                AND `against` IN (SELECT `name` FROM `tabSupplier` WHERE `supplier_group` IN ("Shoeproducer", "Raw Material"))) AS `mar`,
              (SELECT SUM(`credit`) 
               FROM `tabGL Entry`
               WHERE `posting_date` >= "{year}-04-01" 
                 AND `posting_date` < "{year}-05-01"
                 AND (`account` LIKE "1023%%" OR `account` LIKE "1024%%")
-                AND `against` IN (SELECT `name` FROM `tabSupplier` WHERE `supplier_group` IN ("Shoeproducers", "Raw Material"))) AS `apr`,
+                AND `against` IN (SELECT `name` FROM `tabSupplier` WHERE `supplier_group` IN ("Shoeproducer", "Raw Material"))) AS `apr`,
              (SELECT SUM(`credit`) 
               FROM `tabGL Entry`
               WHERE `posting_date` >= "{year}-05-01" 
                 AND `posting_date` <= "{year}-05-31"
                 AND (`account` LIKE "1023%%" OR `account` LIKE "1024%%")
-                AND `against` IN (SELECT `name` FROM `tabSupplier` WHERE `supplier_group` IN ("Shoeproducers", "Raw Material"))) AS `may`,
+                AND `against` IN (SELECT `name` FROM `tabSupplier` WHERE `supplier_group` IN ("Shoeproducer", "Raw Material"))) AS `may`,
              (SELECT SUM(`credit`) 
               FROM `tabGL Entry`
               WHERE `posting_date` >= "{year}-06-01" 
                 AND `posting_date` < "{year}-07-01"
                 AND (`account` LIKE "1023%%" OR `account` LIKE "1024%%")
-                AND `against` IN (SELECT `name` FROM `tabSupplier` WHERE `supplier_group` IN ("Shoeproducers", "Raw Material"))) AS `jun`,
+                AND `against` IN (SELECT `name` FROM `tabSupplier` WHERE `supplier_group` IN ("Shoeproducer", "Raw Material"))) AS `jun`,
              (SELECT SUM(`credit`) 
               FROM `tabGL Entry`
               WHERE `posting_date` >= "{year}-07-01" 
                 AND `posting_date` < "{year}-08-01"
                 AND (`account` LIKE "1023%%" OR `account` LIKE "1024%%")
-                AND `against` IN (SELECT `name` FROM `tabSupplier` WHERE `supplier_group` IN ("Shoeproducers", "Raw Material"))) AS `jul`,
+                AND `against` IN (SELECT `name` FROM `tabSupplier` WHERE `supplier_group` IN ("Shoeproducer", "Raw Material"))) AS `jul`,
              (SELECT SUM(`credit`) 
               FROM `tabGL Entry`
               WHERE `posting_date` >= "{year}-08-01" 
                 AND `posting_date` < "{year}-09-01"
                 AND (`account` LIKE "1023%%" OR `account` LIKE "1024%%")
-                AND `against` IN (SELECT `name` FROM `tabSupplier` WHERE `supplier_group` IN ("Shoeproducers", "Raw Material"))) AS `aug`,
+                AND `against` IN (SELECT `name` FROM `tabSupplier` WHERE `supplier_group` IN ("Shoeproducer", "Raw Material"))) AS `aug`,
              (SELECT SUM(`credit`) 
               FROM `tabGL Entry`
               WHERE `posting_date` >= "{year}-09-01" 
                 AND `posting_date` < "{year}-10-01"
                 AND (`account` LIKE "1023%%" OR `account` LIKE "1024%%")
-                AND `against` IN (SELECT `name` FROM `tabSupplier` WHERE `supplier_group` IN ("Shoeproducers", "Raw Material"))) AS `sep`,
+                AND `against` IN (SELECT `name` FROM `tabSupplier` WHERE `supplier_group` IN ("Shoeproducer", "Raw Material"))) AS `sep`,
              (SELECT SUM(`credit`) 
               FROM `tabGL Entry`
               WHERE `posting_date` >= "{year}-10-01" 
                 AND `posting_date` < "{year}-11-01"
                 AND (`account` LIKE "1023%%" OR `account` LIKE "1024%%")
-                AND `against` IN (SELECT `name` FROM `tabSupplier` WHERE `supplier_group` IN ("Shoeproducers", "Raw Material"))) AS `oct`,
+                AND `against` IN (SELECT `name` FROM `tabSupplier` WHERE `supplier_group` IN ("Shoeproducer", "Raw Material"))) AS `oct`,
              (SELECT SUM(`credit`) 
               FROM `tabGL Entry`
               WHERE `posting_date` >= "{year}-11-01" 
                 AND `posting_date` < "{year}-12-01"
                 AND (`account` LIKE "1023%%" OR `account` LIKE "1024%%")
-                AND `against` IN (SELECT `name` FROM `tabSupplier` WHERE `supplier_group` IN ("Shoeproducers", "Raw Material"))) AS `nov`,
+                AND `against` IN (SELECT `name` FROM `tabSupplier` WHERE `supplier_group` IN ("Shoeproducer", "Raw Material"))) AS `nov`,
              (SELECT SUM(`credit`) 
               FROM `tabGL Entry`
               WHERE `posting_date` >= "{year}-12-01" 
                 AND `posting_date` <= "{year}-12-31"
                 AND (`account` LIKE "1023%%" OR `account` LIKE "1024%%")
-                AND `against` IN (SELECT `name` FROM `tabSupplier` WHERE `supplier_group` IN ("Shoeproducers", "Raw Material"))) AS `dec`
+                AND `against` IN (SELECT `name` FROM `tabSupplier` WHERE `supplier_group` IN ("Shoeproducer", "Raw Material"))) AS `dec`
                 
             UNION SELECT
              "Ausgänge gesamt (1023, 1024)" AS `label`, 
