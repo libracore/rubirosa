@@ -39,6 +39,7 @@ def get_data(filters):
             LEFT JOIN `tabCustomer` ON `tabSales Invoice`.`customer` = `tabCustomer`.`name`
             WHERE `tabSales Invoice`.`docstatus` = 1
                 AND `tabSales Invoice`.`customer` LIKE '{customer}'
+                AND `tabSales Invoice`.`company` LIKE "%rubirosa management%"
             GROUP BY `tabSales Invoice`.`customer`
             ORDER BY SUM(`tabSales Invoice`.`base_net_total`) DESC;
       """.format(customer=filters.customer)
