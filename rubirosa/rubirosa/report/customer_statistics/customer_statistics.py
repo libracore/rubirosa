@@ -1,4 +1,4 @@
-# Copyright (c) 2020, libracore and contributors
+# Copyright (c) 2020-2021, libracore and contributors
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
@@ -39,10 +39,10 @@ def get_data(filters):
             LEFT JOIN `tabCustomer` ON `tabSales Invoice`.`customer` = `tabCustomer`.`name`
             WHERE `tabSales Invoice`.`docstatus` = 1
                 AND `tabSales Invoice`.`customer` LIKE '{customer}'
-                AND `tabSales Invoice`.`company` LIKE "%rubirosa management%"
+                AND `tabSales Invoice`.`company` = "{company}"
             GROUP BY `tabSales Invoice`.`customer`
             ORDER BY SUM(`tabSales Invoice`.`base_net_total`) DESC;
-      """.format(customer=filters.customer)
+      """.format(customer=filters.customer, company=filters.company)
 
     data = frappe.db.sql(sql_query, as_dict=1)
 
