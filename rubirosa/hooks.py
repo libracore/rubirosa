@@ -36,6 +36,13 @@ doctype_js = {
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
+# adding Jinja environments
+jenv = {
+    "methods": [
+        "get_sales_season_matrix:rubirosa.rubirosa.print.get_sales_season_matrix"
+    ]
+}
+
 # Home Pages
 # ----------
 
