@@ -25,7 +25,7 @@ def get_sales_season_matrix(sales_season):
     for i in sold_items:
         if i['item_name'] not in models:
             models.append(i['item_name'])
-    sizes = ["390", "400", "410", "420", "430", "440", "450", "460"]
+    sizes = ["360", "370", "380", "390", "400", "410", "420", "430", "440", "450", "460", "470", "480"]
     
     # build up matrix
     matrix = {}
