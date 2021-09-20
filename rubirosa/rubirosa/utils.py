@@ -174,3 +174,20 @@ def add_comment(sales_order, text):
     })
     new_comment.insert()
     return
+
+"""
+Get all sales order items to process to purchase order
+"""
+@frappe.whitelist()
+def get_sales_order_items(sales_order, supplier):
+    sql_query = """SELECT 
+            `tabSales Order Item`.`item_code`, 
+            `tabSales Order Item`.`qty`, 
+            `tabItem Supplier`.`supplier`
+        FROM `tabSales Order Item`
+        LEFT JOIN `tabItem Supplier` ON `tabItem Supplier`.`parent` = `tabSales Order Item`.`item_code`
+        WHERE `tabSales Order Item`.`parent` = "{sales_order}"
+          AND (`tabItem Supplier`.`supplier` IS NULL OR `tabItem Supplier`.`supplier` = "{supplier}")
+        ;""".format(sales_order=sales_order, supplier=supplier)
+    items = frappe.db.sql(sql_query, as_dict=True)
+    return items
