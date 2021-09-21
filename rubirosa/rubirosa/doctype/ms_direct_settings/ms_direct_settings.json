@@ -20,7 +20,9 @@
   "section_print",
   "dn_print_format",
   "column_print_format",
-  "sinv_print_format"
+  "sinv_print_format",
+  "section_options",
+  "do_not_submit_purchase_receipts"
  ],
  "fields": [
   {
@@ -121,10 +123,21 @@
    "fieldtype": "Link",
    "label": "Sales Invoice Print Format",
    "options": "Print Format"
+  },
+  {
+   "fieldname": "section_options",
+   "fieldtype": "Section Break",
+   "label": "Options"
+  },
+  {
+   "default": "0",
+   "fieldname": "do_not_submit_purchase_receipts",
+   "fieldtype": "Check",
+   "label": "Do not submit purchase receipts"
   }
  ],
  "issingle": 1,
- "modified": "2020-10-26 16:03:32.935893",
+ "modified": "2021-09-21 20:59:41.061370",
  "modified_by": "Administrator",
  "module": "Rubirosa",
  "name": "MS Direct Settings",

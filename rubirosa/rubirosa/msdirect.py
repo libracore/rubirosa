@@ -15,6 +15,7 @@ from frappe import get_print   # for pdf creation
 import base64
 from frappe.defaults import get_global_default
 import time
+from frappe.utils import flt, cint
 
 # write an item to MS Direct
 @frappe.whitelist()
