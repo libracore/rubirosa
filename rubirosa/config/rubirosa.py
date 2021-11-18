@@ -112,6 +112,14 @@ def get_data():
                    {
                        "type": "report",
                        "doctype": "Sales Invoice",
+                       "name": "Advanced Sales Partners Commission Detail",
+                       "label": _("Advanced Sales Partners Commission Detail"),
+                       "description": _("Advanced Sales Partners Commission Detail"),
+                       "is_query_report": True
+                   },
+                   {
+                       "type": "report",
+                       "doctype": "Sales Invoice",
                        "name": "Customer Statistics",
                        "label": _("Customer Statistics"),
                        "description": _("Customer Statistics"),
