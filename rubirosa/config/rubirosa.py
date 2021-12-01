@@ -112,7 +112,7 @@ def get_data():
                    {
                        "type": "report",
                        "doctype": "Sales Invoice",
-                       "name": "Advanced Sales Partners Commission Detail",
+                       "name": "Advanced Sales Partners Commission Detail rubirosa",
                        "label": _("Advanced Sales Partners Commission Detail"),
                        "description": _("Advanced Sales Partners Commission Detail"),
                        "is_query_report": True
