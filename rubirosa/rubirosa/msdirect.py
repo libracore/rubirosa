@@ -471,24 +471,32 @@ def get_country_code(country):
 def post_request(content):
     # get settings
     settings = frappe.get_doc("MS Direct Settings")
+    if (cint(settings.disable_ssl_verification) == 1):
+        verify = False
+    else:
+        verify = True
     password = get_decrypted_password("MS Direct Settings", "MS Direct Settings", 'password')
     # prepare connection
     auth = HTTPBasicAuth(settings.user, password)
     url = settings.endpoint
     # send request
-    response = requests.post(url=url, auth=auth, data=content.encode('utf-8'))
+    response = requests.post(url=url, auth=auth, data=content.encode('utf-8'), verify=verify)
     return response
 
 # create a get request to the API
 def get_request(content):
     # get settings
     settings = frappe.get_doc("MS Direct Settings")
+    if (cint(settings.disable_ssl_verification) == 1):
+        verify = False
+    else:
+        verify = True
     password = get_decrypted_password("MS Direct Settings", "MS Direct Settings", 'password')
     # prepare connection
     auth = HTTPBasicAuth(settings.user, password)
     url = settings.endpoint
     # send request
-    response = requests.get(url=url, auth=auth, data=content.encode('utf-8'))
+    response = requests.get(url=url, auth=auth, data=content.encode('utf-8'), verify=verify)
     return response
     
 def add_log(title, request=None, response=None, result="None"):

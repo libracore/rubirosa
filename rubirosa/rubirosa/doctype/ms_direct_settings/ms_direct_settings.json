@@ -22,7 +22,9 @@
   "column_print_format",
   "sinv_print_format",
   "section_options",
-  "do_not_submit_purchase_receipts"
+  "do_not_submit_purchase_receipts",
+  "column_options",
+  "disable_ssl_verification"
  ],
  "fields": [
   {
@@ -134,10 +136,20 @@
    "fieldname": "do_not_submit_purchase_receipts",
    "fieldtype": "Check",
    "label": "Do not submit purchase receipts"
+  },
+  {
+   "fieldname": "column_options",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "disable_ssl_verification",
+   "fieldtype": "Check",
+   "label": "Disable SSL verification"
   }
  ],
  "issingle": 1,
- "modified": "2021-09-21 20:59:41.061370",
+ "modified": "2022-02-02 10:12:51.587008",
  "modified_by": "Administrator",
  "module": "Rubirosa",
  "name": "MS Direct Settings",
