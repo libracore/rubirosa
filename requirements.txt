@@ -2,5 +2,4 @@ frappe
 bs4
 requests
 requests.auth
-html
 hashlib
