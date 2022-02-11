@@ -20,7 +20,7 @@ def get_columns():
         {"label": _("Territory"), "fieldname": "territory", "fieldtype": "Link", "options": "Territory", "width": 100},
         {"label": _("Sales Season"), "fieldname": "sales_season", "fieldtype": "Link", "options": "Monthly Distribution", "width": 150},
         {"label": _("Volume"), "fieldname": "volume", "fieldtype": "Currency", "width": 100},
-        {"label": _("Delivered %"), "fieldname": "deliverred_percent", "fieldtype": "Percent", "width": 100},
+        {"label": _("Delivered %"), "fieldname": "delivered_percent", "fieldtype": "Percent", "width": 100},
         {"label": _(""), "fieldname": "blank", "fieldtype": "Data", "width": 20}
     ]
     
