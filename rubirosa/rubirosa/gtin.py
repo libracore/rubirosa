@@ -5,6 +5,8 @@
 # for generic gtin functions, refer to https://github.com/libracore/erpnextswiss
 
 import frappe
+import json
+from erpnextswiss.erpnextswiss.gtin import add_check_digit
 
 # this function will return the next available shortcode for GTIN
 @frappe.whitelist()
@@ -22,3 +24,20 @@ def get_next_ean_shortcode():
             return 0
     except Exception as err:
         return 0
+
+# create EAN for multiple items
+@frappe.whitelist()
+def create_bulk_ean(selected, prefix):
+    items = json.loads(selected)
+    for i in items:
+        item = frappe.get_doc("Item", i['name'])
+        if not item.ean_code:   # skip if item already has an EAN
+            short_code = ("000{0}".format(get_next_ean_shortcode()))[-3:]
+            full_ean = add_check_digit("{0}{1}".format(prefix, short_code))
+            item.ean_code = short_code
+            item.append("barcodes", {
+                'barcode_type': "EAN",
+                'barcode': full_ean
+            })
+        item.save()
+    return
