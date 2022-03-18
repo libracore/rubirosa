@@ -5,7 +5,7 @@ frappe.listview_settings['Item'] = {
     onload: function(listview) {
         listview.page.add_menu_item(__("Create EAN"), function() {
             var selected = listview.get_checked_items();
-            create_bulk_ean(selected, "764025272");
+            create_bulk_ean(selected, "764022699");
         });
     }
 };

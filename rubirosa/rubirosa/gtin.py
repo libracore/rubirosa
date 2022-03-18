@@ -32,9 +32,10 @@ def create_bulk_ean(selected, prefix):
     for i in items:
         item = frappe.get_doc("Item", i['name'])
         if not item.ean_code:   # skip if item already has an EAN
-            short_code = ("000{0}".format(get_next_ean_shortcode()))[-3:]
+            next_ean = get_next_ean_shortcode()
+            short_code = ("000{0}".format(next_ean))[-3:]
             full_ean = add_check_digit("{0}{1}".format(prefix, short_code))
-            item.ean_code = short_code
+            item.ean_code = next_ean
             item.append("barcodes", {
                 'barcode_type': "EAN",
                 'barcode': full_ean
