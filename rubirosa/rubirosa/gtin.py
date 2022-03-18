@@ -39,5 +39,6 @@ def create_bulk_ean(selected, prefix):
                 'barcode_type': "EAN",
                 'barcode': full_ean
             })
+            item.barcode = full_ean
         item.save()
     return
