@@ -49,8 +49,8 @@ def get_data(filters):
                      `tabAddress`.`pincode` AS `pincode`,
                      `tabAddress`.`city` AS `city`,
                      `tabSales Order`.`name` AS `sales_order`,
-                     `tabSales Order`.`total_qty` AS `qty`,
-                     `tabSales Order`.`base_net_total` AS `order_amount`,
+                     SUM(`tabSales Order Item`.`qty`) AS `qty`,
+                     SUM(`tabSales Order Item`.`base_net_amount`) AS `order_amount`,
                      (SELECT `tabPurchase Order Item`.`parent`
                       FROM `tabPurchase Order Item`
                       WHERE `tabPurchase Order Item`.`sales_order_trace` LIKE CONCAT("%", `tabSales Order`.`name`, "%")
@@ -80,6 +80,11 @@ def get_data(filters):
                    LEFT JOIN `tabSales Order` ON `tabSales Order`.`customer` = `raw`.`name`
                                              AND `tabSales Order`.`sales_season` = "{season}"
                                              AND `tabSales Order`.`docstatus` < 2
+                   LEFT JOIN `tabSales Order Item` ON `tabSales Order Item`.`parent` = `tabSales Order`.`name`
+                   WHERE 
+                       (`tabSales Order Item`.`item_code` IS NULL 
+                        OR `tabSales Order Item`.`item_code` NOT LIKE "%shipping%")
+                   GROUP BY `raw`.`name`
                      ;
       """.format(season=filters.sales_season, conditions=conditions)
     data = frappe.db.sql(sql_query, as_dict=1)
