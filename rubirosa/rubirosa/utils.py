@@ -191,3 +191,22 @@ def get_sales_order_items(sales_order, supplier):
         ;""".format(sales_order=sales_order, supplier=supplier)
     items = frappe.db.sql(sql_query, as_dict=True)
     return items
+
+"""
+Fetch purchase receipt items with ean codes
+"""
+@frappe.whitelist()
+def get_purchase_receipt_items(purchase_receipt):
+    content = frappe.db.sql("""
+        SELECT 
+            `tabPurchase Receipt Item` .`item_code`,
+            `tabPurchase Receipt Item` .`item_name`,
+            `tabPurchase Receipt Item` .`qty`,
+            `tabItem Barcode`.`barcode`
+        FROM `tabPurchase Receipt Item` 
+        LEFT JOIN `tabItem Barcode` ON 
+            `tabPurchase Receipt Item`.`item_code` = `tabItem Barcode`.`parent` 
+            AND `tabItem Barcode`.`barcode_type` = "EAN"
+        WHERE `tabPurchase Receipt Item`.`parent` = "{{prec}}";
+    """.format(prec=purchase_receipt), as_dict=True)
+    return content
