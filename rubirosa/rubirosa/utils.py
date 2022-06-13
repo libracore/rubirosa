@@ -207,6 +207,6 @@ def get_purchase_receipt_items(purchase_receipt):
         LEFT JOIN `tabItem Barcode` ON 
             `tabPurchase Receipt Item`.`item_code` = `tabItem Barcode`.`parent` 
             AND `tabItem Barcode`.`barcode_type` = "EAN"
-        WHERE `tabPurchase Receipt Item`.`parent` = "{{prec}}";
+        WHERE `tabPurchase Receipt Item`.`parent` = "{prec}";
     """.format(prec=purchase_receipt), as_dict=True)
     return content
