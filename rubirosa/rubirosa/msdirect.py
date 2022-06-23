@@ -481,19 +481,19 @@ def post_request(content, repeat=0):
     auth = HTTPBasicAuth(settings.user, password)
     url = settings.endpoint
     # send request
+    response = None
     try:
         response = requests.post(url=url, auth=auth, data=content.encode('utf-8'), verify=verify, timeout=120)
-    except Timeout:
+    except requests.exceptions.Timeout as e:
         print("POST timed out")
         add_log("MS Direct POST Timeout", request=content, response="Timeout", result="")
         # try again
         if repeat < 10:
             repeat += 1
-            post_request(content, repeat)
+            response = post_request(content, repeat)
         else:
             return None
-    else:
-        return response
+    return response
 
 # create a get request to the API
 def get_request(content):
