@@ -144,14 +144,15 @@ def write_delivery_note(delivery_note):
     # post request
     response = post_request(xml)    
     # evaluate response
-    result = "undefined"
-    if """<wn1:resultCode i:type="d:boolean">1</wn1:resultCode>""" in response.text:
-        result = "Success"
-    elif """<wn1:errorCode i:type="d:string">ERROR</wn1:errorCode>""" in response.text:
-        result = "Error"
-        
-    # add log
-    add_log("Delivery Note {0} sent to MS Direct".format(delivery_note), request=xml, response=response.text, result=result)
+    if response:
+        result = "undefined"
+        if """<wn1:resultCode i:type="d:boolean">1</wn1:resultCode>""" in response.text:
+            result = "Success"
+        elif """<wn1:errorCode i:type="d:string">ERROR</wn1:errorCode>""" in response.text:
+            result = "Error"
+            
+        # add log
+        add_log("Delivery Note {0} sent to MS Direct".format(delivery_note), request=xml, response=response.text, result=result)
     return
 
 # write purchase order to MS Direct
@@ -468,7 +469,7 @@ def get_country_code(country):
     return frappe.get_value("Country", country, "code")
 
 # create a post request to the API
-def post_request(content):
+def post_request(content, repeat=0):
     # get settings
     settings = frappe.get_doc("MS Direct Settings")
     if (cint(settings.disable_ssl_verification) == 1):
@@ -480,8 +481,19 @@ def post_request(content):
     auth = HTTPBasicAuth(settings.user, password)
     url = settings.endpoint
     # send request
-    response = requests.post(url=url, auth=auth, data=content.encode('utf-8'), verify=verify)
-    return response
+    try:
+        response = requests.post(url=url, auth=auth, data=content.encode('utf-8'), verify=verify, timeout=120)
+    except Timeout:
+        print("POST timed out")
+        add_log("MS Direct POST Timeout", request=content, response="Timeout", result="")
+        # try again
+        if repeat < 10:
+            repeat += 1
+            post_request(content, repeat)
+        else:
+            return None
+    else:
+        return response
 
 # create a get request to the API
 def get_request(content):
