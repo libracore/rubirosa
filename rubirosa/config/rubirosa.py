@@ -48,6 +48,14 @@ def get_data():
                        "is_query_report": True
                    },
                    {
+                       "type": "report",
+                       "doctype": "Purchase Receipt",
+                       "name": "Purchase Receipt Mapping",
+                       "label": _("Purchase Receipt Mapping"),
+                       "description": _("Purchase Receipt Mapping"),
+                       "is_query_report": True
+                   },
+                   {
                        "type": "doctype",
                        "name": "Etikettenbogen",
                        "label": _("Etikettenbogen"),
