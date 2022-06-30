@@ -111,7 +111,7 @@ jenv = {
 # 		"rubirosa.tasks.all"
 # 	],
 # 	"daily": [
-# 		"rubirosa.tasks.daily"
+# 		"rubirosa.rubirosa.msdirect.write_latest_items"
 # 	],
 # 	"hourly": [
 # 		"rubirosa.tasks.hourly"

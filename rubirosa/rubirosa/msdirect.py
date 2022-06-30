@@ -218,6 +218,73 @@ def write_purchase_order(purchase_order):
         time.sleep(1)           # delay sending items for 1 sec per item to allow the server to process the item
     return
 
+# write purchase receipt to MS Direct
+@frappe.whitelist()
+def write_purchase_receipt(purchase_receipt):
+    # get purchase order
+    pr = frappe.get_doc("Purchase Receipt", purchase_receipt)
+    if pr.supplier_address:
+        supplier_address = frappe.get_doc("Address", pr.supplier_address)
+    else:
+        frappe.throw("Supplier address missing in purchase order {0}".format(purchase_order), "MS Direct write_purchase_order")
+        
+    # update all item records to make sure that the used
+    for item in pr.items:
+        write_item(item.item_code)
+        time.sleep(1)           # delay sending items for 1 sec per item to allow the server to process the item
+        
+    # get settings
+    settings = frappe.get_doc("MS Direct Settings")
+    
+    # extend warehouse code and barcode
+    items = []
+    for item in pr.items:
+        ms_uom = frappe.get_value("UOM", item.uom, "ms_direct_uom")
+        barcode = frappe.get_value("Item", item.item_code, "barcode")
+        if barcode and len(barcode) <= 17:          # ignore items with barcodes longer than 17 characters
+            items.append({
+                'item_name': item.item_name,
+                'item_code': html.escape(barcode),
+                'rate': item.rate,
+                'idx': item.idx,
+                'schedule_date': item.schedule_date,
+                'qty': item.qty,
+                'uom': ms_uom,
+                'warehouse_code': frappe.get_value("Warehouse", item.warehouse, "warehouse_code") or "LA",
+                'barcode': barcode
+            })
+    # prepare content
+    data = {
+        'header': get_header(),
+        'date': pr.transaction_date,
+        'name': purchase_receipt,
+        'currency': html.escape(pr.currency),
+        'email_id': pr.contact_email,
+        'language': pr.language,
+        'supplier_name': html.escape(pr.supplier_name),
+        'tax_id': frappe.get_value("Supplier", pr.supplier, "tax_id"),
+        'items': items,
+        'address': {
+            'address': html.escape(supplier_address.address_line1),
+            'city': html.escape(supplier_address.city),
+            'country_code': get_country_code(supplier_address.country)
+        }
+    }
+    # render content
+    xml = frappe.render_template('rubirosa/templates/xml/purchase_order.html', data)
+    # post request
+    response = post_request(xml)    
+    # evaluate response
+    result = "undefined"
+    if """<wn1:resultCode i:type="d:boolean">1</wn1:resultCode>""" in response.text:
+        result = "Success"
+    elif """<wn1:errorCode i:type="d:string">ERROR</wn1:errorCode>""" in response.text:
+        result = "Error"
+    # add log
+    add_log("Purchase Receipt {0} sent to MS Direct".format(purchase_order), request=xml, response=response.text, result=result)
+    
+    return
+    
 # get purchase orders from MS Direct
 @frappe.whitelist()
 def get_purchase_orders(debug=False):
@@ -532,3 +599,35 @@ def get_pdf_base64(delivery_note, print_format):
     encoded = base64.b64encode(pdf)
     # return as string b'BHGhju...'
     return str(encoded)
+
+"""
+Migration commands
+
+recursively_send_pos(['PO-00115', 'PO-00098'])
+
+"""
+def recursively_send_pos(po_list):
+    for po in po_list: 
+         doc = frappe.get_doc("Purchase Order", po) 
+         for item in doc.items: 
+             write_item(item.item_code) 
+             print("Sent {0}".format(item.item_code)) 
+             time.sleep(1)
+
+    for po in po_list:
+        write_purchase_order(po)
+        print("Sent {0}".format(po))
+        time.sleep(1)
+        
+def write_latest_items():
+    settings = frappe.get_doc("MS Direct Settings")  
+    if settings.user:
+        items = frappe.db.sql("""SELECT `item_code` 
+            FROM `tabItem` 
+            WHERE `modified` >= DATE_ADD(CURDATE(), INTERVAL -2 DAY)
+              AND `disabled` = 0;""", as_dict=True)                                                                                                                                         
+        for item in items: 
+             write_item(item['item_code']) 
+             print("Sent {0}".format(item['item_code'])) 
+             time.sleep(2)
+    return
