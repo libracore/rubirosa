@@ -1,6 +1,6 @@
 frappe.ui.form.on("Purchase Order", {
     on_submit: function(frm) {
-        send_to_msdirect(frm);
+        //send_to_msdirect(frm);            // disabled: MS Direct cannot process part deliveries
     }
 });
 

@@ -31,7 +31,9 @@ doctype_js = {
     "Item" : "public/js/item.js",
     "Delivery Note": "public/js/delivery_note.js",
     "Purchase Order": "public/js/purchase_order.js", 
-    "Purchase Receipt": "public/js/xlsx.full.min.js",
+    "Purchase Receipt": ["public/js/xlsx.full.min.js",
+        "public/js/purchase_receipt.js"
+    ],
     "Monthly Distribution": "public/js/monthly_distribution.js"
 }
 doctype_list_js = {

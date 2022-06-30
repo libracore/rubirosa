@@ -226,7 +226,7 @@ def write_purchase_receipt(purchase_receipt):
     if pr.supplier_address:
         supplier_address = frappe.get_doc("Address", pr.supplier_address)
     else:
-        frappe.throw("Supplier address missing in purchase order {0}".format(purchase_order), "MS Direct write_purchase_order")
+        frappe.throw("Supplier address missing in purchase receipt {0}".format(purchase_order), "MS Direct write_purchase_receipt")
         
     # update all item records to make sure that the used
     for item in pr.items:
