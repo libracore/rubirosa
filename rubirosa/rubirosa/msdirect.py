@@ -256,7 +256,7 @@ def write_purchase_receipt(purchase_receipt):
     # prepare content
     data = {
         'header': get_header(),
-        'date': pr.transaction_date,
+        'date': pr.posting_date,
         'name': purchase_receipt,
         'currency': html.escape(pr.currency),
         'email_id': pr.contact_email,
