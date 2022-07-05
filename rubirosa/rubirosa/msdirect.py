@@ -281,7 +281,7 @@ def write_purchase_receipt(purchase_receipt):
     elif """<wn1:errorCode i:type="d:string">ERROR</wn1:errorCode>""" in response.text:
         result = "Error"
     # add log
-    add_log("Purchase Receipt {0} sent to MS Direct".format(purchase_order), request=xml, response=response.text, result=result)
+    add_log("Purchase Receipt {0} sent to MS Direct".format(purchase_receipt), request=xml, response=response.text, result=result)
     
     return
     
