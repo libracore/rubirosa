@@ -1,0 +1,113 @@
+{
+ "autoname": "MTF-.#####",
+ "creation": "2022-07-20 09:21:25.860186",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "file_type",
+  "col_main",
+  "date",
+  "sec_po",
+  "purchase_orders"
+ ],
+ "fields": [
+  {
+   "default": "Purchase Order",
+   "fieldname": "file_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Type",
+   "options": "Purchase Order",
+   "reqd": 1
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date"
+  },
+  {
+   "depends_on": "eval:doc.file_type==\"Purchase Order\"",
+   "fieldname": "sec_po",
+   "fieldtype": "Section Break",
+   "label": "Purchase Orders"
+  },
+  {
+   "fieldname": "purchase_orders",
+   "fieldtype": "Table",
+   "label": "Purchase Orders",
+   "options": "MS Direct Transfer File PO"
+  },
+  {
+   "fieldname": "col_main",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "modified": "2022-07-20 09:57:14.988431",
+ "modified_by": "Administrator",
+ "module": "Rubirosa",
+ "name": "MS Direct Transfer File",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Purchase Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Purchase User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

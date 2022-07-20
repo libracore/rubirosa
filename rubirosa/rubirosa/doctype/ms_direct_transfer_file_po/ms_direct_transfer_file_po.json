@@ -1,0 +1,49 @@
+{
+ "creation": "2022-07-20 09:20:10.980390",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "purchase_order",
+  "supplier",
+  "date"
+ ],
+ "fields": [
+  {
+   "fieldname": "purchase_order",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Purchase Order",
+   "options": "Purchase Order",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "purchase_order.supplier",
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Supplier",
+   "options": "Supplier",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "purchase_order.transaction_date",
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date",
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2022-07-20 09:59:37.170532",
+ "modified_by": "Administrator",
+ "module": "Rubirosa",
+ "name": "MS Direct Transfer File PO",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

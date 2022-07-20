@@ -631,3 +631,76 @@ def write_latest_items():
              print("Sent {0}".format(item['item_code'])) 
              time.sleep(2)
     return
+
+"""
+MS Direct Transfer File: Purchase Order
+"""
+@frappe.whitelist()
+def send_multiple_pos(msd_transfer_file):
+    # get settings
+    settings = frappe.get_doc("MS Direct Settings")
+    # get purchase order
+    doc = frappe.get_doc("MS Direct Transfer File", msd_transfer_file)
+    # check if there are purchase orders
+    if len(doc.purchase_orders) == 0:
+        frappe.throw( _("No POs found") )
+    # check supplier address
+    first_po = frappe.get_doc("Purchase Order", doc.purchase_orders[0].purchase_order)
+    if first_po.supplier_address:
+        supplier_address = frappe.get_doc("Address", first_po.supplier_address)
+    else:
+        frappe.throw("Supplier address missing in purchase order {0}".format(first_po.name), "MS Direct multiple write_purchase_order")
+    # extend warehouse code and barcode
+    items = []
+    for po_row in doc.purchase_orders:
+        po = frappe.get_doc("Purchase Order", po_row.purchase_order)
+        for item in po.items:
+            ms_uom = frappe.get_value("UOM", item.uom, "ms_direct_uom")
+            barcode = frappe.get_value("Item", item.item_code, "barcode")
+            if barcode and len(barcode) <= 17:          # ignore items with barcodes longer than 17 characters
+                items.append({
+                    'item_name': item.item_name,
+                    'item_code': html.escape(barcode),
+                    'erp_item_code': item.item_code,
+                    'rate': item.rate,
+                    'idx': item.idx,
+                    'schedule_date': item.schedule_date,
+                    'qty': item.qty,
+                    'uom': ms_uom,
+                    'warehouse_code': frappe.get_value("Warehouse", item.warehouse, "warehouse_code") or "LA",
+                    'barcode': barcode
+                })
+    # prepare content
+    data = {
+        'header': get_header(),
+        'date': first_po.transaction_date,
+        'name': doc.name,
+        'currency': html.escape(first_po.currency),
+        'email_id': first_po.contact_email,
+        'language': first_po.language,
+        'supplier_name': html.escape(first_po.supplier_name),
+        'tax_id': frappe.get_value("Supplier", first_po.supplier, "tax_id"),
+        'items': items,
+        'address': {
+            'address': html.escape(supplier_address.address_line1),
+            'city': html.escape(supplier_address.city),
+            'country_code': get_country_code(supplier_address.country)
+        }
+    }
+    # update all item records to make sure that they aere available
+    for item in items:
+        write_item(item['erp_item_code'])
+        time.sleep(1)           # delay sending items for 1 sec per item to allow the server to process the item
+    # render content
+    xml = frappe.render_template('rubirosa/templates/xml/purchase_order.html', data)
+    # post request
+    response = post_request(xml)    
+    # evaluate response
+    result = "undefined"
+    if """<wn1:resultCode i:type="d:boolean">1</wn1:resultCode>""" in response.text:
+        result = "Success"
+    elif """<wn1:errorCode i:type="d:string">ERROR</wn1:errorCode>""" in response.text:
+        result = "Error"
+    # add log
+    add_log("Purchase Order Tranfer File {0} sent to MS Direct".format(doc.name), request=xml, response=response.text, result=result)
+    return

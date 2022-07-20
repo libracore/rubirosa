@@ -90,6 +90,12 @@ def get_data():
                        "name": "MS Direct Log",
                        "label": _("MS Direct Log"),
                        "description": _("MS Direct Log")
+                   },
+                   {
+                       "type": "doctype",
+                       "name": "MS Direct Transfer File",
+                       "label": _("MS Direct Transfer File"),
+                       "description": _("MS Direct Transfer File")
                    }
             ]
         },
