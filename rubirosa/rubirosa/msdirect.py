@@ -256,7 +256,7 @@ def write_purchase_receipt(purchase_receipt):
     # prepare content
     data = {
         'header': get_header(),
-        'date': pr.transaction_date,
+        'date': pr.posting_date,
         'name': purchase_receipt,
         'currency': html.escape(pr.currency),
         'email_id': pr.contact_email,
@@ -281,7 +281,7 @@ def write_purchase_receipt(purchase_receipt):
     elif """<wn1:errorCode i:type="d:string">ERROR</wn1:errorCode>""" in response.text:
         result = "Error"
     # add log
-    add_log("Purchase Receipt {0} sent to MS Direct".format(purchase_order), request=xml, response=response.text, result=result)
+    add_log("Purchase Receipt {0} sent to MS Direct".format(purchase_receipt), request=xml, response=response.text, result=result)
     
     return
     
