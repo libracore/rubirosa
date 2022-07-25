@@ -10,14 +10,17 @@ function write_to_msdirect(frm) {
     // wait for the data to be stored in the database
     sleep(5000).then(() => {
         frappe.call({
-    		method: 'rubirosa.rubirosa.msdirect.write_item',
-    		args: {
-    			'item_code': frm.doc.name
-    		},
-    		callback: function(r) {
-    			frappe.show_alert("Artikel an MS Direct übertragen");
-    		}
-    	}); 
+            'method': 'rubirosa.rubirosa.msdirect.enqueue_write',
+            'args': {
+                'command': 'rubirosa.rubirosa.msdirect.write_item',
+                'kwargs': {
+                    'item_code': frm.doc.name
+                }
+            },
+            'callback': function(r) {
+                frappe.show_alert("Artikel an MS Direct übertragen");
+            }
+        }); 
     });
 }
 

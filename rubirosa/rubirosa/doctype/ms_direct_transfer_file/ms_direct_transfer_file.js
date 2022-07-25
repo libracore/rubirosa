@@ -34,9 +34,12 @@ frappe.ui.form.on('MS Direct Transfer File', {
 function send_file(frm) {
     if (frm.doc.file_type === "Purchase Order") {
         frappe.call({
-            'method': 'rubirosa.rubirosa.msdirect.send_multiple_pos',
+            'method': 'rubirosa.rubirosa.msdirect.enqueue_write',
             'args': {
-                'msd_transfer_file': frm.doc.name
+                'command': 'rubirosa.rubirosa.msdirect.send_multiple_pos',
+                'kwargs': {
+                    'msd_transfer_file': frm.doc.name
+                }
             },
             'callback': function(r) {
                 frappe.show_alert( __("Sent") );

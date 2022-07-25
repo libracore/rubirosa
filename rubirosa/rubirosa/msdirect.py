@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2018-2020, libracore (https://www.libracore.com) and contributors
+# Copyright (c) 2018-2022, libracore (https://www.libracore.com) and contributors
 # For license information, please see license.txt
 #
 # Interface module for MS Direct
@@ -16,6 +16,8 @@ import base64
 from frappe.defaults import get_global_default
 import time
 from frappe.utils import flt, cint
+from frappe.utils.background_jobs import enqueue
+import json
 
 # write an item to MS Direct
 @frappe.whitelist()
@@ -703,4 +705,11 @@ def send_multiple_pos(msd_transfer_file):
         result = "Error"
     # add log
     add_log("Purchase Order Tranfer File {0} sent to MS Direct".format(doc.name), request=xml, response=response.text, result=result)
+    return
+
+@frappe.whitelist()
+def enqueue_write(command, kwargs):
+    if type(kwargs) == str:
+        kwargs = json.loads(kwargs)
+    enqueue(command, queue='long', timeout=15000, **kwargs)
     return

@@ -9,9 +9,12 @@ frappe.ui.form.on("Delivery Note", {
 
 function send_to_msdirect(frm) {
     frappe.call({
-        "method": "rubirosa.rubirosa.msdirect.write_delivery_note",
-        "args": {
-            "delivery_note": frm.doc.name
+        'method': 'rubirosa.rubirosa.msdirect.enqueue_write',
+        'args': {
+            'command': 'rubirosa.rubirosa.msdirect.write_delivery_note',
+            'kwargs': {
+                'delivery_note': frm.doc.name
+            }
         },
         "callback": function(response) {
             frappe.show_alert( __("Sent to MS Direct") );
