@@ -84,7 +84,7 @@ def get_data(filters):
                    WHERE 
                        (`tabSales Order Item`.`item_code` IS NULL 
                         OR `tabSales Order Item`.`item_code` NOT LIKE "%shipping%")
-                   GROUP BY `raw`.`name`
+                   GROUP BY `tabSales Order`.`name`
                      ;
       """.format(season=filters.sales_season, conditions=conditions)
     data = frappe.db.sql(sql_query, as_dict=1)
