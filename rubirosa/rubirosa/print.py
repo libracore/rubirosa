@@ -7,7 +7,10 @@
 import frappe
 
 
-def get_sales_season_matrix(sales_season):
+def get_sales_season_matrix(sales_season, territory=None):
+    conditions = ""
+    if territory:
+        conditions += """ AND `tabSales Order`.`territory` = "{0}" """.format(territory)
     # get all sold quantities, aggregated per item
     sql_query = """SELECT 
         `tabSales Order Item`.`item_code` AS `item_code`,
@@ -17,7 +20,8 @@ def get_sales_season_matrix(sales_season):
     LEFT JOIN `tabSales Order` ON `tabSales Order`.`name` = `tabSales Order Item`.`parent`
     WHERE `tabSales Order`.`sales_season` = "{sales_season}"
       AND `tabSales Order`.`docstatus` = 1
-    GROUP BY `tabSales Order Item`.`item_code`;""".format(sales_season=sales_season)
+      {conditions}
+    GROUP BY `tabSales Order Item`.`item_code`;""".format(sales_season=sales_season, conditions=conditions)
     sold_items = frappe.db.sql(sql_query, as_dict=True)
     
     # combine items into matrix

@@ -10,6 +10,12 @@ frappe.query_reports["Sales Season Overview"] = {
             "fieldtype": "Link",
             "options": "Monthly Distribution",
             "reqd": 1
+        },
+        {
+            "fieldname":"territory",
+            "label": __("Territory"),
+            "fieldtype": "Link",
+            "options": "Territory"
         }
     ]
 };

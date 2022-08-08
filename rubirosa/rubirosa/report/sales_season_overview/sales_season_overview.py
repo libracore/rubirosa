@@ -67,6 +67,6 @@ def get_columns(data):
     
 def get_data(filters):
     
-    data = get_sales_season_matrix(filters.monthly_distribution)
+    data = get_sales_season_matrix(filters.monthly_distribution, filters.territory)
         
     return data
