@@ -200,5 +200,29 @@ def get_data():
                        "is_query_report": True
                    }
             ]
+        },
+        {
+            "label": _("EDI"),
+            "icon": "octicon octicon-git-compare",
+            "items": [
+                   {
+                       "type": "doctype",
+                       "name": "EDI Connection",
+                       "label": _("EDI Connection"),
+                       "description": _("EDI Connection")                   
+                   },
+                   {
+                       "type": "doctype",
+                       "name": "EDI File",
+                       "label": _("EDI File"),
+                       "description": _("EDI File")                   
+                   } ,
+                   {
+                       "type": "doctype",
+                       "name": "EDI Sales Report",
+                       "label": _("EDI Sales Report"),
+                       "description": _("EDI Sales Report")                   
+                   }               
+            ]
         }
 ]
