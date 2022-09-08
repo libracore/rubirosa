@@ -222,7 +222,14 @@ def get_data():
                        "name": "EDI Sales Report",
                        "label": _("EDI Sales Report"),
                        "description": _("EDI Sales Report")                   
-                   }               
+                   },
+                   {
+                        "type": "report",
+                        "name": "EDI Sales Report Overview",
+                        "label": _("EDI Sales Report Overview"),
+                        "doctype": "EDI Sales Report",
+                        "is_query_report": True
+                   }
             ]
         }
 ]
