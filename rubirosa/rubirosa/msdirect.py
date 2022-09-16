@@ -100,7 +100,7 @@ def write_delivery_note(delivery_note):
     elif dn.shipping_method == "Express":
         shipping = "PLI_EXP"
     elif dn.shipping_method == "Kurier":
-        shipping = "DHL_EXP"
+        shipping = "DUMMY"                  # formerly not used/conflicting: shipping = "DHL_EXP"
     elif dn.shipping_method == "DHL":
         shipping = "DHL"
     elif dn.shipping_method == "Post AT":
