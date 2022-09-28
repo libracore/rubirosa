@@ -1,9 +1,12 @@
-# Copyright (c) 2020, libracore and contributors
+# Copyright (c) 2020-2022, libracore and contributors
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+import json
+from rubirosa.rubirosa.utils import add_items_to_purchase_order, get_sales_order_items
+from datetime import datetime
 
 def execute(filters=None):
     filters = frappe._dict(filters or {})
@@ -192,3 +195,54 @@ def get_sinv_for_so(sales_order):
         
     data = frappe.db.sql(sql_query, as_dict=True)
     return data
+
+@frappe.whitelist()
+def create_purchase_order(sales_orders, supplier):
+    if type(sales_orders) == str:
+        sales_orders = json.loads(sales_orders)
+    
+    if len(sales_orders) > 0:
+        # prepare purchase order
+        s = frappe.get_doc("Supplier", supplier)
+        purchase_order = frappe.get_doc({
+            'doctype': "Purchase Order",
+            'supplier': supplier,
+            'schedule_date': datetime.now(),
+            'currency': s.default_currency
+        })
+        
+        # compile items
+        po_items = {}
+        for sales_order in sales_orders:
+            items = get_sales_order_items(sales_order['sales_order'], supplier)
+            for item in items:
+                item_code = item.get('item_code')
+                if item_code in po_items:
+                    # add to existing
+                    po_items[item_code]['qty'] += item.get('qty')
+                    po_items[item_code]['sales_order_trace'] += "," + sales_order['sales_order']
+                else:
+                    # create new item
+                    po_items[item_code] = {
+                        'qty': item.get('qty'),
+                        'sales_order': sales_order['sales_order'],
+                        'sales_order_trace': sales_order['sales_order']
+                    }
+                
+        # add items to purchase order
+        for item_code, values in po_items.items():
+            purchase_order.append('items', {
+                'item_code': item_code,
+                'qty': values.get('qty'),
+                'sales_order': values.get('sales_order'),
+                'sales_order_trace': values.get('sales_order_trace')
+            })
+        
+        # insert po
+        if len(po_items) == 0:
+            frappe.throw(_("No applicable items found") )
+            
+        purchase_order.insert()
+        frappe.db.commit()
+        
+        return purchase_order.name
