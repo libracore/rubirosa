@@ -1,0 +1,88 @@
+{
+ "autoname": "naming_series:",
+ "creation": "2022-10-24 15:57:34.447580",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "year",
+  "naming_series",
+  "sec_budgets",
+  "qtys",
+  "sec_budgets_online",
+  "qtys_online"
+ ],
+ "fields": [
+  {
+   "fieldname": "year",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Year",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sec_budgets",
+   "fieldtype": "Section Break",
+   "label": "Sales Budget Qtys"
+  },
+  {
+   "fieldname": "sec_budgets_online",
+   "fieldtype": "Section Break",
+   "label": "Sales Budegt Qtys Online"
+  },
+  {
+   "fieldname": "qtys",
+   "fieldtype": "Table",
+   "label": "Sales Budget Qtys",
+   "options": "Budget Qty Item"
+  },
+  {
+   "fieldname": "qtys_online",
+   "fieldtype": "Table",
+   "label": "Sales Budget Qtys Online",
+   "options": "Budget Qty Item"
+  },
+  {
+   "default": "BUDG-QTY-.###",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "BUDG-QTY-.###"
+  }
+ ],
+ "modified": "2022-10-24 16:18:03.131080",
+ "modified_by": "Administrator",
+ "module": "Rubirosa",
+ "name": "Budget Qty",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "year",
+ "track_changes": 1
+}

@@ -3,13 +3,13 @@
 /* eslint-disable */
 
 frappe.query_reports["Liquidity Plan"] = {
-	"filters": [
+    "filters": [
         {
-			"fieldname":"year",
-			"label": __("Year"),
-			"fieldtype": "Int",
-			"default": new Date().getFullYear(),
+            "fieldname":"year",
+            "label": __("Year"),
+            "fieldtype": "Int",
+            "default": new Date().getFullYear(),
             "reqd": 1
         }
-	]
+    ]
 };

@@ -1,0 +1,36 @@
+{
+ "creation": "2022-10-24 16:02:47.243315",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "month",
+  "qty"
+ ],
+ "fields": [
+  {
+   "fieldname": "month",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Month",
+   "reqd": 1
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Qty",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2022-10-24 16:02:47.243315",
+ "modified_by": "Administrator",
+ "module": "Rubirosa",
+ "name": "Budget Qty Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
