@@ -198,6 +198,14 @@ def get_data():
                        "label": _("Liquidity Plan"),
                        "description": _("Liquidity Plan"),
                        "is_query_report": True
+                   },
+                   {
+                       "type": "report",
+                       "doctype": "Budget",
+                       "name": "Monthly Investors Report",
+                       "label": _("Monthly Investors Report"),
+                       "description": _("Monthly Investors Report"),
+                       "is_query_report": True
                    }
             ]
         },
