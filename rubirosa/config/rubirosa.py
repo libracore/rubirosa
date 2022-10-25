@@ -168,6 +168,18 @@ def get_data():
                        "label": _("Liquidity Plan"),
                        "description": _("Liquidity Plan"),
                        "is_query_report": True
+                   },
+                   {
+                       "type": "doctype",
+                       "name": "Budget",
+                       "label": _("Budget"),
+                       "description": _("Budget")                   
+                   },
+                   {
+                       "type": "doctype",
+                       "name": "Budget Qty",
+                       "label": _("Budget Qty"),
+                       "description": _("Budget Qty")                   
                    }
             ]
         },
