@@ -283,82 +283,100 @@ def get_data(filters):
     
     # sales per customer group
     data.append({
-        'description': '<b>Sales per Customer Group / Total</b>'
+        'description': '<b>Sales per Customer Group / Total</b>',
+        'month_last_year': "<b>{0}-{1} (CHF)</b>".format(filters.year - 1, filters.month),
+        'budget_month_this_year': "<b>{0}-{1} (pcs)</b>".format(filters.year, filters.month),
+        'month_this_year': "<b>{0}-{1} (CHF)</b>".format(filters.year, filters.month),
+        'last_year': "<b>{0} (CHF)</b>".format(filters.year - 1),
+        'budget_this_year': "<b>{0} (pcs)</b>".format(filters.year),
+        'this_year': "<b>{0} (CHF)</b>".format(filters.year)
     })
     data.append({
-        'description': 'Retail Customer (CHF)',
+        'description': 'Retail Customer',
         'month_last_year': get_currency_str(get_amount(filters.year - 1, filters.month, filters.company, customer_group="Retail Customer")),
-        'budget_month_this_year': "",
+        'budget_month_this_year': get_qty_str(get_qty(filters.year, filters.month, filters.company, customer_group="Retail Customer")),
         'month_this_year': get_currency_str(get_amount(filters.year, filters.month, filters.company, customer_group="Retail Customer")),
         'last_year': get_currency_str(get_amount_ytd(filters.year - 1, filters.month, filters.company, customer_group="Retail Customer")),
-        'budget_this_year': "",
+        'budget_this_year': get_qty_str(get_qty_ytd(filters.year, filters.month, filters.company, customer_group="Retail Customer")),
         'this_year': get_currency_str(get_amount_ytd(filters.year, filters.month, filters.company, customer_group="Retail Customer"))
     })
     data.append({
-        'description': 'Online Customer (CHF)',
-        'month_last_year': get_currency_str(get_amount(filters.year - 1, filters.month, filters.company, customer_group="Online-Kunden")),
-        'budget_month_this_year': "",
-        'month_this_year': get_currency_str(get_amount(filters.year, filters.month, filters.company, customer_group="Online-Kunden")),
-        'last_year': get_currency_str(get_amount_ytd(filters.year - 1, filters.month, filters.company, customer_group="Online-Kunden")),
-        'budget_this_year': "",
-        'this_year': get_currency_str(get_amount_ytd(filters.year, filters.month, filters.company, customer_group="Online-Kunden"))
+        'description': 'Online Customer',
+        'month_last_year': get_currency_str(get_amount(filters.year - 1, filters.month, filters.company, customer_group="Online Customer")),
+        'budget_month_this_year': get_qty_str(get_qty(filters.year, filters.month, filters.company, customer_group="Online Customer")),
+        'month_this_year': get_currency_str(get_amount(filters.year, filters.month, filters.company, customer_group="Online Customer")),
+        'last_year': get_currency_str(get_amount_ytd(filters.year - 1, filters.month, filters.company, customer_group="Online Customer")),
+        'budget_this_year': get_qty_str(get_qty_ytd(filters.year, filters.month, filters.company, customer_group="Online Customer")),
+        'this_year': get_currency_str(get_amount_ytd(filters.year, filters.month, filters.company, customer_group="Online Customer"))
     })
     data.append({
-        'description': 'Outlet (CHF)',
+        'description': 'Outlet',
         'month_last_year': get_currency_str(get_amount(filters.year - 1, filters.month, filters.company, customer_group="Outlet")),
-        'budget_month_this_year': "",
+        'budget_month_this_year': get_qty_str(get_qty(filters.year, filters.month, filters.company, customer_group="Outlet")),
         'month_this_year': get_currency_str(get_amount(filters.year, filters.month, filters.company, customer_group="Outlet")),
         'last_year': get_currency_str(get_amount_ytd(filters.year - 1, filters.month, filters.company, customer_group="Outlet")),
-        'budget_this_year': "",
+        'budget_this_year': get_qty_str(get_qty_ytd(filters.year, filters.month, filters.company, customer_group="Outlet")),
         'this_year': get_currency_str(get_amount_ytd(filters.year, filters.month, filters.company, customer_group="Outlet"))
     })
     data.append({
-        'description': 'RR Friends (CHF)',
+        'description': 'RR Friends',
         'month_last_year': get_currency_str(get_amount(filters.year - 1, filters.month, filters.company, customer_group="RR Friends")),
-        'budget_month_this_year': "",
+        'budget_month_this_year': get_qty_str(get_qty(filters.year, filters.month, filters.company, customer_group="RR Friends")),
         'month_this_year': get_currency_str(get_amount(filters.year, filters.month, filters.company, customer_group="RR Friends")),
         'last_year': get_currency_str(get_amount_ytd(filters.year - 1, filters.month, filters.company, customer_group="RR Friends")),
-        'budget_this_year': "",
+        'budget_this_year': get_qty_str(get_qty_ytd(filters.year, filters.month, filters.company, customer_group="RR Friends")),
         'this_year': get_currency_str(get_amount_ytd(filters.year, filters.month, filters.company, customer_group="RR Friends"))
     })
     full_amount_month = get_amount(filters.year, filters.month, filters.company)
     full_amount_month_py = get_amount(filters.year - 1, filters.month, filters.company)
     full_amount_year = get_amount_ytd(filters.year, filters.month, filters.company)
     full_amount_py = get_amount_ytd(filters.year - 1, filters.month, filters.company)
+    full_qty_month = get_qty(filters.year, filters.month, filters.company)
+    full_qty_year = get_qty_ytd(filters.year, filters.month, filters.company)
     
     recorded_amount_month = 0
     recorded_amount_month_py = 0
     recorded_amount_year = 0
     recorded_amount_py = 0
+    recorded_qty_month = 0
+    recorded_qty_year = 0
     for i in range(-4, 0, +1):
         recorded_amount_month += get_float(data[i]['month_this_year'])
         recorded_amount_month_py += get_float(data[i]['month_last_year'])
         recorded_amount_year += get_float(data[i]['this_year'])
         recorded_amount_py += get_float(data[i]['last_year'])
-
+        recorded_qty_month += get_float(data[i]['budget_month_this_year'])
+        recorded_qty_year += get_float(data[i]['budget_this_year'])
+    
     data.append({
-        'description': 'Others (Stylist, Showroom, etc (CHF)',
+        'description': 'Others (Stylist, Showroom, etc.)',
         'month_last_year': get_currency_str(full_amount_month_py - recorded_amount_month_py),
-        'budget_month_this_year': "",
+        'budget_month_this_year': get_qty_str(full_qty_month - recorded_qty_month),
         'month_this_year': get_currency_str(full_amount_month - recorded_amount_month),
         'last_year': get_currency_str(full_amount_py - recorded_amount_py),
-        'budget_this_year': "",
+        'budget_this_year': get_qty_str(full_qty_year - recorded_qty_year),
         'this_year': get_currency_str(full_amount_year - recorded_amount_year)
     })
     
     return data
 
 def get_float(s):
-    return float(s.replace("'", ""))
+    return float(s.split(" ")[0].replace("'", ""))
 
 def get_currency_str(v):
     return "{:,.2f}".format(v).replace(",", "'")
     
 def get_percent_str(v):
     return "{:,.2f}%".format(v).replace(",", "'")
+
+def get_qty_str(v):
+    return "{:,.0f} pcs".format(v).replace(",", "'")
     
-def get_qty(year, month, company, online=False):
-    condition = """ AND `tabSales Invoice`.`customer_group` LIKE "%Online%" """ if online else ""
+def get_qty(year, month, company, online=False, customer_group=None):
+    if customer_group:
+        condition = """ AND `tabSales Invoice`.`customer_group` = "{0}" """.format(customer_group)
+    else:
+        condition = """ AND `tabSales Invoice`.`customer_group` LIKE "%Online%" """ if online else ""
     
     qty = frappe.db.sql("""SELECT IFNULL(SUM(`qty`), 0)
         FROM `tabSales Invoice Item` 
@@ -373,8 +391,11 @@ def get_qty(year, month, company, online=False):
         """.format(month=month, year=year, company=company, condition=condition))[0][0]
     return qty
     
-def get_qty_ytd(year, month, company, online=False):
-    condition = """ AND `tabSales Invoice`.`customer_group` LIKE "%Online%" """ if online else ""
+def get_qty_ytd(year, month, company, online=False, customer_group=None):
+    if customer_group:
+        condition = """ AND `tabSales Invoice`.`customer_group` = "{0}" """.format(customer_group)
+    else:
+        condition = """ AND `tabSales Invoice`.`customer_group` LIKE "%Online%" """ if online else ""
     
     qty = frappe.db.sql("""SELECT IFNULL(SUM(`qty`), 0)
         FROM `tabSales Invoice Item` 
@@ -442,7 +463,7 @@ def get_qty_budget(year, month, online=False):
     return qty
 
 def get_qty_budget_ytd(year, month, online=False):
-    target = "online_qtys" if online else "qtys"
+    target = "qtys_online" if online else "qtys"
     
     try:
         qty = frappe.db.sql("""SELECT IFNULL(SUM(`qty`), 0)
