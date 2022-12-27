@@ -35,7 +35,16 @@ def get_columns(filters):
         {"label": "{0}".format(filters.year - 1), "fieldname": "last_year", "fieldtype": "Data", "width": 100},
         {"label": "Budget {0}".format(filters.year), "fieldname": "budget_this_year", "fieldtype": "Data", "width": 120},
         {"label": "{0}".format(filters.year), "fieldname": "this_year", "fieldtype": "Data", "width": 100},
-        {"label": "", "fieldname": "blank", "fieldtype": "Data", "width": 100}
+        {"label": "Switzerland", "fieldname": "switzerland", "fieldtype": "Data", "width": 100},
+        {"label": "Germany", "fieldname": "germany", "fieldtype": "Data", "width": 100},
+        {"label": "USA", "fieldname": "usa", "fieldtype": "Data", "width": 100},
+        {"label": "Netherlands", "fieldname": "netherlands", "fieldtype": "Data", "width": 100},
+        {"label": "New Markets", "fieldname": "new_markets", "fieldtype": "Data", "width": 100},
+        {"label": "Online", "fieldname": "online", "fieldtype": "Data", "width": 100},
+        {"label": "Budget {0}".format(filters.year + 1), "fieldname": "budget_next_year", "fieldtype": "Data", "width": 120},
+        {"label": "Preorder {0}".format(filters.year + 1), "fieldname": "next_year", "fieldtype": "Data", "width": 100},
+        
+        {"label": "", "fieldname": "blank", "fieldtype": "Data", "width": 20}
     ]
     
     
@@ -56,10 +65,26 @@ def get_data(filters):
         'month_this_year': "<b>{0} {1}</b>".format(month[filters.month], filters.year),
         'last_year': "<b>{0}</b>".format(filters.year - 1),
         'budget_this_year': "<b>Budget {0}</b>".format(filters.year),
-        'this_year': "<b>{0}</b>".format(filters.year)
+        'this_year': "<b>{0}</b>".format(filters.year),
+        'switzerland': "<b>Switzerland</b>",
+        'germany': "<b>Germany</b>",
+        'usa': "<b>USA</b>",
+        'netherlands': "<b>Netherlands</b>",
+        'new_markets': "<b>New Markets</b>",
+        'online': "<b>Online</b>",
+        'budget_next_year': "<b>Budget {0}</b>".format(filters.year + 1),
+        'next_year': "<b>Preorder {0}</b>".format(filters.year + 1)
     })
     
     # insert qty values
+    online_qty_this_month = get_qty(filters.year, filters.month, filters.company, online=True)
+    switzerland_qty_this_month = get_qty(filters.year, filters.month, filters.company, territory="Schweiz")
+    germany_qty_this_month = get_qty(filters.year, filters.month, filters.company, territory="Deutschland")
+    usa_qty_this_month = get_qty(filters.year, filters.month, filters.company, territory="United States (US)")
+    netherlands_qty_this_month = get_qty(filters.year, filters.month, filters.company, territory="Niederlande")
+    new_markets_qty_this_month = get_qty(filters.year, filters.month, filters.company, territory="New Markets")
+    budget_qty_next_year = get_qty_budget_ytd(filters.year + 1, filters.month)
+    
     data.append({
         'description': 'Total sold sneakers (QTY)',
         'month_last_year': get_qty(filters.year - 1, filters.month, filters.company),
@@ -67,14 +92,22 @@ def get_data(filters):
         'month_this_year': get_qty(filters.year, filters.month, filters.company),
         'last_year': get_qty_ytd(filters.year - 1, filters.month, filters.company),
         'budget_this_year': get_qty_budget_ytd(filters.year, filters.month),
-        'this_year': get_qty_ytd(filters.year, filters.month, filters.company)
+        'this_year': get_qty_ytd(filters.year, filters.month, filters.company),
+        'online': online_qty_this_month,
+        'switzerland': switzerland_qty_this_month,
+        'germany': germany_qty_this_month,
+        'usa': usa_qty_this_month,
+        'netherlands': netherlands_qty_this_month,
+        'new_markets': new_markets_qty_this_month,
+        'budget_next_year': budget_qty_next_year,
+        'next_year': get_perorder(filters.year + 1)
     })
     
     data.append({
         'description': 'Therof sold sneakers online (QTY)',
         'month_last_year': get_qty(filters.year - 1, filters.month, filters.company, online=True),
         'budget_month_this_year': get_qty_budget(filters.year, filters.month, online=True),
-        'month_this_year': get_qty(filters.year, filters.month, filters.company, online=True),
+        'month_this_year': online_qty_this_month,
         'last_year': get_qty_ytd(filters.year - 1, filters.month, filters.company, online=True),
         'budget_this_year': get_qty_budget_ytd(filters.year, filters.month, online=True),
         'this_year': get_qty_ytd(filters.year, filters.month, filters.company, online=True)
@@ -127,7 +160,7 @@ def get_data(filters):
     budget_month = get_float(data[-3]['budget_month_this_year']) + get_float(data[-2]['budget_month_this_year']) + get_float(data[-1]['budget_month_this_year'])
     budget_year = (get_float(data[-3]['budget_this_year']) + get_float(data[-2]['budget_this_year']) + get_float(data[-1]['budget_this_year']))
     #avg_budget_year = budget_year / filters.month
-    data.append({
+    """data.append({
         'description': 'Growing Rate Gross Revenue',
         'month_last_year': "",
         'budget_month_this_year': "",
@@ -135,7 +168,8 @@ def get_data(filters):
         'last_year': "",
         'budget_this_year': "",
         'this_year': "{:,.2f}%".format(100 * (net_revenue_year - net_revenue_py) / net_revenue_py).replace(",", "'")
-    })
+    })"""
+    
     data.append({
         'description': '<b>Operational Revenue</b> (CHF)',
         'month_last_year': get_currency_str(net_revenue_month_py),
@@ -177,7 +211,7 @@ def get_data(filters):
     budget_gross_profit_month = get_float(data[-3]['budget_month_this_year']) + get_float(data[-2]['budget_month_this_year']) + get_float(data[-1]['budget_month_this_year'])
     budget_gross_profit_year = (get_float(data[-3]['budget_this_year']) + get_float(data[-2]['budget_this_year']) + get_float(data[-1]['budget_this_year']))
     data.append({
-        'description': '<b>Gross Profit</b> (CHF)',
+        'description': '<b>Gross Margin</b> (CHF)',
         'month_last_year': get_currency_str(gross_profit_month_py),
         'budget_month_this_year': get_currency_str(budget_gross_profit_month),
         'month_this_year': get_currency_str(gross_profit_month),
@@ -186,7 +220,7 @@ def get_data(filters):
         'this_year': get_currency_str(gross_profit_year)
     })
     data.append({
-        'description': 'Gross Profit in %',
+        'description': '% of revenue',
         'month_last_year': get_percent_str((100 * (gross_profit_month_py) / net_revenue_month_py) if net_revenue_month_py else 0),
         'budget_month_this_year': get_percent_str((100 * (budget_gross_profit_month) / budget_month) if budget_month else 0),
         'month_this_year': get_percent_str((100 * (gross_profit_month) / net_revenue_month) if net_revenue_month else 0),
@@ -194,6 +228,44 @@ def get_data(filters):
         'budget_this_year': get_percent_str((100 * (budget_gross_profit_year) / budget_year) if budget_year else 0),
         'this_year': get_percent_str((100 * (gross_profit_year) / net_revenue_month) if net_revenue_month else 0)
     })
+    
+    # contribution margin
+    accounts = []
+    data.append({
+        'description': '-Beratung Marktaufbau (CHF)',
+        'month_last_year': get_currency_str(get_turnover(filters.year - 1, filters.month, accounts, filters.company)),
+        'budget_month_this_year': get_currency_str((-1) * get_turnover_budget(filters.year, filters.month, accounts, filters.company)),
+        'month_this_year': get_currency_str(get_turnover(filters.year, filters.month, accounts, filters.company)),
+        'last_year': get_currency_str(get_turnover_ytd(filters.year - 1, filters.month, accounts, filters.company)),
+        'budget_this_year': get_currency_str((-1) * get_turnover_budget_ytd(filters.year, filters.month, accounts, filters.company)),
+        'this_year': get_currency_str(get_turnover_ytd(filters.year, filters.month, accounts, filters.company))
+    })
+    
+    contribution_month = get_float(data[-3]['month_this_year']) + get_float(data[-1]['month_this_year'])
+    contribution_month_py = get_float(data[-3]['month_last_year']) + get_float(data[-1]['month_last_year'])
+    contribution_year = (get_float(data[-3]['this_year']) + get_float(data[-1]['this_year']))
+    contribution_py = get_float(data[-3]['last_year']) + get_float(data[-1]['last_year'])
+    budget_contribution_month = get_float(data[-3]['budget_month_this_year']) + get_float(data[-1]['budget_month_this_year'])
+    budget_contribution_year = (get_float(data[-3]['budget_this_year']) + get_float(data[-1]['budget_this_year']))
+    data.append({
+        'description': '<b>Contribution Margin</b> (CHF)',
+        'month_last_year': get_currency_str(contribution_month_py),
+        'budget_month_this_year': get_currency_str(budget_contribution_month),
+        'month_this_year': get_currency_str(contribution_month),
+        'last_year': get_currency_str(contribution_py),
+        'budget_this_year': get_currency_str(budget_contribution_year),
+        'this_year': get_currency_str(contribution_year)
+    })
+    data.append({
+        'description': '% of revenue',
+        'month_last_year': get_percent_str((100 * (contribution_month_py) / net_revenue_month_py) if net_revenue_month_py else 0),
+        'budget_month_this_year': get_percent_str((100 * (budget_contribution_month) / budget_month) if budget_month else 0),
+        'month_this_year': get_percent_str((100 * (contribution_month) / net_revenue_month) if net_revenue_month else 0),
+        'last_year': get_percent_str((100 * (contribution_py) / net_revenue_py) if net_revenue_py else 0),
+        'budget_this_year': get_percent_str((100 * (budget_contribution_year) / budget_year) if budget_year else 0),
+        'this_year': get_percent_str((100 * (contribution_year) / net_revenue_month) if net_revenue_month else 0)
+    })
+    
     data.append({
         'description': ''
     })
@@ -201,7 +273,7 @@ def get_data(filters):
     # other expenses
     accounts = ["5000", "5001", "5700", "5720", "5730", "5740", "5810", "5880"]
     data.append({
-        'description': 'Salaries (FTE) (CHF)',
+        'description': 'Salaries gmbh (CHF)',
         'month_last_year': get_currency_str(get_turnover(filters.year - 1, filters.month, accounts, filters.company)),
         'budget_month_this_year': get_currency_str((-1) * get_turnover_budget(filters.year, filters.month, accounts, filters.company)),
         'month_this_year': get_currency_str(get_turnover(filters.year, filters.month, accounts, filters.company)),
@@ -235,7 +307,7 @@ def get_data(filters):
     expenses_py = get_float(data[-3]['last_year']) + get_float(data[-2]['last_year']) + get_float(data[-1]['last_year'])
     budget_expenses_month = get_float(data[-3]['budget_month_this_year']) + get_float(data[-2]['budget_month_this_year']) + get_float(data[-1]['budget_month_this_year'])
     budget_expenses_year = (get_float(data[-3]['budget_this_year']) + get_float(data[-2]['budget_this_year']) + get_float(data[-1]['budget_this_year']))
-    data.append({
+    """data.append({
         'description': '<b>Total Expenses</b> (CHF)',
         'month_last_year': get_currency_str(expenses_month_py),
         'budget_month_this_year': get_currency_str(budget_expenses_month),
@@ -243,20 +315,20 @@ def get_data(filters):
         'last_year': get_currency_str(expenses_py),
         'budget_this_year': get_currency_str(budget_expenses_year),
         'this_year': get_currency_str(expenses_year)
-    })
+    })"""
     data.append({
         'description': ''
     })
     
     # EBITDA
-    ebitda_month = gross_profit_month + expenses_month
-    ebitda_month_py = gross_profit_month_py + expenses_month_py
-    ebitda_year = gross_profit_year + expenses_year
-    ebitda_py = gross_profit_py + expenses_py
-    budget_ebitda_month = budget_gross_profit_month + budget_expenses_month
-    budget_ebitda_year = budget_gross_profit_year + budget_expenses_year
+    ebitda_month = contribution_month + expenses_month
+    ebitda_month_py = contribution_month_py + expenses_month_py
+    ebitda_year = contribution_year + expenses_year
+    ebitda_py = contribution_py + expenses_py
+    budget_ebitda_month = budget_contribution_month + budget_expenses_month
+    budget_ebitda_year = budget_contribution_year + budget_expenses_year
     data.append({
-        'description': '<b>Total</b> (CHF)',
+        'description': '<b>EBITDA</b> (CHF)',
         'month_last_year': get_currency_str(ebitda_month_py),
         'budget_month_this_year': get_currency_str(budget_ebitda_month),
         'month_this_year': get_currency_str(ebitda_month),
@@ -277,7 +349,7 @@ def get_data(filters):
         'last_year': "<b>{0} (CHF)</b>".format(filters.year - 1),
         'budget_this_year': "<b>{0} (pcs)</b>".format(filters.year),
         'this_year': "<b>{0} (CHF)</b>".format(filters.year),
-        'blank': "<b>{0} (pcs)</b>".format(filters.year - 1)
+        'switzerland': "<b>{0} (pcs)</b>".format(filters.year - 1)
     })
     data.append({
         'description': 'Retail Customer',
@@ -287,7 +359,7 @@ def get_data(filters):
         'last_year': get_currency_str(get_amount_ytd(filters.year - 1, filters.month, filters.company, customer_group="Retail Customer")),
         'budget_this_year': get_qty_str(get_qty_ytd(filters.year, filters.month, filters.company, customer_group="Retail Customer")),
         'this_year': get_currency_str(get_amount_ytd(filters.year, filters.month, filters.company, customer_group="Retail Customer")),
-        'blank': get_qty_str(get_qty_ytd(filters.year - 1, filters.month, filters.company, customer_group="Retail Customer"))
+        'switzerland': get_qty_str(get_qty_ytd(filters.year - 1, filters.month, filters.company, customer_group="Retail Customer"))
     })
     data.append({
         'description': 'Online Customer',
@@ -297,7 +369,7 @@ def get_data(filters):
         'last_year': get_currency_str(get_amount_ytd(filters.year - 1, filters.month, filters.company, customer_group="Online Customer")),
         'budget_this_year': get_qty_str(get_qty_ytd(filters.year, filters.month, filters.company, customer_group="Online Customer")),
         'this_year': get_currency_str(get_amount_ytd(filters.year, filters.month, filters.company, customer_group="Online Customer")),
-        'blank': get_qty_str(get_qty_ytd(filters.year - 1, filters.month, filters.company, customer_group="Online Customer"))
+        'switzerland': get_qty_str(get_qty_ytd(filters.year - 1, filters.month, filters.company, customer_group="Online Customer"))
     })
     data.append({
         'description': 'Outlet',
@@ -307,7 +379,7 @@ def get_data(filters):
         'last_year': get_currency_str(get_amount_ytd(filters.year - 1, filters.month, filters.company, customer_group="Outlet")),
         'budget_this_year': get_qty_str(get_qty_ytd(filters.year, filters.month, filters.company, customer_group="Outlet")),
         'this_year': get_currency_str(get_amount_ytd(filters.year, filters.month, filters.company, customer_group="Outlet")),
-        'blank': get_qty_str(get_qty_ytd(filters.year - 1, filters.month, filters.company, customer_group="Outlet"))
+        'switzerland': get_qty_str(get_qty_ytd(filters.year - 1, filters.month, filters.company, customer_group="Outlet"))
     })
     data.append({
         'description': 'RR Friends',
@@ -317,7 +389,7 @@ def get_data(filters):
         'last_year': get_currency_str(get_amount_ytd(filters.year - 1, filters.month, filters.company, customer_group="RR Friends")),
         'budget_this_year': get_qty_str(get_qty_ytd(filters.year, filters.month, filters.company, customer_group="RR Friends")),
         'this_year': get_currency_str(get_amount_ytd(filters.year, filters.month, filters.company, customer_group="RR Friends")),
-        'blank': get_qty_str(get_qty_ytd(filters.year - 1, filters.month, filters.company, customer_group="RR Friends"))
+        'switzerland': get_qty_str(get_qty_ytd(filters.year - 1, filters.month, filters.company, customer_group="RR Friends"))
     })
     full_amount_month = get_amount(filters.year, filters.month, filters.company)
     full_amount_month_py = get_amount(filters.year - 1, filters.month, filters.company)
@@ -341,7 +413,7 @@ def get_data(filters):
         recorded_amount_py += get_float(data[i]['last_year'])
         recorded_qty_month += get_float(data[i]['budget_month_this_year'])
         recorded_qty_year += get_float(data[i]['budget_this_year'])
-        recorded_qty_py += get_float(data[i]['blank'])
+        recorded_qty_py += get_float(data[i]['switzerland'])
         
     data.append({
         'description': 'Others (Stylist, Showroom, etc.)',
@@ -351,7 +423,7 @@ def get_data(filters):
         'last_year': get_currency_str(full_amount_py - recorded_amount_py),
         'budget_this_year': get_qty_str(full_qty_year - recorded_qty_year),
         'this_year': get_currency_str(full_amount_year - recorded_amount_year),
-        'blank': get_qty_str(full_qty_py - recorded_qty_py)
+        'switzerland': get_qty_str(full_qty_py - recorded_qty_py)
     })
     data.append({
         'description': '<b>Total</b>',
@@ -360,7 +432,7 @@ def get_data(filters):
         'last_year': get_currency_str(full_amount_py),
         'budget_this_year': get_qty_str(full_qty_year),
         'this_year': get_currency_str(full_amount_year),
-        'blank': get_qty_str(full_qty_py)
+        'switzerland': get_qty_str(full_qty_py)
     })
     
     return data
@@ -377,9 +449,11 @@ def get_percent_str(v):
 def get_qty_str(v):
     return "{:,.0f} pcs".format(v).replace(",", "'")
     
-def get_qty(year, month, company, online=False, customer_group=None):
+def get_qty(year, month, company, online=False, customer_group=None, territory=None):
     if customer_group:
         condition = """ AND `tabSales Invoice`.`customer_group` = "{0}" """.format(customer_group)
+    elif territory:
+        condition = """ AND `tabSales Invoice`.`territory` = "{0}" """.format(territory)
     else:
         condition = """ AND `tabSales Invoice`.`customer_group` LIKE "%Online%" """ if online else ""
     
@@ -467,6 +541,30 @@ def get_qty_budget(year, month, online=False):
         return 0
     return qty
 
+def get_perorder(year):
+    # find sales season (=monthly distribution)
+    sales_seasons = frappe.get_all("Monthly Distribution", filters={'fiscal_year': year}, fields=['name'])
+    if len(sales_seasons) > 0:
+        sales_season = sales_seasons[0]['name']
+        
+        try:
+            qty = frappe.db.sql("""SELECT IFNULL(`qty`, 0)
+                FROM `tabSales Order Item` 
+                LEFT JOIN `tabSales Order` ON `tabSales Order`.`name` = `tabSales Order Item`.`parent`
+                LEFT JOIN `tabItem` ON `tabItem`.`item_code` = `tabSales Order Item`.`item_code`
+                WHERE 
+                    `tabsales Order`.`sales_season` = "{sales_season}"
+                    `tabSales Order`.`docstatus` = 1
+                    AND `tabSales Order`.`company` = "{company}"
+                    AND `tabItem`.`is_stock_item` = 1;
+                """.format(sales_season=sales_season))[0][0]
+        except:
+            return 0
+        return qty
+    else:
+        return 0
+
+    
 def get_qty_budget_ytd(year, month, online=False):
     target = "qtys_online" if online else "qtys"
     
@@ -487,6 +585,8 @@ def last_day_of_month(year, month):
     return (datetime.date(year, (month % 12) + 1, 1) - datetime.timedelta(days=1)).day
     
 def get_turnover(year, month, accounts, company):
+    if len(accounts) == 0:
+        return 0
     amount = frappe.db.sql("""SELECT IFNULL((SUM(`tabGL Entry`.`credit`) - SUM(`tabGL Entry`.`debit`)), 0)
             FROM `tabGL Entry` 
             LEFT JOIN `tabAccount` ON `tabAccount`.`name` = `tabGL Entry`.`account`
@@ -498,6 +598,8 @@ def get_turnover(year, month, accounts, company):
     return amount
     
 def get_turnover_ytd(year, month, accounts, company):
+    if len(accounts) == 0:
+        return 0
     amount = frappe.db.sql("""SELECT IFNULL((SUM(`tabGL Entry`.`credit`) - SUM(`tabGL Entry`.`debit`)), 0)
             FROM `tabGL Entry` 
             LEFT JOIN `tabAccount` ON `tabAccount`.`name` = `tabGL Entry`.`account`
