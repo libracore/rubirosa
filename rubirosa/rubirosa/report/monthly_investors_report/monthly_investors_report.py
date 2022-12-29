@@ -77,12 +77,12 @@ def get_data(filters):
     })
     
     # insert qty values
-    online_qty_this_month = get_qty(filters.year, filters.month, filters.company, online=True)
-    switzerland_qty_this_month = get_qty(filters.year, filters.month, filters.company, territory="Schweiz")
-    germany_qty_this_month = get_qty(filters.year, filters.month, filters.company, territory="Deutschland")
-    usa_qty_this_month = get_qty(filters.year, filters.month, filters.company, territory="United States (US)")
-    netherlands_qty_this_month = get_qty(filters.year, filters.month, filters.company, territory="Niederlande")
-    new_markets_qty_this_month = get_qty(filters.year, filters.month, filters.company, territory="New Markets")
+    online_qty_this_month = get_qty_ytd(filters.year, filters.month, filters.company, online=True)
+    switzerland_qty_this_month = get_qty_ytd(filters.year, filters.month, filters.company, territory="Schweiz")
+    germany_qty_this_month = get_qty_ytd(filters.year, filters.month, filters.company, territory="Deutschland")
+    usa_qty_this_month = get_qty_ytd(filters.year, filters.month, filters.company, territory="United States (US)")
+    netherlands_qty_this_month = get_qty_ytd(filters.year, filters.month, filters.company, territory="Niederlande")
+    new_markets_qty_this_month = get_qty_ytd(filters.year, filters.month, filters.company, territory="New Markets")
     budget_qty_next_year = get_qty_budget_ytd(filters.year + 1, filters.month)
     
     data.append({
@@ -230,7 +230,7 @@ def get_data(filters):
     })
     
     # contribution margin
-    accounts = []
+    accounts = ["6532"]
     data.append({
         'description': '-Beratung Marktaufbau (CHF)',
         'month_last_year': get_currency_str(get_turnover(filters.year - 1, filters.month, accounts, filters.company)),
@@ -470,9 +470,11 @@ def get_qty(year, month, company, online=False, customer_group=None, territory=N
         """.format(month=month, year=year, company=company, condition=condition))[0][0]
     return qty
     
-def get_qty_ytd(year, month, company, online=False, customer_group=None):
+def get_qty_ytd(year, month, company, online=False, customer_group=None, territory=None):
     if customer_group:
         condition = """ AND `tabSales Invoice`.`customer_group` = "{0}" """.format(customer_group)
+    elif territory:
+        condition = """ AND `tabSales Invoice`.`territory` = "{0}" """.format(territory)
     else:
         condition = """ AND `tabSales Invoice`.`customer_group` LIKE "%Online%" """ if online else ""
     
