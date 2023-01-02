@@ -80,7 +80,7 @@ def get_data(filters):
     online_qty_this_month = get_qty_ytd(filters.year, filters.month, filters.company, online=True)
     switzerland_qty_this_month = get_qty_ytd(filters.year, filters.month, filters.company, territory="Schweiz")
     germany_qty_this_month = get_qty_ytd(filters.year, filters.month, filters.company, territory="Deutschland")
-    usa_qty_this_month = get_qty_ytd(filters.year, filters.month, filters.company, territory="United States (US)")
+    usa_qty_this_month = get_qty_ytd(filters.year, filters.month, filters.company, territory="United States (USA)")
     netherlands_qty_this_month = get_qty_ytd(filters.year, filters.month, filters.company, territory="Niederlande")
     new_markets_qty_this_month = get_qty_ytd(filters.year, filters.month, filters.company, territory="New Markets")
     budget_qty_next_year = get_qty_budget_ytd(filters.year + 1, filters.month)
@@ -107,7 +107,7 @@ def get_data(filters):
         'description': 'Therof sold sneakers online (QTY)',
         'month_last_year': get_qty(filters.year - 1, filters.month, filters.company, online=True),
         'budget_month_this_year': get_qty_budget(filters.year, filters.month, online=True),
-        'month_this_year': online_qty_this_month,
+        'month_this_year': get_qty(filters.year, filters.month, filters.company, online=True),
         'last_year': get_qty_ytd(filters.year - 1, filters.month, filters.company, online=True),
         'budget_this_year': get_qty_budget_ytd(filters.year, filters.month, online=True),
         'this_year': get_qty_ytd(filters.year, filters.month, filters.company, online=True)
