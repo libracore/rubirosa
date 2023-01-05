@@ -291,7 +291,7 @@ def get_data(filters):
         'budget_this_year': get_currency_str((-1) * get_turnover_budget_ytd(filters.year, filters.month, accounts, filters.company)),
         'this_year': get_currency_str(get_turnover_ytd(filters.year, filters.month, accounts, filters.company))
     })
-    accounts = ["6000", "6001", "6200", "6300", "6500", "6501", "6510", "6513", "6520", "6530", "6531", "6532", "6540", "6570", "6576"]
+    accounts = ["6000", "6001", "6200", "6300", "6500", "6501", "6510", "6513", "6520", "6530", "6531", "6540", "6570", "6576"]
     data.append({
         'description': 'Other expenses (CHF)',
         'month_last_year': get_currency_str(get_turnover(filters.year - 1, filters.month, accounts, filters.company)),
