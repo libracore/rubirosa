@@ -26,6 +26,10 @@ def get_columns():
 def get_data(filters):
     if not filters.customer:
         filters.customer = "%"
+    if not filters.from_date:
+        filters.from_date = "2000-01-01"
+    if not filters.to_date:
+        filters.to_date = "2099-01-01"
         
     sql_query = """SELECT
                 `tabSales Invoice`.`customer`,
@@ -40,9 +44,11 @@ def get_data(filters):
             WHERE `tabSales Invoice`.`docstatus` = 1
                 AND `tabSales Invoice`.`customer` LIKE '{customer}'
                 AND `tabSales Invoice`.`company` = "{company}"
+                AND `tabSales Invoice`.`posting_date` BETWEEN "{from_date}" AND "{to_date}"
             GROUP BY `tabSales Invoice`.`customer`
             ORDER BY SUM(`tabSales Invoice`.`base_net_total`) DESC;
-      """.format(customer=filters.customer, company=filters.company)
+      """.format(customer=filters.customer, company=filters.company,
+        from_date=filters.from_date, to_date=filters.to_date)
 
     data = frappe.db.sql(sql_query, as_dict=1)
 
