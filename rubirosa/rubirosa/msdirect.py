@@ -28,9 +28,9 @@ def write_item(item_code):
     item = frappe.get_doc("Item", item_code)
     # prepare weight
     if (item.weight_uom or "").lower() == "kg":
-        net_weight = cint((item.weight_per_unit or 0) * 1000)
-    elif (item.weight_uom or "").lower() == "g":
         net_weight = cint(item.weight_per_unit or 0)
+    elif (item.weight_uom or "").lower() == "g":
+        net_weight = cint(item.weight_per_unit or 0) / 1000
     # prepare content
     data = {
         'blocked': item.disabled,
@@ -47,7 +47,7 @@ def write_item(item_code):
         'header': get_header(),
         'customs_tariff_number': item.customs_tariff_number if item.customs_tariff_number else None,
         'country_of_origin': get_country_code(item.country_of_origin) if item.country_of_origin else None,
-        'net_weight': net_weight
+        # 'net_weight': net_weight
     }
     # add last purchase rate if available
     if item.last_purchase_rate:
