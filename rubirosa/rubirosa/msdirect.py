@@ -28,9 +28,9 @@ def write_item(item_code):
     item = frappe.get_doc("Item", item_code)
     # prepare weight
     if (item.weight_uom or "").lower() == "kg":
-        net_weight = (item.weight_per_unit or 0) * 1000
+        net_weight = cint((item.weight_per_unit or 0) * 1000)
     elif (item.weight_uom or "").lower() == "g":
-        net_weight = (item.weight_per_unit or 0)
+        net_weight = cint(item.weight_per_unit or 0)
     # prepare content
     data = {
         'blocked': item.disabled,
