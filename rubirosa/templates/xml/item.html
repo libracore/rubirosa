@@ -23,9 +23,9 @@
                   {%- if customs_tariff_number %}
                   <msd:tariffNo>{{ customs_tariff_number }}</msd:tariffNo>
                   {%- endif %}
-                  {%- if net_weight %}
+                  {#- {%- if net_weight %}
                   <msd:netWeight>{{ net_weight }}</msd:netWeight>
-                  {%- endif %}
+                  {%- endif %} -#}
                   <msd:unitOfMeasureCd>{{ stock_uom }}</msd:unitOfMeasureCd>
                   <msd:unitPrice>{{ valuation_rate }}</msd:unitPrice>
                   <msd:vatPostingGroup>{{ vat_code }}</msd:vatPostingGroup>
