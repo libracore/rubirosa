@@ -26,11 +26,11 @@ def write_item(item_code):
     settings = frappe.get_doc("MS Direct Settings")
     # get item
     item = frappe.get_doc("Item", item_code)
-    # prepare weight
+    # prepare weight (use always grams!)
     if (item.weight_uom or "").lower() == "kg":
-        net_weight = cint(item.weight_per_unit or 0)
+        net_weight = cint((item.weight_per_unit or 0) * 1000)
     elif (item.weight_uom or "").lower() == "g":
-        net_weight = cint(item.weight_per_unit or 0) / 1000
+        net_weight = cint(item.weight_per_unit or 0)
     # prepare content
     data = {
         'blocked': item.disabled,
