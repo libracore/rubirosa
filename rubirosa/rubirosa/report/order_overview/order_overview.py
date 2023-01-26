@@ -26,6 +26,7 @@ def get_columns():
         {"label": _("Qty"), "fieldname": "qty", "fieldtype": "Float", "width": 100},
         {"label": _("Amount"), "fieldname": "order_amount", "fieldtype": "Currency", "width": 100},
         {"label": _("Sales Order"), "fieldname": "sales_order", "fieldtype": "Link", "options": "Sales Order", "width": 100},
+        {"label": _("Delivered"), "fieldname": "delivered", "fieldtype": "Percent", "width": 70},
         {"label": _("Purchase Order"), "fieldname": "purchase_order", "fieldtype": "Link", "options": "Purchase Order", "width": 100},
         {"label": _("Check"), "fieldname": "check", "fieldtype": "Data", "width": 100},
         {"label": _("Sales Invoice"), "fieldname": "sales_invoice", "fieldtype": "Link", "options": "Sales Invoice", "width": 100},
@@ -52,6 +53,7 @@ def get_data(filters):
                      `tabAddress`.`pincode` AS `pincode`,
                      `tabAddress`.`city` AS `city`,
                      `tabSales Order`.`name` AS `sales_order`,
+                     `tabSales Order`.`per_delivered` AS `delivered`,
                      SUM(`tabSales Order Item`.`qty`) AS `qty`,
                      SUM(`tabSales Order Item`.`base_net_amount`) AS `order_amount`,
                      (SELECT `tabPurchase Order Item`.`parent`
