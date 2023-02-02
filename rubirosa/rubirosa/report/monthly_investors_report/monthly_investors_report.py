@@ -84,14 +84,15 @@ def get_data(filters):
     netherlands_qty_this_month = get_qty_ytd(filters.year, filters.month, filters.company, territory="Niederlande")
     new_markets_qty_this_month = get_qty_ytd(filters.year, filters.month, filters.company, territory="New Markets")
     budget_qty_next_year = get_qty_budget_ytd(filters.year + 1, filters.month)
-    
+    budget_qty_month = get_qty_budget(filters.year, filters.month)
+    budget_qty_year = get_qty_budget_ytd(filters.year, filters.month)
     data.append({
         'description': 'Total sold sneakers (QTY)',
         'month_last_year': get_qty(filters.year - 1, filters.month, filters.company),
-        'budget_month_this_year': get_qty_budget(filters.year, filters.month),
+        'budget_month_this_year': budget_qty_month,
         'month_this_year': get_qty(filters.year, filters.month, filters.company),
         'last_year': get_qty_ytd(filters.year - 1, filters.month, filters.company),
-        'budget_this_year': get_qty_budget_ytd(filters.year, filters.month),
+        'budget_this_year': budget_qty_year,
         'this_year': get_qty_ytd(filters.year, filters.month, filters.company),
         'online': online_qty_this_month,
         'switzerland': switzerland_qty_this_month,
@@ -259,10 +260,10 @@ def get_data(filters):
     data.append({
         'description': '% of revenue',
         'month_last_year': get_percent_str((100 * (contribution_month_py) / net_revenue_month_py) if net_revenue_month_py else 0),
-        'budget_month_this_year': get_percent_str((100 * (budget_contribution_month) / budget_month) if budget_month else 0),
+        'budget_month_this_year': get_percent_str((100 * (budget_contribution_month) / budget_qty_month) if budget_qty_month else 0),
         'month_this_year': get_percent_str((100 * (contribution_month) / net_revenue_month) if net_revenue_month else 0),
         'last_year': get_percent_str((100 * (contribution_py) / net_revenue_py) if net_revenue_py else 0),
-        'budget_this_year': get_percent_str((100 * (budget_contribution_year) / budget_year) if budget_year else 0),
+        'budget_this_year': get_percent_str((100 * (budget_contribution_year) / budget_qty_year) if budget_qty_year else 0),
         'this_year': get_percent_str((100 * (contribution_year) / net_revenue_month) if net_revenue_month else 0)
     })
     
