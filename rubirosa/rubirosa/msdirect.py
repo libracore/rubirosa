@@ -69,7 +69,7 @@ def write_item(item_code):
 
 # write delivery note to MS Direct
 @frappe.whitelist()
-def write_delivery_note(delivery_note):
+def write_delivery_note(delivery_note, force=False):
     # get settings
     settings = frappe.get_doc("MS Direct Settings")
     # get delivery note
@@ -150,7 +150,11 @@ def write_delivery_note(delivery_note):
     # render content
     xml = frappe.render_template('rubirosa/templates/xml/delivery_note.html', data)
     # post request
-    response = post_request(xml)    
+    if cint(force):
+        repeat=10
+    else:
+        repeat=0
+    response = post_request(xml, repeat)    
     # evaluate response
     if response:
         result = "undefined"
@@ -161,6 +165,8 @@ def write_delivery_note(delivery_note):
             
         # add log
         add_log("Delivery Note {0} sent to MS Direct".format(delivery_note), request=xml, response=response.text, result=result)
+    elif cint(force):
+        add_log("Delivery Note {0} sent to MS Direct".format(delivery_note), request=xml, response="None", result="Forced")
     return
 
 # write purchase order to MS Direct
