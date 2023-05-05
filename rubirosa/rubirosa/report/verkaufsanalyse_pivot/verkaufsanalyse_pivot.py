@@ -1,4 +1,4 @@
-# Copyright (c) 2013-2020, libracore and contributors
+# Copyright (c) 2013-2023, libracore and contributors
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
@@ -42,6 +42,10 @@ def get_columns(filters):
 def get_data(filters):
     # prepare pivot fields
     pivot = ""
+    conditions = ""
+    if filters.territory:
+        conditions += """ AND `tSI`.`territory` = "{territory}" """.format(territory=filters.territory)
+    
     for g in get_customer_groups(filters):
         pivot += """
             , (SELECT SUM(`qty`)
@@ -51,7 +55,10 @@ def get_data(filters):
                     AND `tSII`.`item_name` = `tabSales Invoice Item`.`item_name`
                     AND `tSI`.`posting_date` >= "{from_date}"
                     AND `tSI`.`posting_date` <= "{end_date}"
-                    AND `tSI`.`docstatus` = 1) AS `qty_{shortcode}`
+                    AND `tSI`.`docstatus` = 1
+                    {conditions}
+               ) AS `qty_{shortcode}`
+                    
              , (SELECT SUM(`base_amount`)
                    FROM `tabSales Invoice Item` AS `tSII`
                    JOIN `tabSales Invoice` AS `tSI` ON `tSI`.`name` = `tSII`.`parent`
@@ -59,9 +66,15 @@ def get_data(filters):
                     AND `tSII`.`item_name` = `tabSales Invoice Item`.`item_name`
                     AND `tSI`.`posting_date` >= "{from_date}"
                     AND `tSI`.`posting_date` <= "{end_date}"
-                    AND `tSI`.`docstatus` = 1) AS `amount_{shortcode}`
+                    AND `tSI`.`docstatus` = 1
+                    {conditions}
+               ) AS `amount_{shortcode}`
+                    
         """.format(from_date=filters.from_date, end_date=filters.end_date,
-            customer_group=g['customer_group'], shortcode=g['shortcode'])     
+            customer_group=g['customer_group'], shortcode=g['shortcode'],
+            conditions=conditions)     
+    
+    conditions = conditions.replace("`tSII`", "`tabSales Invoice Item`").replace("`tSI`", "`tabSales Invoice`")
     
     sql_query = """SELECT 
                       `tabSales Invoice Item`.`item_name`
@@ -72,9 +85,14 @@ def get_data(filters):
                       `tabSales Invoice`.`posting_date` >= "{from_date}"
                       AND `tabSales Invoice`.`posting_date` <= "{end_date}"
                       AND `tabSales Invoice`.`docstatus` = 1
-                      AND `tabSales Invoice Item`.`item_group` IN (SELECT `name` FROM `tabItem Group` WHERE `tabItem Group`.`parent_item_group` IN ('Accessories', 'Shoes'))
+                      AND `tabSales Invoice Item`.`item_group` IN 
+                        (SELECT `name` 
+                         FROM `tabItem Group` 
+                         WHERE `tabItem Group`.`parent_item_group` IN ('Accessories', 'Shoes'))
+                      {conditions}
                     GROUP BY `tabSales Invoice Item`.`item_name`
-      """.format(from_date=filters.from_date, end_date=filters.end_date, pivot=pivot)
+      """.format(from_date=filters.from_date, end_date=filters.end_date, pivot=pivot,
+        conditions=conditions)
 
     data = frappe.db.sql(sql_query, as_dict=True)
 
