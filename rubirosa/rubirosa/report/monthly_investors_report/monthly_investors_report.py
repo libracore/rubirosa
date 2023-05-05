@@ -77,12 +77,19 @@ def get_data(filters):
     })
     
     # insert qty values
+    qty_ytd = get_qty_ytd(filters.year, filters.month, filters.company)
     online_qty_this_month = get_qty_ytd(filters.year, filters.month, filters.company, online=True)
     switzerland_qty_this_month = get_qty_ytd(filters.year, filters.month, filters.company, territory="Schweiz")
     germany_qty_this_month = get_qty_ytd(filters.year, filters.month, filters.company, territory="Deutschland")
     usa_qty_this_month = get_qty_ytd(filters.year, filters.month, filters.company, territory="United States (USA)")
     netherlands_qty_this_month = get_qty_ytd(filters.year, filters.month, filters.company, territory="Niederlande")
-    new_markets_qty_this_month = get_qty_ytd(filters.year, filters.month, filters.company, territory="New Markets")
+    #new_markets_qty_this_month = get_qty_ytd(filters.year, filters.month, filters.company, territory="New Markets")
+    new_markets_qty_this_month = (qty_ytd 
+        - switzerland_qty_this_month
+        - germany_qty_this_month
+        - usa_qty_this_month
+        - netherlands_qty_this_month
+    )
     budget_qty_next_year = get_qty_budget_ytd(filters.year + 1, filters.month)
     budget_qty_month = get_qty_budget(filters.year, filters.month)
     budget_qty_year = get_qty_budget_ytd(filters.year, filters.month)
@@ -93,7 +100,7 @@ def get_data(filters):
         'month_this_year': get_qty(filters.year, filters.month, filters.company),
         'last_year': get_qty_ytd(filters.year - 1, filters.month, filters.company),
         'budget_this_year': budget_qty_year,
-        'this_year': get_qty_ytd(filters.year, filters.month, filters.company),
+        'this_year': qty_ytd,
         'online': online_qty_this_month,
         'switzerland': switzerland_qty_this_month,
         'germany': germany_qty_this_month,
