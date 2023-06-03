@@ -81,7 +81,7 @@ def get_data(filters):
     online_qty_this_month = get_qty_ytd(filters.year, filters.month, filters.company, online=True)
     switzerland_qty_this_month = get_qty_ytd(filters.year, filters.month, filters.company, territory="Schweiz")
     germany_qty_this_month = get_qty_ytd(filters.year, filters.month, filters.company, territory="Deutschland")
-    usa_qty_this_month = get_qty_ytd(filters.year, filters.month, filters.company, territory="United States (USA)")
+    usa_qty_this_month = get_qty_ytd(filters.year, filters.month, filters.company, territory="United States (US)")
     netherlands_qty_this_month = get_qty_ytd(filters.year, filters.month, filters.company, territory="Niederlande")
     #new_markets_qty_this_month = get_qty_ytd(filters.year, filters.month, filters.company, territory="New Markets")
     new_markets_qty_this_month = (qty_ytd 
