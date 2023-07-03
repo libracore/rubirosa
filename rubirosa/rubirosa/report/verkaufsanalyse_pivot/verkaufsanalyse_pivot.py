@@ -59,7 +59,7 @@ def get_data(filters):
                     {conditions}
                ) AS `qty_{shortcode}`
                     
-             , (SELECT SUM(`base_amount`)
+             , (SELECT SUM(`base_net_amount`)
                    FROM `tabSales Invoice Item` AS `tSII`
                    JOIN `tabSales Invoice` AS `tSI` ON `tSI`.`name` = `tSII`.`parent`
                    WHERE `tSI`.`customer_group` = "{customer_group}" 
