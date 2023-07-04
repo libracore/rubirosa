@@ -506,7 +506,7 @@ def get_qty_ytd(year, month, company, online=False, customer_group=None, territo
 def get_amount(year, month, company, customer_group=None):
     condition = """ AND `tabSales Invoice`.`customer_group` LIKE "{0}" """.format(customer_group) if customer_group else ""
     
-    qty = frappe.db.sql("""SELECT IFNULL(SUM(`base_amount`), 0)
+    qty = frappe.db.sql("""SELECT IFNULL(SUM(`base_net_amount`), 0)
         FROM `tabSales Invoice Item` 
         LEFT JOIN `tabSales Invoice` ON `tabSales Invoice`.`name` = `tabSales Invoice Item`.`parent`
         LEFT JOIN `tabItem` ON `tabItem`.`item_code` = `tabSales Invoice Item`.`item_code`
@@ -522,7 +522,7 @@ def get_amount(year, month, company, customer_group=None):
 def get_amount_ytd(year, month, company, customer_group=None):
     condition = """ AND `tabSales Invoice`.`customer_group` LIKE "{0}" """.format(customer_group) if customer_group else ""
     
-    qty = frappe.db.sql("""SELECT IFNULL(SUM(`base_amount`), 0)
+    qty = frappe.db.sql("""SELECT IFNULL(SUM(`base_net_amount`), 0)
         FROM `tabSales Invoice Item` 
         LEFT JOIN `tabSales Invoice` ON `tabSales Invoice`.`name` = `tabSales Invoice Item`.`parent`
         LEFT JOIN `tabItem` ON `tabItem`.`item_code` = `tabSales Invoice Item`.`item_code`
