@@ -71,7 +71,7 @@ def get_data(filters):
     date = ""
     if filters.from_date:
             date = """AND `sinv`.`posting_date` BETWEEN '{0}' AND '{1}'""".format(filters.from_date, filters.end_date)
-    frappe.log_error("{0}".format(date), "date")
+    
     data = frappe.db.sql("""
                             SELECT
                                 `sinv`.`customer_name`,
@@ -98,5 +98,5 @@ def get_data(filters):
                             {no_pre_payments}
                             {date}
                         """.format(amount=amount, sinv_filter=sinv_filter, no_pre_payments=no_pre_payments, date=date), as_dict=True)
-    frappe.log_error("{0}".format(data), "YYY")
+
     return data
