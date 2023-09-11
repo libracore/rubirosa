@@ -10,6 +10,17 @@ frappe.query_reports["Debitoren Export"] = {
             "fieldtype": "Select",
             "options": "\nInvoices\nReturns",
             "reqd": 1
+        },
+        {
+            "fieldname":"from_date",
+            "label": __("From date"),
+            "fieldtype": "Date"
+        },
+        {
+            "fieldname":"end_date",
+            "label": __("End date"),
+            "fieldtype": "Date",
+            "default" : frappe.datetime.get_today()
         }
     ]
 };

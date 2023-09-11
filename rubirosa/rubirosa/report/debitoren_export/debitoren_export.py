@@ -68,6 +68,10 @@ def get_data(filters):
         sinv_filter = """WHERE `sinv`.`is_return` = 1"""
         amount = """(`sinv`.`grand_total` * -1) AS `amount`"""
     
+    date = ""
+    if filters.from_date:
+            date = """AND `sinv`.`posting_date` BETWEEN '{0}' AND '{1}'""".format(filters.from_date, filters.end_date)
+    frappe.log_error("{0}".format(date), "date")
     data = frappe.db.sql("""
                             SELECT
                                 `sinv`.`customer_name`,
@@ -92,5 +96,7 @@ def get_data(filters):
                             LEFT JOIN `tabCustomer` AS `cust` ON `sinv`.`customer` = `cust`.`name`
                             {sinv_filter}
                             {no_pre_payments}
-                        """.format(amount=amount, sinv_filter=sinv_filter, no_pre_payments=no_pre_payments), as_dict=True)
+                            {date}
+                        """.format(amount=amount, sinv_filter=sinv_filter, no_pre_payments=no_pre_payments, date=date), as_dict=True)
+    frappe.log_error("{0}".format(data), "YYY")
     return data
