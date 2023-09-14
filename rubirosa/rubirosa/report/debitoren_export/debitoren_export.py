@@ -1,4 +1,4 @@
-# Copyright (c) 2013, libracore and contributors
+# Copyright (c) 2023, libracore and contributors
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
@@ -29,7 +29,8 @@ def get_columns(filters):
             {"label": _("Re.datum"), "fieldname": "sinv_date", "fieldtype": "Data", "width": 100},
             {"label": _("Re.nummer"), "fieldname": "sales_invoice", "fieldtype": "Link", "options": "Sales Invoice", "width": 100},
             {"label": _("ESR-Referenz"), "fieldname": "esr_reference", "fieldtype": "Data", "width": 100},
-            {"label": _("Re.betrag"), "fieldname": "amount", "fieldtype": "Currency", "width": 100},
+            {"label": _("Re.betrag"), "fieldname": "amount", "fieldtype": "Float", "precision": 2, "width": 100},
+            {"label": _("Währung"), "fieldname": "currency", "fieldtype": "Data", "width": 75},
             {"label": _("Zahlungsziel"), "fieldname": "payment_target", "fieldtype": "Date", "width": 100},
             {"label": _("Skonto/Rabatt"), "fieldname": "discounts", "fieldtype": "Float", "precision": 2, "width": 100},
             {"label": _("Skontofrist"), "fieldname": "discount_period", "fieldtype": "Int", "width": 100}
@@ -47,7 +48,8 @@ def get_columns(filters):
             {"label": _("Sprache"), "fieldname": "language", "fieldtype": "Data", "width": 100},
             {"label": _("GS-Datum"), "fieldname": "sinv_date", "fieldtype": "Data", "width": 100},
             {"label": _("GS-Nr."), "fieldname": "sales_invoice", "fieldtype": "Link", "options": "Sales Invoice", "width": 100},
-            {"label": _("GS-Betrag"), "fieldname": "amount", "fieldtype": "Currency", "width": 100}
+            {"label": _("GS-Betrag"), "fieldname": "amount", "fieldtype": "Float", "precision": 2, "width": 100},
+            {"label": _("Währung"), "fieldname": "currency", "fieldtype": "Data", "width": 75}
         ]
     
 def get_data(filters):
@@ -55,7 +57,7 @@ def get_data(filters):
     amount = ''
     no_pre_payments = ''
     if filters.sinv_type == "Invoices":
-        sinv_filter = """WHERE `sinv`.`is_return` = 0"""
+        sinv_filter = """WHERE `sinv`.`is_return` = 0 AND `sinv`.`docstatus` = 1 """
         amount = """`sinv`.`grand_total` AS `amount`"""
         no_pre_payments = """AND `sinv`.`name` NOT IN (
                                 SELECT `parent` FROM `tabSales Invoice Item`
@@ -65,7 +67,7 @@ def get_data(filters):
                                 )
                             )"""
     elif filters.sinv_type == "Returns":
-        sinv_filter = """WHERE `sinv`.`is_return` = 1"""
+        sinv_filter = """WHERE `sinv`.`is_return` = 1 AND `sinv`.`docstatus` = 1 """
         amount = """(`sinv`.`grand_total` * -1) AS `amount`"""
     
     date = ""
@@ -78,6 +80,7 @@ def get_data(filters):
                                 `sinv`.`posting_date` AS `sinv_date`,
                                 `sinv`.`name` AS `sales_invoice`,
                                 `sinv`.`esr_reference`,
+                                `sinv`.`currency`,
                                 {amount},
                                 `sinv`.`due_date` AS `payment_target`,
                                 `sinv`.`discount_amount` AS `discounts`,
