@@ -1,0 +1,78 @@
+{
+ "creation": "2023-09-19 16:06:33.840658",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "user",
+  "password",
+  "host_name",
+  "column_break_4",
+  "in_folder",
+  "out_folder",
+  "change_since"
+ ],
+ "fields": [
+  {
+   "fieldname": "user",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "password",
+   "fieldtype": "Password",
+   "label": "Password",
+   "reqd": 1
+  },
+  {
+   "fieldname": "host_name",
+   "fieldtype": "Data",
+   "label": "Host Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "in_folder",
+   "fieldtype": "Data",
+   "label": "In Folder",
+   "reqd": 1
+  },
+  {
+   "fieldname": "out_folder",
+   "fieldtype": "Data",
+   "label": "Out Folder",
+   "reqd": 1
+  },
+  {
+   "fieldname": "change_since",
+   "fieldtype": "Date",
+   "label": "Change Since"
+  }
+ ],
+ "issingle": 1,
+ "modified": "2023-09-21 12:31:49.696802",
+ "modified_by": "Administrator",
+ "module": "Rubirosa",
+ "name": "Multisped Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

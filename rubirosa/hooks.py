@@ -34,8 +34,8 @@ doctype_js = {
     "Purchase Receipt": ["public/js/xlsx.full.min.js",
         "public/js/purchase_receipt.js"
     ],
-    "Monthly Distribution": "public/js/monthly_distribution.js"
-    
+    "Monthly Distribution": "public/js/monthly_distribution.js",
+    "Multisped Settings": "rubirosa/doctype/multisped/multisped.js"
 }
 doctype_list_js = {
     "Item" : "public/js/item_list.js"

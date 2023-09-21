@@ -2,27 +2,20 @@
 // For license information, please see license.txt
 
 
-frappe.ui.form.on('Multisped', {
+frappe.ui.form.on('Multisped Settings', {
 	refresh(frm) {
-		frm.add_custom_button(__("Get Data"),  () => get_data(frm))
+		console.log("Multisped Settings")
+		frm.add_custom_button(__("Get Item Data"),  () => get_data(frm))
 	}
 })
 
 function get_data(frm) {
-    //~ frappe.call({
-        //~ 'method': "rubirosa.rubirosa.doctype.multisped.multisped.get_data",
-        //~ 'args': {
-                //~ "doc": frm.doc.name
-            //~ },
-        //~ 'callback': function (response) {
-            //~ var res = response.message;
-            //~ console.log("res", res);
-//~ }
-//~ })
+
 // generate intrastat csv file
     frappe.call({
-        method: 'rubirosa.rubirosa.doctype.multisped.multisped.generate_transfer_file',
+        method: 'rubirosa.rubirosa.doctype.multisped.multisped.generate_items_transfer_file',
         args: {
+			"change_since": frm.doc.change_since 
         },
         callback: function(r) {
             if (r.message) {
@@ -30,8 +23,6 @@ function get_data(frm) {
                 var res = r.message.content;
                 var today = new Date();
                 download("Multisped WMS - ARTIKELSTAMMSATZ " + today.getFullYear() + "-" + (today.getMonth() + 1) + ".csv", res);
-                //~ var today = new Date();
-                //~ download("intrastat_" + today.getFullYear() + "-" + (today.getMonth() + 1) + ".csv", r.message.content);
             } 
         }
     });

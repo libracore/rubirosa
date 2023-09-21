@@ -1,0 +1,83 @@
+
+<!-- intro section -->
+<p style="font-size: 20pt !important;"><strong>{{ _("WMS - ARTIKELSTAMMSATZ") }}</strong></p>
+
+<p><br/></p>
+<!-- positions -->
+<table  style="width: 100%;">
+    <tr style="border-bottom: 1px solid silver; ">
+        <td style="width: auto; "><strong>{{ _("Kennzeichen") }}</strong></td>
+        <td style="width: auto; "><strong>{{ _("Artikelnummer") }}</strong></td>
+        <td style="width: auto; text-align: right; "><strong>{{ _("Bezeichnung 1") }}</strong></td>
+        <td style="width: auto; text-align: right; "><strong>{{ _("Bezeichnung 2") }}</strong></td>
+        <td style="width: auto; text-align: right; "><strong>{{ _("Artikelgruppe 1") }}</strong></td>
+        <td style="width: auto; text-align: right; "><strong>{{ _("Artikelgruppe 2") }}</strong></td>
+        <td style="width: auto; "><strong>{{ _("ABC – Klassifikation") }}</strong></td>
+        <td style="width: auto; "><strong>{{ _("Merkmal 1") }}</strong></td>
+        <td style="width: auto; "><strong>{{ _("Merkmal 2") }}</strong></td>
+        <td style="width: auto; "><strong>{{ _("EAN – Code") }}</strong></td>
+        <td style="width: auto; "><strong>{{ _("Lagereinheit") }}</strong></td>
+        <td style="width: auto; "><strong>{{ _("Verpackungseinheit") }}</strong></td>
+        <td style="width: auto; "><strong>{{ _("Kartonmenge") }}</strong></td>
+        <td style="width: auto; "><strong>{{ _("Volumen") }}</strong></td>
+        <td style="width: auto; "><strong>{{ _("Gewicht") }}</strong></td>
+        <td style="width: auto; "><strong>{{ _("Länge") }}</strong></td>
+        <td style="width: auto; "><strong>{{ _("Breite") }}</strong></td>
+        <td style="width: auto; "><strong>{{ _("Höhe") }}</strong></td>
+        <td style="width: auto; "><strong>{{ _("VK – Preis Netto") }}</strong></td>
+        <td style="width: auto; "><strong>{{ _("Ursprungsland") }}</strong></td>
+        <td style="width: auto; "><strong>{{ _("Zolltarifnummer") }}</strong></td>
+        <td style="width: auto; "><strong>{{ _("Artikelart") }}</strong></td>
+        <td style="width: auto; "><strong>{{ _("MwSt – Schlüssel") }}</strong></td>
+        <td style="width: auto; "><strong>{{ _("Währungskürzel") }}</strong></td>
+        <td style="width: auto; "><strong>{{ _("Auswert 1") }}</strong></td>
+        <td style="width: auto; "><strong>{{ _("Auswert 2") }}</strong></td>
+        <td style="width: auto; "><strong>{{ _("Auswert 3") }}</strong></td>
+        <td style="width: auto; "><strong>{{ _("Auswert 4") }}</strong></td>
+        <td style="width: auto; "><strong>{{ _("Auswert 5") }}</strong></td>
+        <td style="width: auto; "><strong>{{ _("Text 1") }}</strong></td>
+        <td style="width: auto; "><strong>{{ _("Text 2") }}</strong></td>
+        <td style="width: auto; "><strong>{{ _("Text 3") }}</strong></td>
+        <td style="width: auto; "><strong>{{ _("Text 4") }}</strong></td>
+        <td style="width: auto; "><strong>{{ _("Text 5") }}</strong></td>
+    </tr>
+    {% for item in content %}
+    <tr style="border-bottom: 1px solid silver; ">
+        <td>{{ loop.index }}</td>
+        <td><strong>{{ item.item_status }}</strong></td>
+        <td style="text-align: right; ">{{ item.barcode }} </td>
+        <td style="text-align: right; ">{{ item.description }} </td>
+        <td style="text-align: right; "> - </td>
+        <td style="text-align: right; ">{{ item.group }} </td>
+        <td style="text-align: right; "> - </td>
+        <td style="text-align: right; "> - </td>
+        <td style="text-align: right; ">{{ item.size_value }} </td>
+        <td style="text-align: right; ">{{ item.colour_value }} </td>
+        <td style="text-align: right; ">{{ item.ean_code }} </td>
+        <td style="text-align: right; ">{{ item.stock_uom }} </td>
+        <td style="text-align: right; "> - </td>
+        <td style="text-align: right; "> - </td>
+        <td style="text-align: right; "> - </td>
+        <td style="text-align: right; ">{{ "{:.3f}".format(items.weight or 0)).replace(".", ",") }} </td>
+        <td style="text-align: right; "> - </td>
+        <td style="text-align: right; "> - </td>
+        <td style="text-align: right; "> - </td>
+        <td style="text-align: right; "> - </td>
+        <td style="text-align: right; ">{{ item.origin }} </td>
+        <td style="text-align: right; ">{{ item.tariff }} </td>
+        <td style="text-align: right; "> - </td>
+        <td style="text-align: right; "> - </td>
+        <td style="text-align: right; "> - </td>
+        <td style="text-align: right; "> - </td>
+        <td style="text-align: right; "> - </td>
+        <td style="text-align: right; "> - </td>
+        <td style="text-align: right; "> - </td>
+        <td style="text-align: right; "> - </td>
+        <td style="text-align: right; "> - </td>
+        <td style="text-align: right; "> - </td>
+        <td style="text-align: right; "> - </td>
+        <td style="text-align: right; "> - </td>
+        <td style="text-align: right; "> - </td>
+    </tr>
+   {% endfor %}
+</table>
