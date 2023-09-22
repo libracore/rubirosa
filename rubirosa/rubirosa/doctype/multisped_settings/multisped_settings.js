@@ -10,14 +10,14 @@ frappe.ui.form.on('Multisped Settings', {
 });
 
 function get_data(frm) {
-
+console.log("get data")
 // generate intrastat csv file
     frappe.call({
         method: 'rubirosa.rubirosa.doctype.multisped_settings.multisped_settings.generate_items_transfer_file',
         args: {
         },
         callback: function(r) {
-			console.log("r", r)
+			
             if (r.message) {
                 // prepare the xml file for download
                 

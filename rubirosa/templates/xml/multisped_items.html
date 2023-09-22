@@ -1,8 +1,5 @@
 
-<!-- intro section -->
-<p style="font-size: 20pt !important;"><strong>{{ _("WMS - ARTIKELSTAMMSATZ") }}</strong></p>
 
-<p><br/></p>
 <!-- positions -->
 <table  style="width: 100%;">
     <tr style="border-bottom: 1px solid silver; ">
@@ -43,7 +40,6 @@
     </tr>
     {% for item in items %}
     <tr style="border-bottom: 1px solid silver; ">
-        <td>{{ loop.index }}</td>
         <td><strong>{{ item.item_status }}</strong></td>
         <td style="text-align: right; ">{{ item.barcode }} </td>
         <td style="text-align: right; ">{{ item.description }} </td>

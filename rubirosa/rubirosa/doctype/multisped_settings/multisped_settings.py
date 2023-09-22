@@ -39,7 +39,6 @@ def get_items_data():
     WHERE
         `tabItem`.`disabled` = 0
         AND `tabItem`.`is_sales_item` = 1
-        AND (`tabItem`.`creation` >= '{change_since}' OR `tabItem`.`modified` >= '{change_since}')
         AND `sle`.`actual_qty` > 0
     GROUP BY
         `tabItem`.`name`
@@ -63,7 +62,7 @@ def generate_items_transfer_file():
     item_content = frappe.render_template('rubirosa/templates/xml/multisped_items.html', {'items': items})
     
     # First attemp of trying to do the file transfer
-    file = codecs.open("{path}ItemTransfered{date}.xml".format(path=target_path, date=date.today()), "w", "utf-8")
+    file = codecs.open("{path}ItemTransferedFITHH{date}.xml".format(path=target_path, date=date.today()), "w", "utf-8")
     file.write(item_content)
     file.close()
 
