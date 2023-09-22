@@ -9,8 +9,7 @@
   "host_name",
   "column_break_4",
   "in_folder",
-  "out_folder",
-  "change_since"
+  "out_folder"
  ],
  "fields": [
   {
@@ -47,15 +46,10 @@
    "fieldtype": "Data",
    "label": "Out Folder",
    "reqd": 1
-  },
-  {
-   "fieldname": "change_since",
-   "fieldtype": "Date",
-   "label": "Change Since"
   }
  ],
  "issingle": 1,
- "modified": "2023-09-21 12:31:49.696802",
+ "modified": "2023-09-21 17:13:10.499704",
  "modified_by": "Administrator",
  "module": "Rubirosa",
  "name": "Multisped Settings",

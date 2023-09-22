@@ -41,7 +41,7 @@
         <td style="width: auto; "><strong>{{ _("Text 4") }}</strong></td>
         <td style="width: auto; "><strong>{{ _("Text 5") }}</strong></td>
     </tr>
-    {% for item in content %}
+    {% for item in items %}
     <tr style="border-bottom: 1px solid silver; ">
         <td>{{ loop.index }}</td>
         <td><strong>{{ item.item_status }}</strong></td>
@@ -58,7 +58,7 @@
         <td style="text-align: right; "> - </td>
         <td style="text-align: right; "> - </td>
         <td style="text-align: right; "> - </td>
-        <td style="text-align: right; ">{{ "{:.3f}".format(items.weight or 0)).replace(".", ",") }} </td>
+        <td style="text-align: right; ">{{ items.weight or 0 }} </td>
         <td style="text-align: right; "> - </td>
         <td style="text-align: right; "> - </td>
         <td style="text-align: right; "> - </td>
