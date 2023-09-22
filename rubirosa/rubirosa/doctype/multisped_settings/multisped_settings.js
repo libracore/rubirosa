@@ -17,11 +17,13 @@ function get_data(frm) {
         args: {
         },
         callback: function(r) {
+			console.log("r", r)
             if (r.message) {
                 // prepare the xml file for download
-                var res = r.message.content;
+                
+                var csv = r.message.content;
                 var today = new Date();
-                download("Multisped WMS - ARTIKELSTAMMSATZ " + today.getFullYear() + "-" + (today.getMonth() + 1) + ".csv", res);
+                download("Multisped WMS - ARTIKELSTAMMSATZ " + today.getFullYear() + "-" + (today.getMonth() + 1) + ".csv", csv);
             } 
         }
     });
