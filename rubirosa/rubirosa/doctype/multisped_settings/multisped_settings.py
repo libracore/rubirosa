@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+import hashlib  
 import codecs
 import os
 from datetime import date
@@ -17,13 +18,12 @@ def get_items_data():
     sql_query = """
     SELECT
         IF(`mtr`.`item_code` IS NOT NULL, 'U', 'N') AS `item_status`,
-        `tabItem`.`name`,
-        `tabItem`.`barcode` AS `barcode`,
+        `tabItem`.`name` AS `item_number`,
         `tabItem`.`description` AS `description`,
         `tabItem`.`item_group` AS `group`,
         MAX(IF(`tabItem Variant Attribute`.`attribute` = 'Size', `tabItem Variant Attribute`.`attribute_value`, NULL)) AS `size_value`,
         MAX(IF(`tabItem Variant Attribute`.`attribute` = 'Colour', `tabItem Variant Attribute`.`attribute_value`, NULL)) AS `colour_value`,
-        `tabItem`.`ean_code` AS `ean_code`,
+        `tabItem`.`barcode` AS `ean_code`,
         `tabItem`.`stock_uom` AS `stock_uom`,
         `tabItem`.`weight_per_unit` AS `weight`,
         `tabItem`.`country_of_origin` AS `origin`,
@@ -47,6 +47,10 @@ def get_items_data():
     """
     data = frappe.db.sql(sql_query, as_dict=True)
     
+    for row in data:
+        if row['item_number']:
+            row['item_number'] = hashlib.md5(row['item_number'].encode('utf-8')).hexdigest()[:20]
+    
     return data
 
 @frappe.whitelist()
@@ -56,13 +60,13 @@ def generate_items_transfer_file():
 
     # fetch Multisped Settings and select tagert path
     settings = frappe.get_doc("Multisped Settings")
-    target_path = settings.in_folder
+    target_path = os.path.join(settings.in_folder,"ItemTransfered{date}.csv".format(date=date.today().strftime("%Y%m%d%H%M%S")))
 
     # create transfer file   
     item_content = frappe.render_template('rubirosa/templates/xml/multisped_items.html', {'items': items})
     
     # First attemp of trying to do the file transfer
-    file = codecs.open("{path}ItemTransferedFITHH{date}.xml".format(path=target_path, date=date.today()), "w", "utf-8")
+    file = codecs.open(target_path, "w", "utf-8")
     file.write(item_content)
     file.close()
 
@@ -77,13 +81,13 @@ def update_items_records(items):
         try:
             mtr = frappe.get_doc({
                 'doctype': 'Multisped Transfer Record',
-                'item_code': i['name']
+                'item_code': i['item_number']
             })
 
             mtr.insert(ignore_permissions=True)    
             frappe.db.commit()
             mtr_ref = mtr.name
         except Exception as e:
-            frappe.log_error("{0}\n\n{1}".format(e, i['name']), "Update Items Records Failed")
+            frappe.log_error("{0}\n\n{1}".format(e, i['item_number']), "Update Items Records Failed")
     
     return
