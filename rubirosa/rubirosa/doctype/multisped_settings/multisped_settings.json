@@ -7,6 +7,8 @@
   "user",
   "password",
   "host_name",
+  "port",
+  "host_keys",
   "column_break_4",
   "in_folder",
   "out_folder"
@@ -26,10 +28,26 @@
    "reqd": 1
   },
   {
+   "fieldname": "column_break_host",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "host_name",
    "fieldtype": "Data",
    "label": "Host Name",
    "reqd": 1
+  },
+  {
+   "fieldname": "port",
+   "fieldtype": "Int",
+   "label": "Port",
+   "default": 2222,
+   "reqd": 1
+  },
+  {
+   "fieldname": "host_keys",
+   "fieldtype": "Data",
+   "label": "Host Keys"
   },
   {
    "fieldname": "column_break_4",
@@ -49,7 +67,7 @@
   }
  ],
  "issingle": 1,
- "modified": "2023-09-21 17:13:10.499704",
+ "modified": "2023-09-26 13:57:10.499704",
  "modified_by": "Administrator",
  "module": "Rubirosa",
  "name": "Multisped Settings",
