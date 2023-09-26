@@ -11,7 +11,8 @@
   "host_keys",
   "column_break_4",
   "in_folder",
-  "out_folder"
+  "out_folder",
+  "warehouse"
  ],
  "fields": [
   {
@@ -64,10 +65,17 @@
    "fieldtype": "Data",
    "label": "Out Folder",
    "reqd": 1
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse",
+   "reqd": 1
   }
  ],
  "issingle": 1,
- "modified": "2023-09-26 13:57:10.499704",
+ "modified": "2023-09-26 23:39:10.499704",
  "modified_by": "Administrator",
  "module": "Rubirosa",
  "name": "Multisped Settings",
