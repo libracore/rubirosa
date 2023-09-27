@@ -104,6 +104,32 @@ def generate_items_transfer_file(debug=False):
 def get_multisped_item_code(s, length):
     return hashlib.md5(s.encode('utf-8')).hexdigest()[:length]
     
+"""
+This function will store an item_code to multisped_code lookup table
+"""
+def create_multisped_code(item_code):
+    if not frappe.db.exists("Multisped Item Code", item_code)
+        lookup_entry = frappe.get_doc({
+            'doctype': "Multisped Item Code",
+            'item_code': item_code,
+            'multisped_code': get_multisped_item_code(item_code, 20)
+        })
+        lookup_entry.insert(ignore_permissions=True)
+    return
+
+"""
+This function return the ERP item_code of a multisped item_code
+"""
+def find_item_code_from_multisped_code(multisped_code):
+    lookup_items = frappe.get_all("Multisped Item Code",
+        filters={'multisped_code': multisped_code},
+        fields='item_code'
+    )
+    if len(lookup_items) > 0:
+        return lookup_items[0]['item_code']
+    else:
+        return None
+        
 def mark_records_transmitted(record, field):
     
     for i in record:
@@ -115,6 +141,9 @@ def mark_records_transmitted(record, field):
 
             mtr.insert(ignore_permissions=True)    
             frappe.db.commit()
+            
+            create_multisped_code(item_code)
+            
             mtr_ref = mtr.name
         except Exception as e:
             frappe.log_error("{0}\n\n{1}".format(e, i['name']), "Update Records Failed")
@@ -148,7 +177,6 @@ def create_shipping_order(debug=False):
     if not debug:
         os.remove(local_file)
     
-
     return 
 
 @frappe.whitelist()
@@ -301,7 +329,7 @@ def parse_purchase_order_feedback(content):
             'delivery_note': fields[field_map["Lieferscheinnummer"]],
             'delivery_date': datetime.strptime((fields[field_map["Lieferdatum"]]), "%d.%m.%Y") if fields[field_map["Lieferdatum"]] else None,
             'order_details': fields[field_map["Bestellposition"]],
-            'item_code': fields[field_map["Artikelnummer"]],
+            'item_code': find_item_code_from_multisped_code(fields[field_map["Artikelnummer"]]),
             'item_state': fields[field_map["Teilezustand"]],
             'attribute1': flt((fields[field_map["Merkmal1"]] or "").replace(",", ".")),
             'attribute2': flt((fields[field_map["Merkmal2"]] or "").replace(",", ".")),
@@ -338,7 +366,6 @@ def parse_purchase_order_feedback(content):
         # set items to actually received items
         received_items = []
         for i in purchase_receipt.items:
-            # note: this is the multisped item code -> rewrite to ERPNext (TODO)
             if i.item_code in items:
                 _item = i
                 _item.qty = items[i.item_code]
@@ -393,7 +420,7 @@ def parse_stock_reconciliation_feedback(contant):
     for line in lines:
         fields = line.split("|")
         stock_level = {
-            'item_code': fields[field_map["Artikelnummer"]],
+            'item_code': find_item_code_from_multisped_code(fields[field_map["Artikelnummer"]]),
             'attribute1': fields[field_map["Farbe"]],
             'attribute2': fields[field_map["Grösse"]],
             'batch_no': fields[field_map["Lotnummer"]],
@@ -419,7 +446,6 @@ def parse_stock_reconciliation_feedback(contant):
         'doctype': "Stock Reconciliation",
     })
     for item_code, qty in level_by_item:
-        # note: this is the multisped item code -> rewrite to ERPNext (TODO)
         stock_reconciliation.append("items", {
             'item_code': item_code,
             'warehouse': settings.warehouse,
