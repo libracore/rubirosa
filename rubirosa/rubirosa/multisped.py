@@ -177,7 +177,7 @@ def create_shipping_order(debug=False):
 
     # fetch Multisped Settings and select tagert path
     settings = frappe.get_doc("Multisped Settings")
-    local_file = os.path.join("/tmp", "AI{date}{nn}.csv".format(date=date.today().strftime("%y%m%d"), nn=1))
+    local_file = os.path.join("/tmp", "AI{date}{nn}.txt".format(date=date.today().strftime("%y%m%d"), nn=1))
     
     # create delivery note transfer file   
     dns_content = frappe.render_template('rubirosa/templates/xml/multisped_dns.html', {'dns': dns})
