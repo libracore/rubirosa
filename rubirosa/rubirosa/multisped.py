@@ -79,7 +79,7 @@ def generate_items_transfer_file(debug=False):
 
     # fetch Multisped Settings and select tagert path
     settings = frappe.get_doc("Multisped Settings")
-    local_file = os.path.join("/tmp","AS{date}{nn:02d}.txt".format(date=date.today().strftime("%y%m%d"), nn=1)
+    local_file = os.path.join("/tmp","AS{date}{nn:02d}.txt".format(date=date.today().strftime("%y%m%d"), nn=1))
 
     # create items transfer file   
     item_content = frappe.render_template('rubirosa/templates/xml/multisped_items.html', {'items': items})
