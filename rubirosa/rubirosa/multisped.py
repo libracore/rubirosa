@@ -13,6 +13,21 @@ from frappe.utils.password import get_decrypted_password
 from frappe.utils import flt
 from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
 
+carrier_codes = {
+    'SwissPost Economy': '012',
+    'SwissPost Priority': '013',
+    'UPS Standard': '060',
+    'UPS Express Saver': '063',
+    'DHL national': '10',
+    'DHL national + Retourenetikett': '14',
+    'DHL international': '410',
+    'GLS': '24',
+    'GLS + Retourenetikett': '23',
+    'GLS Express': '22',
+    'Post Österreich': '100',
+    'Post Österreich + Retourenetikett': '102',
+}
+
 def get_items_data():
     sql_query = """
         SELECT
@@ -62,11 +77,11 @@ def get_items_data():
         d['item_number'] = get_multisped_item_code(d['item_number'], 20)
         
         # convert weight to comma-notation
-        d['weight'] = ("{:.2f}".format(d['weight'] or 0)).replace(".", ",")
+        d['weight'] = format_multisped_number(d['weight'])
         
         # check that there is a sales price and rewrite to comma-notation
         if d['vk']:
-            d['vk'] = ("{:.2f}".format(d['vk'] or 0)).replace(".", ",")
+            d['vk'] = format_multisped_number(d['vk'])
         else:
             frappe.log_error("Item: {0} Item Number: {1} has no price list'Selling RP EUR' ".format(d['name'], d['item_number']) , "Multisped Item has no price")
     
@@ -100,7 +115,7 @@ def generate_items_transfer_file(debug=False):
         os.remove(local_file)
     
     # create log
-    create_multisped_log("Items transferred", item_content)
+    create_multisped_log("Items transferred {0}".format(local_file.replace("/tmp", "")), item_content)
     
     return
     
@@ -110,7 +125,7 @@ def get_multisped_item_code(s, length):
 """
 This function will store an item_code to multisped_code lookup table
 """
-def create_multisped_code(item_code):
+def store_multisped_code(item_code):
     if not frappe.db.exists("Multisped Item Code", item_code):
         lookup_entry = frappe.get_doc({
             'doctype': "Multisped Item Code",
@@ -120,6 +135,12 @@ def create_multisped_code(item_code):
         lookup_entry.insert(ignore_permissions=True)
     return
 
+"""
+Format a number into the multisped format (comma as decimal separator, no thousands seeparator)
+"""
+def format_multisped_number(n):
+    return ("{:.2f}".format(n or 0)).replace(".", ",")
+    
 """
 This function return the ERP item_code of a multisped item_code
 """
@@ -132,7 +153,10 @@ def find_item_code_from_multisped_code(multisped_code):
         return lookup_items[0]['item_code']
     else:
         return None
-        
+
+"""
+Create a transfer record so that the system knows an item or delivery note or purchase order has been transmitted
+"""
 def mark_records_transmitted(record, field):
     
     for i in record:
@@ -145,14 +169,17 @@ def mark_records_transmitted(record, field):
             mtr.insert(ignore_permissions=True)    
             frappe.db.commit()
             
-            create_multisped_code(item_code)
+            store_multisped_code(item_code)
             
             mtr_ref = mtr.name
         except Exception as e:
             frappe.log_error("{0}\n\n{1}".format(e, i['name']), "Update Records Failed")
 
     return
-    
+
+"""
+Add a log entry with the file content
+"""
 def create_multisped_log(reference, content):
     try:
         msped_log = frappe.get_doc({
@@ -198,7 +225,7 @@ def generate_shipping_order(debug=False):
         os.remove(local_file)
     
     # create log
-    create_multisped_log("Delivery Notes transferred", dns_content)
+    create_multisped_log("Delivery Notes transferred {0}".format(local_file.replace("/tmp", "")), dns_content)
     return 
 
 @frappe.whitelist()
@@ -236,20 +263,33 @@ def get_dns_data():
         AND `mtr`.`delivery_note` IS NULL
     ORDER BY
         `tabDelivery Note`.`creation` DESC
-    LIMIT 10
     """
     data = frappe.db.sql(sql_query, as_dict=True)
     
     for d in data:
+        # pull original document
+        dn_doc = frappe.get_doc("Delivery Note", d['name'])
+        # append items
+        d['items'] = dn_doc.as_dict()['items']
+        for i in d['items']:
+            i['item_code'] = get_multisped_item_code(i['item_code'], 20)
+            i['qty'] = format_multisped_number(i['qty'])
+            i['rate'] = format_multisped_number(i['rate'])
+            i['quantity_ordered'] = format_multisped_number(i['quantity_ordered'])
+            
         # shorten invoice address to hash
         if d['invoice_address']:
             d['invoice_address'] = get_multisped_item_code(d['invoice_address'], 10)
+            
         # rewrite country name to country code
         if d['elkz']:
             d['elkz'] = frappe.get_cached_value("Country", d['elkz'], "code")
         if d['rlkz']:
             d['rlkz'] = frappe.get_cached_value("Country", d['rlkz'], "code")
-            
+        
+        # define carrier
+        d['carrier'] = carrier_codes(dn_doc.shipping_method) if dn_doc.shipping_method in carrier_codes else carrier_codes['SwissPost Economy']
+        
     return data
 
 def connect_sftp(settings):
@@ -301,18 +341,20 @@ def read_files(target_path):
                 f = open(local_file, "r")
                 content = f.read()
                 f.close()
-                # TODO: add log
                 
                 # read and parse local file
                 # TODO parse content
                 if file_name.startswith("WR"):
                     # purchase order feedback (Wareneingangs-Rückmeldung)
+                    create_multisped_log("Received purchase receipt {0}".format(file_name), content)
                     parse_purchase_order_feedback(content)
                 elif file_name.startswith("AR"):
                     # delivery note feedback (Auftragsrückmeldung)
+                    create_multisped_log("Received delivery feedback {0}".format(file_name), content)
                     parse_delivery_note_feedback(content)
                 elif file_name.startswith("AR"):
                     # stock reconciliation feedback (Bestandsmeldung)
+                    create_multisped_log("Received stock reconciliation {0}".format(file_name), content)
                     parse_stock_reconciliation_feedback(content)
                 # remove local file
                 os.remove(local_file)
