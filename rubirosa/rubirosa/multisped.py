@@ -58,18 +58,18 @@ def get_items_data():
     indices_to_remove = []
     
     for i, row in enumerate(data):
-		
+        
         if row['item_number']:
-            row['item_number'] = hashlib.md5(row['item_number'].encode('utf-8')).hexdigest()[:20]
+            row['item_number'] = hash_text_length(row['item_number'], 20)
             
         if row['weight']:
-            row['weight'] = ("{:,.2f}".format(row['weight'] or 0)).replace(".", ",")
+            row['weight'] = ("{:.2f}".format(row['weight'] or 0)).replace(".", ",")
             
         if row['vk'] is None:
             frappe.log_error("Item: {0} Item Number: {1} has no price list'Selling RP EUR' ".format(row['name'],row['item_number']))
             indices_to_remove.append(i)
         else:
-            row['vk'] = ("{:,.2f}".format(row['vk'] or 0)).replace(".", ",")
+            row['vk'] = ("{:.2f}".format(row['vk'] or 0)).replace(".", ",")
     
     # Remove rows where price_list_rate/vk is None
     for index in reversed(indices_to_remove):
@@ -95,24 +95,27 @@ def generate_items_transfer_file():
     file.close()
 
     # update items record table
-    update_items_records(items)
+    update_records(items, 'item_code')
  
-    return 
+    return
     
-def update_items_records(items):
+def hash_text_length(row,length):
+    hashlib.md5(row.encode('utf-8')).hexdigest()[:length]
     
-    for i in items:
+def update_records(record, field):
+    
+    for i in record:
         try:
             mtr = frappe.get_doc({
                 'doctype': 'Multisped Transfer Record',
-                'item_code': i['name']
+                field: i['name']
             })
 
             mtr.insert(ignore_permissions=True)    
             frappe.db.commit()
             mtr_ref = mtr.name
         except Exception as e:
-            frappe.log_error("{0}\n\n{1}".format(e, i['name']), "Update Items Records Failed")
+            frappe.log_error("{0}\n\n{1}".format(e, i['name']), "Update Records Failed")
     
     return
 
@@ -134,7 +137,7 @@ def create_shipping_order():
     file.close()
 
     # update delivery note record table
-    update_dns_records(dns)
+    update_records(dns,'delivery_note')
  
     return 
 
@@ -143,38 +146,50 @@ def get_dns_data():
     sql_query = """
     SELECT
         `tabDelivery Note`.`name` AS `name`,
-        `tabDelivery Note`.`customer` AS `customer`      
+        `tabDelivery Note`.`customer` AS `customer`,
+        `tabDelivery Note`.`customer_address` AS `invoice_address`,
+        `shipping_addrs`.`country` AS `elkz`,
+        `shipping_addrs`.`pincode` AS `eplz`,
+        `shipping_addrs`.`address_line1` AS `estrasse`,
+        `shipping_addrs`.`city` AS `eort`,
+        `tabContact`.`mobile_no` AS `avistelefon`,
+        `tabContact`.`email_id` AS `avisemail`,
+        `tabSales Invoice`.`name` AS `rechnungsname`,
+        `billing_addrs`.`country` AS `rlkz`,
+        `billing_addrs`.`pincode` AS `rplz`,
+        `billing_addrs`.`address_line1` AS `rstrasse`,
+        `billing_addrs`.`city` AS `rort`,
+        `tabSales Order`.`transaction_date` AS `auftragsdatum`,
+        `tabSales Order`.`delivery_date` AS `lieferdatum`,
+        `tabSales Order`.`name` AS `auftragsnummer`,
+        `tabSales Order`.`order_type` AS `auftragsart`,
+        `tabSales Order`.`woocommerce_order_id` AS `auftragskennz`
     FROM
         `tabDelivery Note`
     LEFT JOIN `tabMultisped Transfer Record` AS `mtr` ON `tabDelivery Note`.`name` = `mtr`.`delivery_note`
+    LEFT JOIN `tabAddress` AS `shipping_addrs` ON `tabDelivery Note`.`shipping_address_name` = `shipping_addrs`.`name`
+    LEFT JOIN `tabAddress` AS `billing_addrs` ON `tabDelivery Note`.`customer_address` = `billing_addrs`.`name`
+    LEFT JOIN `tabContact` ON `tabDelivery Note`.`contact_person` = `tabContact`.`name`
+    LEFT JOIN `tabDelivery Note Item` ON `tabDelivery Note`.`name` = `tabDelivery Note Item`.`parent`
+    LEFT JOIN `tabSales Order` ON `tabDelivery Note Item`.`against_sales_order` = `tabSales Order`.`name`
+    LEFT JOIN `tabSales Invoice Item` ON `tabDelivery Note`.`name` = `tabSales Invoice Item`.`delivery_note`
+    LEFT JOIN `tabSales Invoice` ON `tabSales Invoice Item`.`parent` = `tabSales Invoice`.`name`
     WHERE
         `tabDelivery Note`.`docstatus` = 1
         AND `mtr`.`delivery_note` IS NULL
     GROUP BY
         `tabDelivery Note`.`name`
     ORDER BY
-        `tabDelivery Note`.`creation` DESC;
+        `tabDelivery Note`.`creation` DESC
     """
     data = frappe.db.sql(sql_query, as_dict=True)
     
-    return data
-    
-def update_dns_records(dns):
-    
-    for dn in dns:
-        try:
-            mtr = frappe.get_doc({
-                'doctype': 'Multisped Transfer Record',
-                'delivery_note': dn['name']
-            })
-
-            mtr.insert(ignore_permissions=True)    
-            frappe.db.commit()
-            mtr_ref = mtr.name
-        except Exception as e:
-            frappe.log_error("{0}\n\n{1}".format(e, dn['name']), "Update Delivery Note Records Failed")
+    for i, row in enumerate(data):
         
-    return
+        if row['invoice_address']:
+            row['invoice_address'] = hash_text_length(row['invoice_address'], 10)
+    
+    return data
 
 def connect_sftp(settings):
     cnopts = pysftp.CnOpts()
@@ -308,7 +323,7 @@ def parse_purchase_order_feedback(content):
             receipts_by_order[item['order_no']][item['item_code']] += item['qty']
         
     # create purchase receipt based on receipts
-    for order, items in receipts_by_order.items()
+    for order, items in receipts_by_order.items():
         # create downstream document
         purchase_receipt_content = make_purchase_receipt(order)
         # compile document
