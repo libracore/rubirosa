@@ -79,7 +79,7 @@ def generate_items_transfer_file(debug=False):
 
     # fetch Multisped Settings and select tagert path
     settings = frappe.get_doc("Multisped Settings")
-    local_file = os.path.join("/tmp","AS{date}{nn:02d}.txt".format(date=date.today().strftime("%y%m%d"), nn=1))
+    local_file = os.path.join("/tmp","AS{date}{nn:02d}.txt".format(date=date.today().strftime("%y%m%d"), nn=1)
 
     # create items transfer file   
     item_content = frappe.render_template('rubirosa/templates/xml/multisped_items.html', {'items': items})
@@ -98,7 +98,10 @@ def generate_items_transfer_file(debug=False):
     # cleanup (unless in debug mode)
     if not debug:
         os.remove(local_file)
-        
+    
+    # create log
+    create_multisped_log("Items transferred", item_content)
+    
     return
     
 def get_multisped_item_code(s, length):
@@ -147,8 +150,25 @@ def mark_records_transmitted(record, field):
             mtr_ref = mtr.name
         except Exception as e:
             frappe.log_error("{0}\n\n{1}".format(e, i['name']), "Update Records Failed")
-    
+
     return
+    
+def create_multisped_log(reference, content):
+    try:
+        msped_log = frappe.get_doc({
+            'doctype': 'Multisped Log',
+            'method': reference,
+            'datetime': datetime.now(),
+            'content': content
+        })
+
+        msped_log.insert(ignore_permissions=True) 
+        frappe.db.commit()
+
+    except Exception as e:
+        frappe.log_error("{0}\n\n{1}".format(e, reference), "Create Multisped Log Failed")
+    
+    return 
 
 @frappe.whitelist()
 def create_shipping_order(debug=False):    
@@ -177,6 +197,8 @@ def create_shipping_order(debug=False):
     if not debug:
         os.remove(local_file)
     
+    # create log
+    create_multisped_log("Delivery Notes transferred", dns_content)
     return 
 
 @frappe.whitelist()
@@ -214,6 +236,7 @@ def get_dns_data():
         AND `mtr`.`delivery_note` IS NULL
     ORDER BY
         `tabDelivery Note`.`creation` DESC
+    LIMIT 10
     """
     data = frappe.db.sql(sql_query, as_dict=True)
     

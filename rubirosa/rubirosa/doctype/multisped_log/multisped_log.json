@@ -1,0 +1,66 @@
+{
+ "creation": "2023-09-27 14:15:13.885511",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "method",
+  "col_main",
+  "datetime",
+  "sec_content",
+  "content"
+ ],
+ "fields": [
+  {
+   "fieldname": "method",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Method",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "datetime",
+   "fieldtype": "Datetime",
+   "label": "Timestamp",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_main",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sec_content",
+   "fieldtype": "Section Break",
+   "label": "Content"
+  },
+  {
+   "fieldname": "content",
+   "fieldtype": "Code",
+   "label": "Content"
+  }
+ ],
+ "modified": "2023-09-27 17:31:35.107224",
+ "modified_by": "Administrator",
+ "module": "Rubirosa",
+ "name": "Multisped Log",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "method",
+ "track_changes": 1
+}
