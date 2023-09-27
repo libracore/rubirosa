@@ -7,7 +7,7 @@ import frappe
 import hashlib  
 import codecs
 import os
-import sftp
+import pysftp
 from datetime import date, datetime
 from frappe.utils.password import get_decrypted_password
 from frappe.utils import flt
@@ -28,7 +28,7 @@ def get_items_data():
             (SELECT `tA2`.`attribute_value`
              FROM `tabItem Variant Attribute` AS `tA2`
              WHERE `tA2`.`parent` = `tabItem`.`name`
-               AND tA2`.`attribute` = 'Colour') AS `colour_value`,
+               AND `tA2`.`attribute` = 'Colour') AS `colour_value`,
             `tabItem`.`barcode` AS `ean_code`,
             `tabItem`.`stock_uom` AS `stock_uom`,
             `uom`.`uom` AS `uom`,
@@ -68,7 +68,7 @@ def get_items_data():
         if d['vk']:
             d['vk'] = ("{:.2f}".format(d['vk'] or 0)).replace(".", ",")
         else:
-            frappe.log_error("Item: {0} Item Number: {1} has no price list'Selling RP EUR' ".format(row['name'],row['item_number']) , "Multisped Item has no price")
+            frappe.log_error("Item: {0} Item Number: {1} has no price list'Selling RP EUR' ".format(d['name'], d['item_number']) , "Multisped Item has no price")
     
     return consolidated_items
 
@@ -79,7 +79,7 @@ def generate_items_transfer_file(debug=False):
 
     # fetch Multisped Settings and select tagert path
     settings = frappe.get_doc("Multisped Settings")
-    local_file = os.path.join(settings.in_folder,"AS{date}{nn:02d}.txt".format(date=date.today().strftime("%y%m%d"), nn=1))
+    local_file = os.path.join("/tmp","AS{date}{nn:02d}.txt".format(date=date.today().strftime("%y%m%d"), nn=1))
 
     # create items transfer file   
     item_content = frappe.render_template('rubirosa/templates/xml/multisped_items.html', {'items': items})
@@ -108,7 +108,7 @@ def get_multisped_item_code(s, length):
 This function will store an item_code to multisped_code lookup table
 """
 def create_multisped_code(item_code):
-    if not frappe.db.exists("Multisped Item Code", item_code)
+    if not frappe.db.exists("Multisped Item Code", item_code):
         lookup_entry = frappe.get_doc({
             'doctype': "Multisped Item Code",
             'item_code': item_code,
@@ -157,7 +157,7 @@ def create_shipping_order(debug=False):
 
     # fetch Multisped Settings and select tagert path
     settings = frappe.get_doc("Multisped Settings")
-    local_file = os.path.join(settings.in_folder,"AI{date}{nn}.csv".format(date=date.today().strftime("%y%m%d"), nn=1))
+    local_file = os.path.join("/tmp", "AI{date}{nn}.csv".format(date=date.today().strftime("%y%m%d"), nn=1))
     
     # create delivery note transfer file   
     dns_content = frappe.render_template('rubirosa/templates/xml/multisped_dns.html', {'dns': dns})

@@ -2,4 +2,4 @@ frappe
 bs4
 requests
 requests.auth
-sftp
+pysftp

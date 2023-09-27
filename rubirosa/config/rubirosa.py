@@ -96,6 +96,12 @@ def get_data():
                        "name": "MS Direct Transfer File",
                        "label": _("MS Direct Transfer File"),
                        "description": _("MS Direct Transfer File")
+                   },
+                   {
+                       "type": "doctype",
+                       "name": "Multisped Settings",
+                       "label": _("Multisped Settings"),
+                       "description": _("Multisped Settings")
                    }
             ]
         },
