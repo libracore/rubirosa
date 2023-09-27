@@ -9,7 +9,8 @@
   "host_name",
   "column_break_4",
   "in_folder",
-  "out_folder"
+  "out_folder",
+  "price_list"
  ],
  "fields": [
   {
@@ -46,10 +47,16 @@
    "fieldtype": "Data",
    "label": "Out Folder",
    "reqd": 1
+  },
+  {
+   "fieldname": "price_list",
+   "fieldtype": "Link",
+   "label": "Price List",
+   "options": "Price List"
   }
  ],
  "issingle": 1,
- "modified": "2023-09-21 17:13:10.499704",
+ "modified": "2023-09-26 16:07:13.164545",
  "modified_by": "Administrator",
  "module": "Rubirosa",
  "name": "Multisped Settings",

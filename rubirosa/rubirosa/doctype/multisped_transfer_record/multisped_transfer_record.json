@@ -4,7 +4,8 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "item_code"
+  "item_code",
+  "delivery_note"
  ],
  "fields": [
   {
@@ -12,9 +13,15 @@
    "fieldtype": "Link",
    "label": "Item",
    "options": "Item"
+  },
+  {
+   "fieldname": "delivery_note",
+   "fieldtype": "Link",
+   "label": "Delivery Note",
+   "options": "Delivery Note"
   }
  ],
- "modified": "2023-09-22 14:53:24.503029",
+ "modified": "2023-09-26 16:31:19.553749",
  "modified_by": "Administrator",
  "module": "Rubirosa",
  "name": "Multisped Transfer Record",
