@@ -171,7 +171,7 @@ def create_multisped_log(reference, content):
     return 
 
 @frappe.whitelist()
-def create_shipping_order(debug=False):    
+def generate_shipping_order(debug=False):    
     # fetch data
     dns = get_dns_data()
 
@@ -244,7 +244,12 @@ def get_dns_data():
         # shorten invoice address to hash
         if d['invoice_address']:
             d['invoice_address'] = get_multisped_item_code(d['invoice_address'], 10)
-    
+        # rewrite country name to country code
+        if d['elkz']:
+            d['elkz'] = frappe.get_cached_value("Country", d['elkz'], "code")
+        if d['rlkz']:
+            d['rlkz'] = frappe.get_cached_value("Country", d['rlkz'], "code")
+            
     return data
 
 def connect_sftp(settings):
