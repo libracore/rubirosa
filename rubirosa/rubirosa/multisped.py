@@ -214,7 +214,7 @@ def get_dns_data():
         `shipping_addrs`.`city` AS `eort`,
         `tabContact`.`mobile_no` AS `avistelefon`,
         `tabContact`.`email_id` AS `avisemail`,
-        None AS `rechnungsname`,
+        NULL AS `rechnungsname`,
         `billing_addrs`.`country` AS `rlkz`,
         `billing_addrs`.`pincode` AS `rplz`,
         `billing_addrs`.`address_line1` AS `rstrasse`,
