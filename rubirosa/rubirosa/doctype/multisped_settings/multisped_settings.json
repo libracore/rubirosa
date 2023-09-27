@@ -7,10 +7,13 @@
   "user",
   "password",
   "host_name",
+  "port",
+  "host_keys",
   "column_break_4",
   "in_folder",
   "out_folder",
-  "price_list"
+  "price_list",
+  "warehouse"
  ],
  "fields": [
   {
@@ -27,10 +30,26 @@
    "reqd": 1
   },
   {
+   "fieldname": "column_break_host",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "host_name",
    "fieldtype": "Data",
    "label": "Host Name",
    "reqd": 1
+  },
+  {
+   "fieldname": "port",
+   "fieldtype": "Int",
+   "label": "Port",
+   "default": 2222,
+   "reqd": 1
+  },
+  {
+   "fieldname": "host_keys",
+   "fieldtype": "Data",
+   "label": "Host Keys"
   },
   {
    "fieldname": "column_break_4",
@@ -53,10 +72,17 @@
    "fieldtype": "Link",
    "label": "Price List",
    "options": "Price List"
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse",
+   "reqd": 1
   }
  ],
  "issingle": 1,
- "modified": "2023-09-26 16:07:13.164545",
+ "modified": "2023-09-27 09:05:10.499704",
  "modified_by": "Administrator",
  "module": "Rubirosa",
  "name": "Multisped Settings",
