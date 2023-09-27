@@ -7,10 +7,10 @@ import frappe
 import hashlib  
 import codecs
 import os
-import sftp
+# ~ import sftp
 from datetime import date, datetime
 from frappe.utils.password import get_decrypted_password
-from frappe.utils import flt
+from frappe.utils import flt, now_datetime
 from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
 
 @frappe.whitelist()
@@ -48,8 +48,6 @@ def get_items_data():
         `tabItem`.`disabled` = 0
         AND `tabItem`.`is_sales_item` = 1
         AND `tabItem`.`barcode` IS NOT NULL
-    GROUP BY
-        `tabItem`.`name`
     ORDER BY
         `tabItem`.`creation` DESC;
     """.format(price_list=frappe.get_value("Multisped Settings", "Multisped Settings", "price_list"))
@@ -84,6 +82,7 @@ def generate_items_transfer_file():
 
     # fetch Multisped Settings and select tagert path
     settings = frappe.get_doc("Multisped Settings")
+    mults_log = create_multisped_log("Items Transfer File Starting Process Datetime")
     target_path = os.path.join(settings.in_folder,"ItemTransfered{date}.csv".format(date=date.today().strftime("%Y%m%d%H%M%S")))
 
     # create items transfer file   
@@ -100,7 +99,7 @@ def generate_items_transfer_file():
     return
     
 def hash_text_length(row,length):
-    hashlib.md5(row.encode('utf-8')).hexdigest()[:length]
+    return hashlib.md5(row.encode('utf-8')).hexdigest()[:length]
     
 def update_records(record, field):
     
@@ -116,8 +115,26 @@ def update_records(record, field):
             mtr_ref = mtr.name
         except Exception as e:
             frappe.log_error("{0}\n\n{1}".format(e, i['name']), "Update Records Failed")
-    
+
     return
+    
+def create_multisped_log(reference):
+    
+    try:
+        msped_log = frappe.get_doc({
+            'doctype': 'Multisped Log',
+            'method': reference,
+            'datetime': now_datetime()
+        })
+
+        msped_log.insert(ignore_permissions=True) 
+        frappe.db.commit()
+        msped_log = msped_log.creation
+        frappe.log_error(" msped_log.datetime {0}".format(msped_log.datetime))
+    except Exception as e:
+        frappe.log_error("{0}\n\n{1}".format(e, reference), "Create Multisped Log Failed")
+    
+    return msped_log
 
 @frappe.whitelist()
 def create_shipping_order():    
@@ -126,6 +143,8 @@ def create_shipping_order():
 
     # fetch Multisped Settings and select tagert path
     settings = frappe.get_doc("Multisped Settings")
+    mults_log = create_multisped_log("Delivery Note Transfer File Starting Process Datetime")
+    frappe.log_error("mults_log {0}".format(mults_log))
     target_path = os.path.join(settings.in_folder,"DNSTransfered{date}.csv".format(date=date.today().strftime("%Y%m%d%H%M%S")))
     
     # create delivery note transfer file   
@@ -181,6 +200,7 @@ def get_dns_data():
         `tabDelivery Note`.`name`
     ORDER BY
         `tabDelivery Note`.`creation` DESC
+    LIMIT 10
     """
     data = frappe.db.sql(sql_query, as_dict=True)
     
