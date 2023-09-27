@@ -13,95 +13,126 @@ from frappe.utils.password import get_decrypted_password
 from frappe.utils import flt, now_datetime
 from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
 
-@frappe.whitelist()
 def get_items_data():
     sql_query = """
-    SELECT
-        IF(`mtr`.`item_code` IS NOT NULL, 'U', 'N') AS `item_status`,
-        `tabItem`.`name` AS `name`,
-        `tabItem`.`name` AS `item_number`,
-        `tabItem`.`description` AS `description`,
-        `tabItem`.`item_group` AS `group`,
-        MAX(IF(`tabItem Variant Attribute`.`attribute` = 'Size', `tabItem Variant Attribute`.`attribute_value`, NULL)) AS `size_value`,
-        MAX(IF(`tabItem Variant Attribute`.`attribute` = 'Colour', `tabItem Variant Attribute`.`attribute_value`, NULL)) AS `colour_value`,
-        `tabItem`.`barcode` AS `ean_code`,
-        `tabItem`.`stock_uom` AS `stock_uom`,
-        `uom`.`uom` AS `uom`,
-        `uom`.`conversion_factor` AS `kartonmenge`,
-        `tabItem`.`weight_per_unit` AS `weight`,
-        `tabItem Price`.`price_list_rate` AS `vk`,
-        `tabItem`.`country_of_origin` AS `origin`,
-        `tabItem`.`customs_tariff_number` AS `tariff`,
-        `tabItem Price`.`currency` AS `currency`      
-    FROM
-        `tabItem`
-    LEFT JOIN
-        `tabItem Variant Attribute` ON `tabItem Variant Attribute`.`parent` = `tabItem`.`name`
-        AND (`tabItem Variant Attribute`.`attribute` = 'Size' OR `tabItem Variant Attribute`.`attribute` = 'Colour')
-    LEFT JOIN `tabMultisped Transfer Record` AS `mtr` ON `tabItem`.`name` = `mtr`.`item_code`
-    LEFT JOIN `tabStock Ledger Entry` AS `sle` ON `tabItem`.`name` = `sle`.`item_code`
-    LEFT JOIN `tabUOM Conversion Detail` AS `uom` ON `tabItem`.`name` = `uom`.`parent`
-    LEFT JOIN
-        `tabItem Price` ON `tabItem Price`.`item_code` = `tabItem`.`name`
-        AND ( `tabItem Price`.`price_list` = '{price_list}')
-    WHERE
-        `tabItem`.`disabled` = 0
-        AND `tabItem`.`is_sales_item` = 1
-        AND `tabItem`.`barcode` IS NOT NULL
-    ORDER BY
+        SELECT
+            IF(`mtr`.`item_code` IS NOT NULL, 'U', 'N') AS `item_status`,
+            `tabItem`.`name` AS `name`,
+            `tabItem`.`item_code` AS `item_number`,
+            `tabItem`.`description` AS `description`,
+            `tabItem`.`item_group` AS `group`,
+            (SELECT `tA1`.`attribute_value`
+             FROM `tabItem Variant Attribute` AS `tA1`
+             WHERE `tA1`.`parent` = `tabItem`.`name`
+               AND `tA1`.`attribute` = 'Size') AS `size_value`,
+            (SELECT `tA2`.`attribute_value`
+             FROM `tabItem Variant Attribute` AS `tA2`
+             WHERE `tA2`.`parent` = `tabItem`.`name`
+               AND tA2`.`attribute` = 'Colour') AS `colour_value`,
+            `tabItem`.`barcode` AS `ean_code`,
+            `tabItem`.`stock_uom` AS `stock_uom`,
+            `uom`.`uom` AS `uom`,
+            `uom`.`conversion_factor` AS `kartonmenge`,
+            `tabItem`.`weight_per_unit` AS `weight`,
+            `tabItem Price`.`price_list_rate` AS `vk`,
+            `tabItem`.`country_of_origin` AS `origin`,
+            `tabItem`.`customs_tariff_number` AS `tariff`,
+            `tabItem Price`.`currency` AS `currency`      
+        FROM
+            `tabItem`
+        LEFT JOIN `tabMultisped Transfer Record` AS `mtr` ON `tabItem`.`item_code` = `mtr`.`item_code`
+        LEFT JOIN `tabUOM Conversion Detail` AS `uom` ON `tabItem`.`name` = `uom`.`parent`
+        LEFT JOIN
+            `tabItem Price` ON `tabItem Price`.`item_code` = `tabItem`.`item_code`
+            AND ( `tabItem Price`.`price_list` = '{price_list}')
+        WHERE
+            `tabItem`.`disabled` = 0
+            AND `tabItem`.`is_sales_item` = 1
+            AND `tabItem`.`barcode` IS NOT NULL
+        ORDER BY
         `tabItem`.`creation` DESC;
     """.format(price_list=frappe.get_value("Multisped Settings", "Multisped Settings", "price_list"))
     data = frappe.db.sql(sql_query, as_dict=True)
     
-    indices_to_remove = []
+    consolidated_items = []
     
-    for i, row in enumerate(data):
+    for d in data:
         
-        if row['item_number']:
-            row['item_number'] = hash_text_length(row['item_number'], 20)
-            
-        if row['weight']:
-            row['weight'] = ("{:.2f}".format(row['weight'] or 0)).replace(".", ",")
-            
-        if row['vk'] is None:
-            frappe.log_error("Item: {0} Item Number: {1} has no price list'Selling RP EUR' ".format(row['name'],row['item_number']))
-            indices_to_remove.append(i)
+        # rewrite item code to multisped item code (20 digits only - hashed)
+        d['item_number'] = get_multisped_item_code(d['item_number'], 20)
+        
+        # convert weight to comma-notation
+        d['weight'] = ("{:.2f}".format(d['weight'] or 0)).replace(".", ",")
+        
+        # check that there is a sales price and rewrite to comma-notation
+        if d['vk']:
+            d['vk'] = ("{:.2f}".format(d['vk'] or 0)).replace(".", ",")
         else:
-            row['vk'] = ("{:.2f}".format(row['vk'] or 0)).replace(".", ",")
+            frappe.log_error("Item: {0} Item Number: {1} has no price list'Selling RP EUR' ".format(row['name'],row['item_number']) , "Multisped Item has no price")
     
-    # Remove rows where price_list_rate/vk is None
-    for index in reversed(indices_to_remove):
-        data.pop(index)
-    
-    return data
+    return consolidated_items
 
 @frappe.whitelist()
-def generate_items_transfer_file():    
+def generate_items_transfer_file(debug=False):    
     # fetch data
     items = get_items_data()
 
     # fetch Multisped Settings and select tagert path
     settings = frappe.get_doc("Multisped Settings")
+
     mults_log = create_multisped_log("Items Transfer File Starting Process Datetime")
-    target_path = os.path.join(settings.in_folder,"ItemTransfered{date}.csv".format(date=date.today().strftime("%Y%m%d%H%M%S")))
+    local_file = os.path.join(settings.in_folder,"AS{date}{nn:02d}.txt".format(date=date.today().strftime("%y%m%d"), nn=1))
 
     # create items transfer file   
     item_content = frappe.render_template('rubirosa/templates/xml/multisped_items.html', {'items': items})
     
-    # First attemp of trying to do the file transfer
-    file = codecs.open(target_path, "w", "utf-8")
-    file.write(item_content)
-    file.close()
+    # write to file (note: as the file is in ascii, there might be conversion data loss!)
+    f = codecs.open(local_file, "w", encoding="ascii", errors="ignore")
+    f.write(item_content)
+    f.close()
 
+    # push the file to the target system
+    write_file(local_file, settings.in_folder)
+    
     # update items record table
-    update_records(items, 'item_code')
- 
+    mark_records_transmitted(items, 'item_code')
+    
+    # cleanup (unless in debug mode)
+    if not debug:
+        os.remove(local_file)
+        
     return
     
-def hash_text_length(row,length):
-    return hashlib.md5(row.encode('utf-8')).hexdigest()[:length]
+def get_multisped_item_code(s, length):
+    return hashlib.md5(s.encode('utf-8')).hexdigest()[:length]
     
-def update_records(record, field):
+"""
+This function will store an item_code to multisped_code lookup table
+"""
+def create_multisped_code(item_code):
+    if not frappe.db.exists("Multisped Item Code", item_code)
+        lookup_entry = frappe.get_doc({
+            'doctype': "Multisped Item Code",
+            'item_code': item_code,
+            'multisped_code': get_multisped_item_code(item_code, 20)
+        })
+        lookup_entry.insert(ignore_permissions=True)
+    return
+
+"""
+This function return the ERP item_code of a multisped item_code
+"""
+def find_item_code_from_multisped_code(multisped_code):
+    lookup_items = frappe.get_all("Multisped Item Code",
+        filters={'multisped_code': multisped_code},
+        fields='item_code'
+    )
+    if len(lookup_items) > 0:
+        return lookup_items[0]['item_code']
+    else:
+        return None
+        
+def mark_records_transmitted(record, field):
     
     for i in record:
         try:
@@ -112,6 +143,9 @@ def update_records(record, field):
 
             mtr.insert(ignore_permissions=True)    
             frappe.db.commit()
+            
+            create_multisped_code(item_code)
+            
             mtr_ref = mtr.name
         except Exception as e:
             frappe.log_error("{0}\n\n{1}".format(e, i['name']), "Update Records Failed")
@@ -137,27 +171,34 @@ def create_multisped_log(reference):
     return msped_log
 
 @frappe.whitelist()
-def create_shipping_order():    
+def create_shipping_order(debug=False):    
     # fetch data
     dns = get_dns_data()
 
     # fetch Multisped Settings and select tagert path
     settings = frappe.get_doc("Multisped Settings")
+
     mults_log = create_multisped_log("Delivery Note Transfer File Starting Process Datetime")
-    frappe.log_error("mults_log {0}".format(mults_log))
-    target_path = os.path.join(settings.in_folder,"DNSTransfered{date}.csv".format(date=date.today().strftime("%Y%m%d%H%M%S")))
-    
+    local_file = os.path.join(settings.in_folder,"AI{date}{nn}.csv".format(date=date.today().strftime("%y%m%d"), nn=1))
+
     # create delivery note transfer file   
     dns_content = frappe.render_template('rubirosa/templates/xml/multisped_dns.html', {'dns': dns})
     
-    # First attemp of trying to do the file transfer
-    file = codecs.open(target_path, "w", "utf-8")
-    file.write(dns_content)
-    file.close()
+    # create output file (note: ascii encoding, potential data loss)
+    f = codecs.open(local_file, "w", encoding="ascii", errors="ignore")
+    f.write(dns_content)
+    f.close()
 
+    # push the file to the target system
+    write_file(local_file, settings.in_folder)
+    
     # update delivery note record table
-    update_records(dns,'delivery_note')
- 
+    mark_records_transmitted(dns,'delivery_note')
+    
+    # cleanup (unless in debug mode)
+    if not debug:
+        os.remove(local_file)
+    
     return 
 
 @frappe.whitelist()
@@ -173,41 +214,36 @@ def get_dns_data():
         `shipping_addrs`.`city` AS `eort`,
         `tabContact`.`mobile_no` AS `avistelefon`,
         `tabContact`.`email_id` AS `avisemail`,
-        `tabSales Invoice`.`name` AS `rechnungsname`,
+        None AS `rechnungsname`,
         `billing_addrs`.`country` AS `rlkz`,
         `billing_addrs`.`pincode` AS `rplz`,
         `billing_addrs`.`address_line1` AS `rstrasse`,
         `billing_addrs`.`city` AS `rort`,
-        `tabSales Order`.`transaction_date` AS `auftragsdatum`,
-        `tabSales Order`.`delivery_date` AS `lieferdatum`,
-        `tabSales Order`.`name` AS `auftragsnummer`,
-        `tabSales Order`.`order_type` AS `auftragsart`,
-        `tabSales Order`.`woocommerce_order_id` AS `auftragskennz`
+        `tabDelivery Note`.`po_date` AS `auftragsdatum`,
+        `tabDelivery Note`.`posting_date` AS `lieferdatum`,
+        `tabDelivery Note`.`po_no` AS `auftragsnummer`,
+        "Order" AS `auftragsart`,
+        `tabDelivery Note`.`woocommerce_order_id` AS `auftragskennz`
     FROM
         `tabDelivery Note`
     LEFT JOIN `tabMultisped Transfer Record` AS `mtr` ON `tabDelivery Note`.`name` = `mtr`.`delivery_note`
     LEFT JOIN `tabAddress` AS `shipping_addrs` ON `tabDelivery Note`.`shipping_address_name` = `shipping_addrs`.`name`
     LEFT JOIN `tabAddress` AS `billing_addrs` ON `tabDelivery Note`.`customer_address` = `billing_addrs`.`name`
     LEFT JOIN `tabContact` ON `tabDelivery Note`.`contact_person` = `tabContact`.`name`
-    LEFT JOIN `tabDelivery Note Item` ON `tabDelivery Note`.`name` = `tabDelivery Note Item`.`parent`
-    LEFT JOIN `tabSales Order` ON `tabDelivery Note Item`.`against_sales_order` = `tabSales Order`.`name`
-    LEFT JOIN `tabSales Invoice Item` ON `tabDelivery Note`.`name` = `tabSales Invoice Item`.`delivery_note`
-    LEFT JOIN `tabSales Invoice` ON `tabSales Invoice Item`.`parent` = `tabSales Invoice`.`name`
+
     WHERE
         `tabDelivery Note`.`docstatus` = 1
         AND `mtr`.`delivery_note` IS NULL
-    GROUP BY
-        `tabDelivery Note`.`name`
     ORDER BY
         `tabDelivery Note`.`creation` DESC
     LIMIT 10
     """
     data = frappe.db.sql(sql_query, as_dict=True)
     
-    for i, row in enumerate(data):
-        
-        if row['invoice_address']:
-            row['invoice_address'] = hash_text_length(row['invoice_address'], 10)
+    for d in data:
+        # shorten invoice address to hash
+        if d['invoice_address']:
+            d['invoice_address'] = get_multisped_item_code(d['invoice_address'], 10)
     
     return data
 
@@ -215,14 +251,16 @@ def connect_sftp(settings):
     cnopts = pysftp.CnOpts()
     cnopts.hostkeys = settings.host_keys or None        # keep or None to push None instead of ""  
     
-    return pysftp.Connection(
+    connection = pysftp.Connection(
             settings.host_name, 
             port=settings.port,
             username=settings.user, 
             password=get_decrypted_password("Multisped Settings", "Multisped Settings", "password", False),
             cnopts=cnopts
         )
-            
+    
+    return connection
+    
 """
 This function will write a local file to an sFTP target folder
 """
@@ -314,7 +352,7 @@ def parse_purchase_order_feedback(content):
             'delivery_note': fields[field_map["Lieferscheinnummer"]],
             'delivery_date': datetime.strptime((fields[field_map["Lieferdatum"]]), "%d.%m.%Y") if fields[field_map["Lieferdatum"]] else None,
             'order_details': fields[field_map["Bestellposition"]],
-            'item_code': fields[field_map["Artikelnummer"]],
+            'item_code': find_item_code_from_multisped_code(fields[field_map["Artikelnummer"]]),
             'item_state': fields[field_map["Teilezustand"]],
             'attribute1': flt((fields[field_map["Merkmal1"]] or "").replace(",", ".")),
             'attribute2': flt((fields[field_map["Merkmal2"]] or "").replace(",", ".")),
@@ -351,7 +389,6 @@ def parse_purchase_order_feedback(content):
         # set items to actually received items
         received_items = []
         for i in purchase_receipt.items:
-            # note: this is the multisped item code -> rewrite to ERPNext (TODO)
             if i.item_code in items:
                 _item = i
                 _item.qty = items[i.item_code]
@@ -406,7 +443,7 @@ def parse_stock_reconciliation_feedback(contant):
     for line in lines:
         fields = line.split("|")
         stock_level = {
-            'item_code': fields[field_map["Artikelnummer"]],
+            'item_code': find_item_code_from_multisped_code(fields[field_map["Artikelnummer"]]),
             'attribute1': fields[field_map["Farbe"]],
             'attribute2': fields[field_map["Grösse"]],
             'batch_no': fields[field_map["Lotnummer"]],
@@ -432,7 +469,6 @@ def parse_stock_reconciliation_feedback(contant):
         'doctype': "Stock Reconciliation",
     })
     for item_code, qty in level_by_item:
-        # note: this is the multisped item code -> rewrite to ERPNext (TODO)
         stock_reconciliation.append("items", {
             'item_code': item_code,
             'warehouse': settings.warehouse,
