@@ -9,6 +9,7 @@ import codecs
 import os
 import pysftp
 from datetime import date, datetime
+import time
 from frappe.utils.password import get_decrypted_password
 from frappe.utils import flt
 from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
@@ -28,26 +29,28 @@ carrier_codes = {
     'Post Österreich + Retourenetikett': '102',
 }
 
+attribute_codes = {
+    'attribute_1': "Size",
+    'attribute_2': "Colour"
+}
+
 def get_items_data():
+    last_item_sync = frappe.get_value("Multisped Settings", "Multisped Settings", "last_item_sync")
+    if last_item_sync:
+        condition = """ AND `tabItem`.`modified` >= "{sync_date}" """.format(sync_date=last_item_sync)
+    else:
+        condition = ""
+        
     sql_query = """
         SELECT
-            IF(`mtr`.`item_code` IS NOT NULL, 'U', 'N') AS `item_status`,
             `tabItem`.`name` AS `name`,
-            `tabItem`.`item_code` AS `item_number`,
+            `tabItem`.`item_code` AS `item_code`,
             `tabItem`.`description` AS `description`,
-            `tabItem`.`item_group` AS `group`,
-            (SELECT `tA1`.`attribute_value`
-             FROM `tabItem Variant Attribute` AS `tA1`
-             WHERE `tA1`.`parent` = `tabItem`.`name`
-               AND `tA1`.`attribute` = 'Size') AS `size_value`,
-            (SELECT `tA2`.`attribute_value`
-             FROM `tabItem Variant Attribute` AS `tA2`
-             WHERE `tA2`.`parent` = `tabItem`.`name`
-               AND `tA2`.`attribute` = 'Colour') AS `colour_value`,
+            `tabItem`.`item_group` AS `item_group`,
             `tabItem`.`barcode` AS `ean_code`,
             `tabItem`.`stock_uom` AS `stock_uom`,
-            `uom`.`uom` AS `uom`,
-            `uom`.`conversion_factor` AS `kartonmenge`,
+            `tabItem`.`stock_uom` AS `uom`,
+            1 AS `kartonmenge`,
             `tabItem`.`weight_per_unit` AS `weight`,
             `tabItem Price`.`price_list_rate` AS `vk`,
             `tabItem`.`country_of_origin` AS `origin`,
@@ -55,8 +58,6 @@ def get_items_data():
             `tabItem Price`.`currency` AS `currency`      
         FROM
             `tabItem`
-        LEFT JOIN `tabMultisped Transfer Record` AS `mtr` ON `tabItem`.`item_code` = `mtr`.`item_code`
-        LEFT JOIN `tabUOM Conversion Detail` AS `uom` ON `tabItem`.`name` = `uom`.`parent`
         LEFT JOIN
             `tabItem Price` ON `tabItem Price`.`item_code` = `tabItem`.`item_code`
             AND ( `tabItem Price`.`price_list` = '{price_list}')
@@ -64,27 +65,52 @@ def get_items_data():
             `tabItem`.`disabled` = 0
             AND `tabItem`.`is_sales_item` = 1
             AND `tabItem`.`barcode` IS NOT NULL
-        ORDER BY
-        `tabItem`.`creation` DESC;
-    """.format(price_list=frappe.get_value("Multisped Settings", "Multisped Settings", "price_list"))
+            {condition}
+        ORDER BY `tabItem`.`creation` DESC;
+    """.format(price_list=frappe.get_value("Multisped Settings", "Multisped Settings", "price_list"),
+        condition=condition)
     data = frappe.db.sql(sql_query, as_dict=True)
+    
+    # update last sync timestamp
+    frappe.set_value("Multisped Settings", "Multisped Settings", "last_item_sync", datetime.now())
     
     consolidated_items = []
     
     for d in data:
-        
+        # find status
+        transmitted_item = frappe.get_all("Multisped Transfer Record", filters={'item_code': d['item_code']}, fields=['name'])
+        if len(transmitted_item) > 0:
+            d['item_status'] = "U"
+        else:
+            d['item_status'] = "N"
+            
         # rewrite item code to multisped item code (20 digits only - hashed)
-        d['item_number'] = get_multisped_item_code(d['item_number'], 20)
+        d['item_number'] = get_multisped_item_code(d['item_code'], 20)
         
         # convert weight to comma-notation
         d['weight'] = format_multisped_number(d['weight'])
         
+        # origin: country code
+        d['origin'] = frappe.get_cached_value("Country", d['origin'], "code")
+        
+        # sttributes
+        attributes = get_attributes(d['item_code'])
+        try:
+            d['attribute_1'] = attributes[attribute_codes['attribute_1']]
+            d['attribute_2'] = attributes[attribute_codes['attribute_2']]
+        except:
+            # attributes not found - skip
+            continue
+            
         # check that there is a sales price and rewrite to comma-notation
         if d['vk']:
             d['vk'] = format_multisped_number(d['vk'])
         else:
             frappe.log_error("Item: {0} Item Number: {1} has no price list'Selling RP EUR' ".format(d['name'], d['item_number']) , "Multisped Item has no price")
-    
+        
+        # append to output
+        consolidated_items.append(d)
+        
     return consolidated_items
 
 @frappe.whitelist()
@@ -169,11 +195,12 @@ def mark_records_transmitted(record, field):
             mtr.insert(ignore_permissions=True)    
             frappe.db.commit()
             
-            store_multisped_code(item_code)
+            if field == "item_code":
+                store_multisped_code(i['name'])
             
             mtr_ref = mtr.name
         except Exception as e:
-            frappe.log_error("{0}\n\n{1}".format(e, i['name']), "Update Records Failed")
+            frappe.log_error("{0}\n\n{1}: {2}".format(e, field, i['name']), "Update Records Failed")
 
     return
 
@@ -239,15 +266,14 @@ def get_dns_data():
         `shipping_addrs`.`pincode` AS `eplz`,
         `shipping_addrs`.`address_line1` AS `estrasse`,
         `shipping_addrs`.`city` AS `eort`,
-        `tabContact`.`mobile_no` AS `avistelefon`,
+        IF(`tabContact`.`phone`, `tabContact`.`phone`, `tabContact`.`mobile_no`) AS `avistelefon`,
         `tabContact`.`email_id` AS `avisemail`,
-        NULL AS `rechnungsname`,
         `billing_addrs`.`country` AS `rlkz`,
         `billing_addrs`.`pincode` AS `rplz`,
         `billing_addrs`.`address_line1` AS `rstrasse`,
         `billing_addrs`.`city` AS `rort`,
-        `tabDelivery Note`.`po_date` AS `auftragsdatum`,
-        `tabDelivery Note`.`posting_date` AS `lieferdatum`,
+        IF(`tabDelivery Note`.`po_date`, `tabDelivery Note`.`po_date`, `tabDelivery Note`.`posting_date`) AS `po_date`,
+        `tabDelivery Note`.`posting_date` AS `posting_date`,
         `tabDelivery Note`.`po_no` AS `auftragsnummer`,
         "Order" AS `auftragsart`,
         `tabDelivery Note`.`woocommerce_order_id` AS `auftragskennz`
@@ -272,15 +298,20 @@ def get_dns_data():
         # append items
         d['items'] = dn_doc.as_dict()['items']
         for i in d['items']:
-            i['item_code'] = get_multisped_item_code(i['item_code'], 20)
+            i['item_number'] = get_multisped_item_code(i['item_code'], 20)
             i['qty'] = format_multisped_number(i['qty'])
             i['rate'] = format_multisped_number(i['rate'])
             i['quantity_ordered'] = format_multisped_number(i['quantity_ordered'])
+            # find atttributes
+            attributes = get_attributes(i['item_code'])
+            i['attribute_1'] = attributes[attribute_codes['attribute_1']]
+            i['attribute_2'] = attributes[attribute_codes['attribute_2']]
             
-        # shorten invoice address to hash
+        # shorten invoice address and customer to hash
         if d['invoice_address']:
             d['invoice_address'] = get_multisped_item_code(d['invoice_address'], 10)
-            
+        d['customer_id'] = int(time.mktime((frappe.get_value("Customer", d['customer'], "creation")).timetuple()))
+        
         # rewrite country name to country code
         if d['elkz']:
             d['elkz'] = frappe.get_cached_value("Country", d['elkz'], "code")
@@ -291,6 +322,13 @@ def get_dns_data():
         d['carrier'] = carrier_codes(dn_doc.shipping_method) if dn_doc.shipping_method in carrier_codes else carrier_codes['SwissPost Economy']
         
     return data
+
+def get_attributes(item_code):
+    item_doc = frappe.get_doc("Item", item_code)
+    attributes = {}
+    for a in item_doc.attributes:
+        attributes[a.attribute] = a.attribute_value
+    return attributes
 
 def connect_sftp(settings):
     cnopts = pysftp.CnOpts()

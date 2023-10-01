@@ -1,3 +1,37 @@
 Kennzeichen|Artikelnummer|Bezeichnung 1|Bezeichnung 2|Artikelgruppe 1|Artikelgruppe 2|ABC – Klassifikation|Merkmal 1|Merkmal 2|EAN – Code|Lagereinheit|Verpackungseinheit|Kartonmenge|Volumen|Gewicht|Länge|Breite|Höhe|VK – Preis Netto|Ursprungsland|Zolltarifnummer|Artikelart|MwSt – Schlüssel|Währungskürzel|Auswert 1|Auswert 2|Auswert 3|Auswert 4|Auswert 5|Text 1|Text 2|Text 3|Text 4|Text 5{% for item in items %}
-{{item.item_status }}|{{ item.item_number }}|{{ item.description }}|""|{{ item.group }}|""|""|{{ item.size_value }}|{{ item.colour_value }}|{{ item.ean_code }} |{{ item.stock_uom }}|{{ item.uom }}|{{ item.kartonmenge }}|0,0045|{{ item.weight or 0 }}|""|""|""|{{ item.vk}}|{{ item.origin }} |{{ item.tariff }}|Einzel|""|{{ item.currency }}|""|""|""|""|""|""|""|""|""|"" 
+A*|
+    {{- item.item_status }}|{# 1 #}
+    {{- (item.get("item_number") or "")[:20] }}|{# 2 #}
+    {{- (item.get("description") or "")[:150] }}|""|{# 3 #}
+    {{- (item.get("description_2") or "")[:150] }}|{# 4 #}
+    {{- (item.get("item_group") or "")[:50] }}|{# 5 #}
+    {{- (item.get("item_group_2") or "")[:50] }}|{# 6 #}
+    {{- (item.get("abc_class") or "")[:1] }}|{# 7 #}
+    {{- (item.get("attribute_1") or "")[:50] }}|{# 8 #}
+    {{- (item.get("attribute_2") or "")[:50] }}|{# 9 #}
+    {{- (item.get("ean_code") or "")[:20] }}|{# 10 #}
+    {{- (item.get("stock_uom") or "")[:5] }}|{# 11 #}
+    {{- (item.get("uom") or "")[:5] }}|{# 12 #}
+    {{- (item.get("kartonmenge") or "") }}|{# 13 #}
+    {{- (item.get("volume") or "0,0045") }}|{# 14 #}
+    {{- item.weight or 0 }}|{# 15 #}
+    {{- item.get("length") or "" }}|{# 16 #}
+    {{- item.get("width") or "" }}|{# 17 #}
+    {{- item.get("height") or "" }}|{# 18 #}
+    {{- item.get(item.vk) or "" }}|{# 19 #}
+    {{- item.origin }}|{# 20 #}
+    {{- item.tariff }}|{# 21 #}
+    {{- item.get("item_type") or "1" }}|{# 22 #}
+    {{- item.get("vat_code") or "" }}|{# 23 #}
+    {{- item.get("currency") or "EUR" }}|{# 24 #}
+    {{- (item.get("eval_1") or "")[:255] }}|{# 25 #}
+    {{- (item.get("eval_2") or "")[:255] }}|{# 26 #}
+    {{- (item.get("eval_3") or "")[:255] }}|{# 27 #}
+    {{- (item.get("eval_4") or "")[:255] }}|{# 28 #}
+    {{- (item.get("eval_5") or "")[:255] }}|{# 29 #}
+    {{- (item.get("text_1") or "")[:255] }}|{# 30 #}
+    {{- (item.get("text_2") or "")[:255] }}|{# 31 #}
+    {{- (item.get("text_3") or "")[:255] }}|{# 32 #}
+    {{- (item.get("text_4") or "")[:255] }}|{# 33 #}
+    {{- (item.get("text_5") or "")[:255] }}|{# 34 #}
 {%- endfor %}

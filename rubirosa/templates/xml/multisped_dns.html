@@ -1,7 +1,64 @@
 Client ID-Nummer|Client ID-Nummer-Kunde|Submandant|Empfaengername1|Empfaengername2|Empfaengername3|ELKZ|EPLZ|Estrasse_postfach|Eort|Avistelefon|Avisfax|Avis-email|Rechnungsname1|Rechnungsname2|Rechnungsname3|RLKZ|RPLZ|Rstrasse_postfach|Rort|BearbeiterKunde|NameADMit|Produktbereich|Zone|Auftragsdatum|Lieferdatum|Bereitstellungsdatum|Bestelldaten Kunde|Auftragsnummer1|Auftragsnummer2|Auftragsabw_hinweise|Frächter|Frankatur|Inkassobetrag|SummeColli|SummeGewicht|SummeVolumen|NameEKVerband|Priorität|Auftragsart|Auftragskennz|Text1|Text2|Text3|VAS Code|Frachtkosten (ab 12497)
 {%- for dn in dns %}
-K*{{dn.name}}|{{dn.invoice_address}}|{{dn.get("tenant") or ""}}|{{dn.customer_name}}|{{dn.get("customer_name2") or ""}}|{{dn.get("customer_name3") or ""}}|{{dn.elkz}}|{{dn.eplz}}|{{dn.estrasse}}|{{dn.eort}}|{{dn.avistelefon}}|""|{{dn.avisemail}}|{{dn.rechnungsname}}|{{dn.get("invoice_name2") or ""}}|{{dn.get("invoice_name3") or ""}}|{{dn.rlkz}}|{{dn.rplz}}|{{dn.rstrasse}}|{{dn.rort}}|{{dn.get("owner") or ""}}|{{dn.get("log_contact") or ""}}|{{dn.get("product_group") or ""}}|{{dn.get("zone") or ""}}|{{dn.auftragsdatum}}|{{dn.lieferdatum}}|{{dn.get("ready_date") or ""}}|{{dn.get("order_info") or ""}}{{dn.get("carrier") or ""}}|{{dn.get("stamping") or ""}}|{{dn.get("inkasso") or ""}}|{{dn.get("sum_colli") or ""}}|{{dn.get("total_weight")}}|{{dn.get("total_volume") or ""}}|{{dn.get("name_ekv") or ""}}|{{dn.get("priority") or ""}}|{{dn.auftragsart}}|{{dn.auftragskennz}}|{{dn.get("text1") or ""}}|{{dn.get("text2") or ""}}|{{dn.get("text2") or ""}}|{{dn.get("text3") or ""}}|{{dn.get("vas_code") or ""}}|{{dn.get("freight_cost") or ""}}|{{dn.get("name")}}|{{dn.get("po_no") or ""}}|{{dn.get("order_remarks") or ""}}|
+K*|
+    {{- (dn.customer_id) }}|{# 1 #}
+    {{- (dn.invoice_address)[:10] }}|{# 2 #}
+    {{- (dn.get("tenant") or "")[:10] }}|{# 3 #}
+    {{- (dn.customer_name or dn.customer or "")[:40] }}|{# 3 #}
+    {{- (dn.get("customer_name2") or "")[:40] }}|{# 5 #}
+    {{- (dn.get("customer_name3") or "")[:40] }}|{# 6 #}
+    {{- (dn.get("elkz") or "")[:3] }}|{# 7 #}
+    {{- (dn.get("eplz") or "")[:15] }}|{# 8 #}
+    {{- (dn.get("estrasse") or "")[:80] }}|{# 9 #}
+    {{- (dn.get("eort") or "")[:40] }}|{# 10 #}
+    {{- (dn.get("avistelefon") or "")[:20] }}|{# 11 #}
+    {{- "" }}|{# 12 #}
+    {{- (dn.avisemail)[:50] }}|{# 13 #}
+    {{- (dn.customer_name or dn.customer or "")[:40] }}|{# 14 #}
+    {{- (dn.get("invoice_name2") or "")[:40] }}|{# 15 #}
+    {{- (dn.get("invoice_name3") or "")[:40] }}|{# 16 #}
+    {{- (dn.get("rlkz") or "")[:3] }}|{# 17 #}
+    {{- (dn.get("rplz") or "")[:15] }}|{# 18 #}
+    {{- (dn.get("rstrasse") or "")[:80] }}|{# 19 #}
+    {{- (dn.get("rort") or "")[:40] }}|{# 20 #}
+    {{- (dn.get("owner") or "")[:10] }}|{# 21 #}
+    {{- (dn.get("log_contact") or "")[:50] }}|{# 22 #}
+    {{- (dn.get("product_group") or "")[:50] }}|{# 23 #}
+    {{- (dn.get("zone") or "")[:20] }}|{# 24 #}
+    {{- frappe.utils.get_datetime(dn.po_date).strftime("%d.%m.%Y") }}|{# 25 #}
+    {{- frappe.utils.get_datetime(dn.posting_date).strftime("%d.%m.%Y") }}|{# 26 #}
+    {%- if dn.get("ready_date") %}{{ frappe.utils.get_datetime(dn.get("ready_date")).strftime("%d.%m.%Y") }}{% endif %}|{# 27 #}
+    {{- (dn.get("order_info") or "")[:80] }}|{# 28 #}
+    {{- (dn.get("name") or "")[:20] }}|{# 29 #}
+    {{- (dn.get("po_no") or "")[:20] }}|{# 30 #}
+    {{- (dn.get("order_remarks") or "")[:80] }}|{# 31 #}
+    {{- (dn.get("carrier") or "")[:30] }}|{# 32 #}
+    {{- (dn.get("stamping") or "")[:20] }}|{# 33 #}
+    {{- dn.get("inkasso") or "" }}|{# 34 #}
+    {{- dn.get("sum_colli") or "" }}|{# 35 #}
+    {{- dn.get("total_weight") or "" }}|{# 36 #}
+    {{- dn.get("total_volume") or "" }}|{# 37 #}
+    {{- (dn.get("name_ekv") or "")[:50] }}|{# 38 #}
+    {{- dn.get("priority") or 4 }}|{# 39 #}
+    {{- (dn.get("auftragsart") or "")[:50] }}|{# 40 #}
+    {{- (dn.get("auftragskennz") or "")[:1] }}|{# 41 #}
+    {{- (dn.get("text1") or "")[:255] }}|{# 42 #}
+    {{- (dn.get("text2") or "")[:255] }}|{# 43 #}
+    {{- (dn.get("text2") or "")[:255] }}|{# 44 #}
+    {{- (dn.get("vas_code") or "")[:255] }}|{# 45 #}
+    {{- (dn.get("freight_cost") or "")[:10] }}|{# 46 #}
 {%- for item in dn['items'] %}
-P*{{dn.get("name")}}|{{item.get("idx")}}|{{item.get("idx")}}|{{item.get("item_code")}}|{{item.get("item_state") or ""}}|{{item.get("attribute_1") or ""}}|{{item.get("attribute_2") or ""}}|{{item.get("serial_no") or ""}}|{{item.get("rate") or ""}}|{{item.get("qty") or ""}}|{{item.get("quantity_ordered") or ""}}
+P*|
+    {{- dn.get("name") }}|
+    {{- item.get("idx") }}|
+    {{- item.get("idx") }}|
+    {{- item.get("item_number") }}|
+    {{- item.get("item_state") or "" }}|
+    {{- item.get("attribute_1") or "" }}|
+    {{- item.get("attribute_2") or "" }}|
+    {{- item.get("serial_no") or "" }}|
+    {{- item.get("rate") or "" }}|
+    {{- item.get("qty") or "" }}|
+    {{- item.get("quantity_ordered") or ""}}
 {%- endfor %}
 {%- endfor %}
