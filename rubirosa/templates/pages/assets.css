@@ -1,0 +1,29 @@
+
+.page_content {
+	height: 100% !important;
+}
+
+.platform-title {
+	margin-left: 5px;
+}
+
+.card {
+	height: 500px;
+}
+
+.card-body {
+  overflow-y: auto;
+}
+
+.users_only_message {
+	display: none;
+	font-size: 23px;
+	padding: 150px;
+	text-align: center;
+	text-transform: uppercase;
+	letter-spacing: 4px;
+}
+
+.list-group-item  {
+  text-align: right;
+}
