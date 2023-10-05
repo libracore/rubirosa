@@ -4,19 +4,13 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "content",
+  "image",
   "item_code",
   "column_break_3",
   "type_of_media",
   "season"
  ],
  "fields": [
-  {
-   "fieldname": "content",
-   "fieldtype": "Link",
-   "label": "Content",
-   "options": "File"
-  },
   {
    "fieldname": "item_code",
    "fieldtype": "Link",
@@ -38,9 +32,14 @@
    "fieldtype": "Link",
    "label": "Season",
    "options": "Monthly Distribution"
+  },
+  {
+   "fieldname": "image",
+   "fieldtype": "Attach Image",
+   "label": "Image"
   }
  ],
- "modified": "2023-10-03 13:33:32.228028",
+ "modified": "2023-10-05 15:49:12.362529",
  "modified_by": "Administrator",
  "module": "Rubirosa",
  "name": "Marketing Material",
