@@ -48,26 +48,49 @@ def get_user_invoices(user):
     return invoices
 
 def get_marketing_material(orders):
-	
+
     order_names = [order['sales_orders'] for order in orders]
     orders_str = ', '.join(["'" + order + "'" for order in order_names])
-
+    frappe.log_error("mm orders {0}".format(orders_str))
     sql_query = """
         SELECT
+            `tabMarketing Material`.`name`,
             `tabMarketing Material`.`season`,
             `tabMarketing Material`.`item_code`,
+            `tabMarketing Material`.`content`,
+            `tabItem`.`variant_of`,
+            `tabSales Order`.`name` AS `so`,
             `tabMarketing Material`.`image`
         FROM
             `tabMarketing Material`
-        INNER JOIN
-            `tabSales Order Item` ON `tabMarketing Material`.`item_code` = `tabSales Order Item`.`item_code`
-        INNER JOIN
-            `tabSales Order` ON `tabSales Order Item`.`parent` = `tabSales Order`.`name`
+        LEFT JOIN
+            `tabSales Order` ON `tabSales Order`.`sales_season` = `tabMarketing Material`.`season`
+        LEFT JOIN
+            `tabSales Order Item` ON `tabSales Order Item`.`parent` = `tabSales Order`.`name`
+        LEFT JOIN
+            `tabItem` ON `tabItem`.`item_code` = `tabSales Order Item`.`item_code`
         WHERE
-            `tabSales Order`.`name` IN ({orders})
-            OR `tabSales Order`.`sales_season` = `tabMarketing Material`.`season`
+            (
+                (`tabMarketing Material`.`season` IS NOT NULL AND `tabSales Order`.`name` IN ({orders}))
+                OR
+                (`tabMarketing Material`.`item_code` IS NOT NULL AND `tabItem`.`variant_of` = `tabMarketing Material`.`item_code`)
+            )
     """.format(orders=orders_str)
-
     marketing_material = frappe.db.sql(sql_query, as_dict=True)
 
     return marketing_material
+
+@frappe.whitelist()
+def create_marketing_material(file_name, content=None):
+
+    marketing_material = frappe.new_doc('Marketing Material')
+    marketing_material.image = file_name
+    marketing_material.content = content 
+    
+    try:
+        marketing_material.insert()
+        frappe.db.commit()
+    except Exception as e:
+        frappe.log_error("Marketing Material Creation Error", "{0}".format(e))
+        
+    return marketing_material.name

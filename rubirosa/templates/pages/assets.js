@@ -3,6 +3,12 @@ document.addEventListener("DOMContentLoaded", function(event) {
     // process command line arguments
     get_arguments();
     
+    //Pop Up
+    var uploadInput = document.getElementById('upload');
+    uploadInput.addEventListener('change', function () {
+        readURL(this);
+    });
+    
 });
 
 function get_arguments() {
@@ -12,7 +18,7 @@ function get_arguments() {
     if (currentUser !== "Guest") {
 		
 		//TEST USER
-		currentUser = "toberhem@soer.de";
+		currentUser = "jakehollinger@gmail.com";
 		
 		loadPlatform(currentUser);
 	} else {
@@ -67,25 +73,85 @@ function loadPlatform(user) {
 
 function get_marketing_material(mm) {
 			
-	// List to store unique seasons
+	// List of displayed Marketing Materials
+	var mm_list = [];
 	var unique_seasons = [];
+	var templates = [];
 	var mm_counter = 0;
 	var materialli = document.querySelector(".material");
 		
 	mm.forEach(function (material, x) {
-			
-		if (!unique_seasons.includes(material.season)) {
-					
-			unique_seasons.push(material.season);
-			console.log("unique_seasons", unique_seasons)
+			console.log("material", material.item_code)
+		if (!mm_list.includes(material.name)) {	
+			console.log("variant_of", material.variant_of)
+			mm_list.push(material.name);
+			console.log("mm_list", mm_list)
 			if (material.image) {
 				mm_counter = mm_counter + 1;
-				materialli.innerHTML += `<li class="list-group-item marketingli"><img class='marketingImage' src="${material.image}"/></li>`;
-				console.log("material", materialli)
-				}
-		}
+				materialli.innerHTML += `<li class="list-group-item marketingli"><img class='marketingImage' src="${material.image}"/> <br> <p class="image-title">${material.season} - ${material.item_code}</p> <p class="image-text">${material.content}</p></li>`;
+			}
+		} 
 	});
 			
+}
 
+
+function uploadMedia() {
+	var popUpDiv = document.getElementById("modal");
+	popUpDiv.style.display = "block";
+
+}
+
+function popUpConfirm() {
+	var fileName = document.getElementById( 'upload-label' ).textContent;
+	var content = document.getElementById('textarea').value;
 	
+	frappe.call({
+        "method": 'rubirosa.rubirosa.assets.create_marketing_material',
+        "args": {
+            "file_name": fileName,
+            "content": content
+        },
+        "callback": function (response) {
+            if (response.message) {
+                console.log('Marketing Material created successfully:', response.message);
+            } 
+        }
+    });
+    popUpCancel();
+}
+
+
+function popUpCancel() {
+	var infoArea = document.getElementById( 'upload-label' );
+	var textarea = document.getElementById('textarea');
+	var imageDisplay = document.getElementById('imageResult');
+	var popUpDiv = document.getElementById("modal");
+	
+	imageDisplay.src = "";
+	textarea.value = "";
+	infoArea.textContent = "Choose a File";
+    popUpDiv.style.display = "none";
+}
+
+
+function readURL(input) {
+
+	showFileName( input );
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+
+        reader.onload = function (e) {
+            document.getElementById('imageResult').src = e.target.result;
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+
+/*  HOW UPLOADED IMAGE NAME*/
+function showFileName( input ) {
+	var infoArea = document.getElementById( 'upload-label' );
+	var fileName = input.files[0].name;
+	infoArea.textContent =  fileName;
 }
