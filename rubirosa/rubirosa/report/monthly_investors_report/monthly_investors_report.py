@@ -81,7 +81,7 @@ def get_data(filters):
     online_qty_this_month = get_qty_ytd(filters.year, filters.month, filters.company, online=True)
     switzerland_qty_this_month = get_qty_ytd(filters.year, filters.month, filters.company, territory="Schweiz")
     germany_qty_this_month = get_qty_ytd(filters.year, filters.month, filters.company, territory="Deutschland")
-    usa_qty_this_month = get_qty_ytd(filters.year, filters.month, filters.company, territory="United States (USA)")
+    usa_qty_this_month = get_qty_ytd(filters.year, filters.month, filters.company, territory="United States (US)")
     netherlands_qty_this_month = get_qty_ytd(filters.year, filters.month, filters.company, territory="Niederlande")
     #new_markets_qty_this_month = get_qty_ytd(filters.year, filters.month, filters.company, territory="New Markets")
     new_markets_qty_this_month = (qty_ytd 
@@ -476,6 +476,7 @@ def get_qty(year, month, company, online=False, customer_group=None, territory=N
             AND `tabSales Invoice`.`company` = "{company}"
             AND `tabSales Invoice`.`posting_date` LIKE "{year}-{month:02d}%"
             AND `tabItem`.`is_stock_item` = 1
+            AND `tabSales Invoice Item`.`item_group` NOT IN ("Raw Material", "Soles") 
             {condition};
         """.format(month=month, year=year, company=company, condition=condition))[0][0]
     return qty
@@ -498,6 +499,7 @@ def get_qty_ytd(year, month, company, online=False, customer_group=None, territo
             AND `tabSales Invoice`.`posting_date` >= "{year}-01-01"
             AND `tabSales Invoice`.`posting_date` <= "{year}-{month:02d}-{last_day}"
             AND `tabItem`.`is_stock_item` = 1
+            AND `tabSales Invoice Item`.`item_group` NOT IN ("Raw Material", "Soles")
             {condition};
         """.format(month=month, year=year, company=company, last_day=last_day_of_month(year, month),
             condition=condition))[0][0]
@@ -506,7 +508,7 @@ def get_qty_ytd(year, month, company, online=False, customer_group=None, territo
 def get_amount(year, month, company, customer_group=None):
     condition = """ AND `tabSales Invoice`.`customer_group` LIKE "{0}" """.format(customer_group) if customer_group else ""
     
-    qty = frappe.db.sql("""SELECT IFNULL(SUM(`base_amount`), 0)
+    qty = frappe.db.sql("""SELECT IFNULL(SUM(`base_net_amount`), 0)
         FROM `tabSales Invoice Item` 
         LEFT JOIN `tabSales Invoice` ON `tabSales Invoice`.`name` = `tabSales Invoice Item`.`parent`
         LEFT JOIN `tabItem` ON `tabItem`.`item_code` = `tabSales Invoice Item`.`item_code`
@@ -515,6 +517,7 @@ def get_amount(year, month, company, customer_group=None):
             AND `tabSales Invoice`.`company` = "{company}"
             AND `tabSales Invoice`.`posting_date` LIKE "{year}-{month:02d}%"
             AND `tabItem`.`is_stock_item` = 1
+            AND `tabSales Invoice Item`.`item_group` NOT IN ("Raw Material", "Soles")
             {condition};
         """.format(month=month, year=year, company=company, condition=condition))[0][0]
     return qty
@@ -522,7 +525,7 @@ def get_amount(year, month, company, customer_group=None):
 def get_amount_ytd(year, month, company, customer_group=None):
     condition = """ AND `tabSales Invoice`.`customer_group` LIKE "{0}" """.format(customer_group) if customer_group else ""
     
-    qty = frappe.db.sql("""SELECT IFNULL(SUM(`base_amount`), 0)
+    qty = frappe.db.sql("""SELECT IFNULL(SUM(`base_net_amount`), 0)
         FROM `tabSales Invoice Item` 
         LEFT JOIN `tabSales Invoice` ON `tabSales Invoice`.`name` = `tabSales Invoice Item`.`parent`
         LEFT JOIN `tabItem` ON `tabItem`.`item_code` = `tabSales Invoice Item`.`item_code`
@@ -532,6 +535,7 @@ def get_amount_ytd(year, month, company, customer_group=None):
             AND `tabSales Invoice`.`posting_date` >= "{year}-01-01"
             AND `tabSales Invoice`.`posting_date` <= "{year}-{month:02d}-{last_day}"
             AND `tabItem`.`is_stock_item` = 1
+            AND `tabSales Invoice Item`.`item_group` NOT IN ("Raw Material", "Soles")
             {condition};
         """.format(month=month, year=year, company=company, last_day=last_day_of_month(year, month),
             condition=condition))[0][0]
@@ -565,10 +569,12 @@ def get_perorder(year):
                 LEFT JOIN `tabSales Order` ON `tabSales Order`.`name` = `tabSales Order Item`.`parent`
                 LEFT JOIN `tabItem` ON `tabItem`.`item_code` = `tabSales Order Item`.`item_code`
                 WHERE 
-                    `tabsales Order`.`sales_season` = "{sales_season}"
-                    `tabSales Order`.`docstatus` = 1
+                    `tabSales Order`.`sales_season` = "{sales_season}"
+                    AND `tabSales Order`.`docstatus` = 1
                     AND `tabSales Order`.`company` = "{company}"
-                    AND `tabItem`.`is_stock_item` = 1;
+                    AND `tabItem`.`is_stock_item` = 1
+                    AND `tabSales Order Item`.`item_group` NOT IN ("Raw Material", "Soles")
+                ;
                 """.format(sales_season=sales_season))[0][0]
         except:
             return 0

@@ -152,7 +152,15 @@ def get_data():
                        "label": _("Order Overview"),
                        "description": _("Order Overview"),
                        "is_query_report": True
-                   }         
+                   },
+                   {
+                       "type": "report",
+                       "doctype": "Sales Invoice",
+                       "name": "Debitoren Export",
+                       "label": _("Debitoren Export"),
+                       "description": _("Debitoren Export"),
+                       "is_query_report": True
+                   }
             ]
         },
         {
