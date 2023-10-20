@@ -34,6 +34,16 @@ attribute_codes = {
     'attribute_2': "Colour"
 }
 
+currency_codes = {
+    "CHF": 3,
+    "EUR": 5,
+    "DKK": 8,
+    "USD": 23,
+    "GBP": 24,
+    "NOK": 25,
+    "SEK": 26
+}
+
 def get_items_data():
     last_item_sync = frappe.get_value("Multisped Settings", "Multisped Settings", "last_item_sync")
     if last_item_sync:
@@ -93,7 +103,7 @@ def get_items_data():
         # origin: country code
         d['origin'] = frappe.get_cached_value("Country", d['origin'], "code")
         
-        # sttributes
+        # attributes
         attributes = get_attributes(d['item_code'])
         try:
             d['attribute_1'] = attributes[attribute_codes['attribute_1']]
@@ -119,8 +129,8 @@ def generate_items_transfer_file(debug=False):
     items = get_items_data()
 
     # fetch Multisped Settings and select tagert path
-    settings = frappe.get_doc("Multisped Settings")
-    local_file = os.path.join("/tmp","AS{date}{nn:02d}.txt".format(date=date.today().strftime("%y%m%d"), nn=1))
+    settings = frappe.get_doc("Multisped Settings", "Multisped Settings")
+    local_file = os.path.join("/tmp","AS{date}{nn:02d}.txt".format(date=date.today().strftime("%y%m%d"), nn=(get_transfer_file_count() + 1)))
 
     # create items transfer file   
     item_content = frappe.render_template('rubirosa/templates/xml/multisped_items.html', {'items': items})
@@ -141,12 +151,72 @@ def generate_items_transfer_file(debug=False):
         os.remove(local_file)
     
     # create log
-    create_multisped_log("Items transferred {0}".format(local_file.replace("/tmp", "")), item_content)
+    create_multisped_log("Items transferred {0}".format(local_file.replace("/tmp/", "")), item_content)
     
     return
     
 def get_multisped_item_code(s, length):
     return hashlib.md5(s.encode('utf-8')).hexdigest()[:length]
+
+def get_stock_data():
+    settings = frappe.get_doc("Multisped Settings", "Multisped Settings")
+    sql_query = """
+        SELECT
+            `tabBin`.`item_code` AS `item_code`,
+            `tabBin`.`actual_qty` AS `actual_qty`
+        FROM
+            `tabBin`
+        WHERE
+            `tabBin`.`warehouse` = "{warehouse}"
+        ;
+    """.format(warehouse=settings.warehouse)
+    data = frappe.db.sql(sql_query, as_dict=True)
+    
+    for d in data:            
+        # rewrite item code to multisped item code (20 digits only - hashed)
+        d['item_number'] = get_multisped_item_code(d['item_code'], 20)
+        
+        d['actual_qty'] = format_multisped_number(d['actual_qty'])
+        
+        # attributes
+        attributes = get_attributes(d['item_code'])
+        try:
+            d['attribute_1'] = attributes[attribute_codes['attribute_1']]
+            d['attribute_2'] = attributes[attribute_codes['attribute_2']]
+        except:
+            # attributes not found - skip
+            continue
+        
+    return data
+    
+@frappe.whitelist()
+def generate_stock_transfer_file(debug=False):    
+    # fetch data
+    stock = get_stock_data()
+
+    # fetch Multisped Settings and select tagert path
+    settings = frappe.get_doc("Multisped Settings", "Multisped Settings")
+    local_file = os.path.join("/tmp","BE{date}.dat".format(date=date.today().strftime("%Y%m%d")))
+
+    # create items transfer file   
+    item_content = frappe.render_template('rubirosa/templates/xml/multisped_stock.html', {'items': stock})
+    
+    # write to file (note: as the file is in ascii, there might be conversion data loss!)
+    f = codecs.open(local_file, "w", encoding="ascii", errors="ignore")
+    f.write(item_content)
+    f.close()
+
+    # push the file to the target system
+    write_file(local_file, settings.in_folder)
+    
+    # cleanup (unless in debug mode)
+    if not debug:
+        os.remove(local_file)
+    
+    # create log
+    create_multisped_log("Stock transferred {0}".format(local_file.replace("/tmp/", "")), item_content)
+    
+    return
     
 """
 This function will store an item_code to multisped_code lookup table
@@ -231,7 +301,7 @@ def generate_shipping_order(debug=False):
 
     # fetch Multisped Settings and select tagert path
     settings = frappe.get_doc("Multisped Settings")
-    local_file = os.path.join("/tmp", "AI{date}{nn:02d}.txt".format(date=date.today().strftime("%y%m%d"), nn=1))
+    local_file = os.path.join("/tmp", "AI{date}{nn:02d}.txt".format(date=date.today().strftime("%y%m%d"), nn=(get_transfer_file_count() + 1)))
     
     # create delivery note transfer file   
     dns_content = frappe.render_template('rubirosa/templates/xml/multisped_dns.html', {'dns': dns})
@@ -304,8 +374,10 @@ def get_dns_data():
             i['quantity_ordered'] = format_multisped_number(i['quantity_ordered'])
             # find atttributes
             attributes = get_attributes(i['item_code'])
-            i['attribute_1'] = attributes[attribute_codes['attribute_1']]
-            i['attribute_2'] = attributes[attribute_codes['attribute_2']]
+            i['attribute_1'] = attributes.get(attribute_codes['attribute_1'])
+            i['attribute_2'] = attributes.get(attribute_codes['attribute_2'])
+            # set currency code
+            i['currency_code'] = currency_codes[dn_doc.currency]
             
         # shorten invoice address and customer to hash
         if d['invoice_address']:
@@ -363,15 +435,16 @@ def write_file(local_file, target_path):
 """
 This function will read the input path, fetch all files and trigger their action
 """
-def read_files(target_path):
+def read_files():
     settings = frappe.get_doc("Multisped Settings", "Multisped Settings")
+    target_path = settings.out_folder
     
-    try:
+    if True: #try:
         with connect_sftp(settings) as sftp:
             for file_name in sftp.listdir(target_path):
                 # fetch the file
                 local_file = os.path.join("/tmp", file_name)
-                remote_file = os.path.join("TestOUT", file_name)
+                remote_file = os.path.join(target_path, file_name)
                 sftp.get(remote_file, local_file)
                 # remove remote file
                 sftp.remove(remote_file)
@@ -390,15 +463,15 @@ def read_files(target_path):
                     # delivery note feedback (Auftragsrückmeldung)
                     create_multisped_log("Received delivery feedback {0}".format(file_name), content)
                     parse_delivery_note_feedback(content)
-                elif file_name.startswith("AR"):
+                elif file_name.startswith("BE"):
                     # stock reconciliation feedback (Bestandsmeldung)
                     create_multisped_log("Received stock reconciliation {0}".format(file_name), content)
                     parse_stock_reconciliation_feedback(content)
                 # remove local file
                 os.remove(local_file)
                 
-    except Exception as err:
-        frappe.log_error( err, "Multisped Read Files Failed")
+    #except Exception as err:
+    #    frappe.log_error( err, "Multisped Read Files Failed")
         
     return
 
@@ -427,7 +500,7 @@ def parse_purchase_order_feedback(content):
         "MHD": 17
     }
     # parse for all received items
-    lines = content.split("\r\n")
+    lines = content.replace("\r", "").split("\n")
     received_items = []
     for line in lines:
         fields = line.split("|")
@@ -455,7 +528,7 @@ def parse_purchase_order_feedback(content):
         
     # aggregate items by orders
     receipts_by_order = {}
-    for item in received_items:
+    for item in received_items.items():
         # add order if not already there
         if item['order_no'] not in receipts_by_order:
             receipts_by_order[item['order_no']] = {}
@@ -487,32 +560,92 @@ def parse_purchase_order_feedback(content):
     return received_items
 
 def parse_delivery_note_feedback(content):
-    field_map = {
-        "Code": 0,
-        "Submandant": 1,
-        "Client-Idnummer": 2,
-        "Client-Idnummerkunde": 3,
-        "Zone": 4,
-        "Auftragsnummer1": 5,
-        "Auftragsnummer2": 6,
-        "Auftragsnummerintern": 7,
-        "DILOS-Frachtnummer": 8,
-        "Differenzen": 9,
-        "Datum": 10,
-        "Gesamtmenge": 11,
-        "Summe_Colli": 12,
-        "Summe_Gewicht": 13,
-        "Spediteur": 14
-    }
-    lines = content.split("\r\n")
+    lines = content.replace("\r", "").split("\n")
+    delivery_notes = []
+    _delivery_note = None
     for line in lines:
         fields = line.split("|")
 
-        # TODO
+        if fields[0] == "K*":
+            # this is a head record - new delivery note
+            if _delivery_note:
+                delivery_notes.append(_delivery_note)
+            
+            _delivery_note = {
+                'subtenant': fields[1],
+                'client_id': fields[2],
+                'client_customer': fields[3],
+                'region': fields[4],
+                'delivery_note': fields[5],            # this is the delivery note name
+                'order_no_2': fields[6],
+                'order_no_internal': fields[7],
+                'dilos': fields[8],
+                'deviations': fields[9],
+                'date': datetime.strptime(fields[10], "%d.%m.%Y"),  # as dd.mm.yyyy
+                'total_qty': fields[11],
+                'total_colli': fields[12],
+                'total_weight': fields[13],
+                'carrier': fields[14],
+                'items': [],
+                'parcels': [],
+                'picking': []
+            }
+        elif fields[0] == "P*":
+            # this is a position record
+            _delivery_note['items'].append({
+                'delivery_note': fields[1],
+                'pos': fields[2],
+                'item_code': fields[3],
+                'state': fields[4],
+                'attribute_1': fields[5],
+                'attribute_2': fields[6],
+                'serial': fields[7],
+                'batch': fields[8],
+                'qty': fields[9],
+                'delivered_qty': fields[10],
+                'outstanding_qty': fields[11],
+                'best_before_date': fields[12]
+            })
+        elif fields[0] == "C*":
+            # this is a parcel record
+            _delivery_note['parcels'].append({
+                'delivery_note': fields[1],
+                'parcel': fields[2],
+                'packaging': fields[3],
+                'service': fields[4],
+                'weight': fields[5],
+                'tracking_return': fields[6]
+            })
+        elif fields[0] == "L*":
+            # this is a packing record
+            _delivery_note['picking'].append({
+                'delivery_note': fields[1],
+                'pos': fields[2],
+                'item_code': fields[3],
+                'state': fields[4],
+                'attribute_1': fields[5],
+                'attribute_2': fields[6],
+                'serial': fields[7],
+                'batch': fields[8],
+                'picking_qty': fields[9],
+                'package_no': fields[10],
+                'best_before_date': fields[11]
+            })
+    # attach last delivery note
+    if _delivery_note:
+        delivery_notes.append(_delivery_note)
         
+    # update delivery note information
+    for dn in delivery_notes:
+        dn_doc = frappe.get_doc("Delivery Note", dn['delivery_note'])
+        dn_doc.sendungsnummer = dn['parcels'][0]['parcel']
+        dn_doc.save()
+        
+    frappe.db.commit()
+    
     return
     
-def parse_stock_reconciliation_feedback(contant):
+def parse_stock_reconciliation_feedback(content):
     field_map = {
         "Artikelnummer": 0,
         "Farbe": 1,
@@ -523,21 +656,22 @@ def parse_stock_reconciliation_feedback(contant):
         "Teilezustand": 6,
         "MHD": 7
     }
-    lines = content.split("\r\n")
+    lines = content.replace("\r", "").split("\n")
     stock_levels = []
     for line in lines:
         fields = line.split("|")
-        stock_level = {
-            'item_code': find_item_code_from_multisped_code(fields[field_map["Artikelnummer"]]),
-            'attribute1': fields[field_map["Farbe"]],
-            'attribute2': fields[field_map["Grösse"]],
-            'batch_no': fields[field_map["Lotnummer"]],
-            'qty': flt((fields[field_map["Menge"]] or "").replace(",", ".")),
-            'state_code': fields[field_map["Zustand"]],
-            'part_state': fields[field_map["Teilezustand"]],
-            'best_before_date': datetime.strptime((fields[field_map["MHD"]]), "%d.%m.%Y") if fields[field_map["MHD"]] else None
-        }
-        stock_levels.append(received_item)
+        if len(fields) >= 8:
+            stock_level = {
+                'item_code': find_item_code_from_multisped_code(fields[field_map["Artikelnummer"]]),
+                'attribute1': fields[field_map["Farbe"]],
+                'attribute2': fields[field_map["Grösse"]],
+                'batch_no': fields[field_map["Lotnummer"]],
+                'qty': flt((fields[field_map["Menge"]] or "").replace(",", ".")),
+                'state_code': fields[field_map["Zustand"]],
+                'part_state': fields[field_map["Teilezustand"]],
+                'best_before_date': datetime.strptime((fields[field_map["MHD"]]), "%d.%m.%Y") if fields[field_map["MHD"]] else None
+            }
+            stock_levels.append(stock_level)
         
     # aggregate items by orders
     level_by_item = {}
@@ -547,22 +681,31 @@ def parse_stock_reconciliation_feedback(contant):
             level_by_item[item['item_code']] = item['qty']
         else:
             level_by_item[item['item_code']] += item['qty']
-        
+    
     # create stock reconciliation
     settings = frappe.get_doc("Multisped Settings", "Multisped Settings") 
     stock_reconciliation = frappe.get_doc({
         'doctype': "Stock Reconciliation",
     })
-    for item_code, qty in level_by_item:
+    for item_code, qty in level_by_item.items():
         stock_reconciliation.append("items", {
             'item_code': item_code,
             'warehouse': settings.warehouse,
             'qty': qty
         })
         
-
     # insert
+    stock_reconciliation.flags.ignore_validate = True
     stock_reconciliation.insert(ignore_permissions=True)
     #stock_reconciliation.submit()          # uncomment when testing is complete
    
     return
+
+def get_transfer_file_count():
+    count = frappe.db.sql("""
+        SELECT IFNULL(COUNT(`name`), 0) AS `count`
+        FROM `tabMultisped Log`
+        WHERE `method` LIKE "%transferred%"
+          AND `creation` >= CURDATE();
+        """, as_dict=True)[0]['count']
+    return count

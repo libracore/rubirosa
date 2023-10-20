@@ -1,8 +1,7 @@
-Client ID-Nummer|Client ID-Nummer-Kunde|Submandant|Empfaengername1|Empfaengername2|Empfaengername3|ELKZ|EPLZ|Estrasse_postfach|Eort|Avistelefon|Avisfax|Avis-email|Rechnungsname1|Rechnungsname2|Rechnungsname3|RLKZ|RPLZ|Rstrasse_postfach|Rort|BearbeiterKunde|NameADMit|Produktbereich|Zone|Auftragsdatum|Lieferdatum|Bereitstellungsdatum|Bestelldaten Kunde|Auftragsnummer1|Auftragsnummer2|Auftragsabw_hinweise|Frächter|Frankatur|Inkassobetrag|SummeColli|SummeGewicht|SummeVolumen|NameEKVerband|Priorität|Auftragsart|Auftragskennz|Text1|Text2|Text3|VAS Code|Frachtkosten (ab 12497)
 {%- for dn in dns %}
 K*|
     {{- (dn.customer_id) }}|{# 1 #}
-    {{- (dn.invoice_address)[:10] }}|{# 2 #}
+    {{- (dn.invoice_address or "")[:10] }}|{# 2 #}
     {{- (dn.get("tenant") or "")[:10] }}|{# 3 #}
     {{- (dn.customer_name or dn.customer or "")[:40] }}|{# 3 #}
     {{- (dn.get("customer_name2") or "")[:40] }}|{# 5 #}
@@ -13,7 +12,7 @@ K*|
     {{- (dn.get("eort") or "")[:40] }}|{# 10 #}
     {{- (dn.get("avistelefon") or "")[:20] }}|{# 11 #}
     {{- "" }}|{# 12 #}
-    {{- (dn.avisemail)[:50] }}|{# 13 #}
+    {{- (dn.avisemail or "")[:50] }}|{# 13 #}
     {{- (dn.customer_name or dn.customer or "")[:40] }}|{# 14 #}
     {{- (dn.get("invoice_name2") or "")[:40] }}|{# 15 #}
     {{- (dn.get("invoice_name3") or "")[:40] }}|{# 16 #}
@@ -46,19 +45,27 @@ K*|
     {{- (dn.get("text2") or "")[:255] }}|{# 43 #}
     {{- (dn.get("text2") or "")[:255] }}|{# 44 #}
     {{- (dn.get("vas_code") or "")[:255] }}|{# 45 #}
-    {{- (dn.get("freight_cost") or "")[:10] }}|{# 46 #}
+    {{- (dn.get("freight_cost") or "")[:10] }}{# 46 #}
 {%- for item in dn['items'] %}
 P*|
-    {{- dn.get("name") }}|
-    {{- item.get("idx") }}|
-    {{- item.get("idx") }}|
-    {{- item.get("item_number") }}|
-    {{- item.get("item_state") or "" }}|
-    {{- item.get("attribute_1") or "" }}|
-    {{- item.get("attribute_2") or "" }}|
-    {{- item.get("serial_no") or "" }}|
-    {{- item.get("rate") or "" }}|
-    {{- item.get("qty") or "" }}|
-    {{- item.get("quantity_ordered") or ""}}
+    {{- dn.get("name") }}|{# 1 #}
+    {{- item.get("idx") }}|{# 2 #}
+    {{- item.get("idx") }}|{# 3 #}
+    {{- item.get("item_number") }}|{# 4 #}
+    {{- item.get("item_state") or "" }}|{# 5 #}
+    {{- item.get("attribute_1") or "" }}|{# 6 #}
+    {{- item.get("attribute_2") or "" }}|{# 7 #}
+    {{- item.get("serial_no") or "" }}|{# 8 #}
+    {{- item.get("rate") or "" }}|{# 9 #}
+    {{- item.get("qty") or "" }}|{# 10 #}
+    {{- item.get("quantity_ordered") or ""}}|{# 11 #}
+    {{- item.get("outstanding_qty") or "" }}|{# 12 #}
+    {{- (item.get("comment") or "")[:255] }}|{# 13 #}
+    {{- item.get("currency_code") or "" }}|{# 14 #}
+    {{- item.get("vat") or "" }}|{# 15 #}
+    {{- (item.get("print_code") or "")[:1] }}|{# 16 #}
+    {{- (item.get("gift") or "")[:1] }}|{# 17 #}
+    {{- (item.get("best_before_date") or "")[:10] }}|{# 18 #}
+    {{- (item.get("batch") or "")[:20] }}{# 19 #}
 {%- endfor %}
 {%- endfor %}

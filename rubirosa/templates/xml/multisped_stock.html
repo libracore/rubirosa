@@ -1,0 +1,10 @@
+{%- for item in items -%}
+{{ (item.get("item_number") or "")[:20] }}|{# 1 #}
+    {{- (item.get("attribute_1") or "")[:10] }}|{# 2 #}
+    {{- (item.get("attribute_2") or "")[:10] }}|{# 3 #}
+    {{- (item.get("batch") or "")[:20] }}|{# 4 #}
+    {{- (item.get("actual_qty") or "") }}|{# 5 #}
+    {{- (item.get("available") or "VER")[:10] }}|{# 6 #}
+    {{- (item.get("state") or "")[:20] }}|{# 7 #}
+    {{- (item.get("best_before_date") or "")[:10] }}|{# 8 #}
+{%- endfor %}

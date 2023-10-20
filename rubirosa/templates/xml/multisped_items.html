@@ -1,8 +1,8 @@
-Kennzeichen|Artikelnummer|Bezeichnung 1|Bezeichnung 2|Artikelgruppe 1|Artikelgruppe 2|ABC – Klassifikation|Merkmal 1|Merkmal 2|EAN – Code|Lagereinheit|Verpackungseinheit|Kartonmenge|Volumen|Gewicht|Länge|Breite|Höhe|VK – Preis Netto|Ursprungsland|Zolltarifnummer|Artikelart|MwSt – Schlüssel|Währungskürzel|Auswert 1|Auswert 2|Auswert 3|Auswert 4|Auswert 5|Text 1|Text 2|Text 3|Text 4|Text 5{% for item in items %}
+{%- for item in items -%}
 A*|
     {{- item.item_status }}|{# 1 #}
     {{- (item.get("item_number") or "")[:20] }}|{# 2 #}
-    {{- (item.get("description") or "")[:150] }}|""|{# 3 #}
+    {{- (item.get("description") or "")[:150] }}|{# 3 #}
     {{- (item.get("description_2") or "")[:150] }}|{# 4 #}
     {{- (item.get("item_group") or "")[:50] }}|{# 5 #}
     {{- (item.get("item_group_2") or "")[:50] }}|{# 6 #}
@@ -33,5 +33,5 @@ A*|
     {{- (item.get("text_2") or "")[:255] }}|{# 31 #}
     {{- (item.get("text_3") or "")[:255] }}|{# 32 #}
     {{- (item.get("text_4") or "")[:255] }}|{# 33 #}
-    {{- (item.get("text_5") or "")[:255] }}|{# 34 #}
-{%- endfor %}
+    {{- (item.get("text_5") or "")[:255] }}{# 34 #}
+{% endfor %}
