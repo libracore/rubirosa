@@ -5,7 +5,8 @@
  "engine": "InnoDB",
  "field_order": [
   "item_code",
-  "delivery_note"
+  "delivery_note",
+  "purchase_order"
  ],
  "fields": [
   {
@@ -14,7 +15,8 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Item",
-   "options": "Item"
+   "options": "Item",
+   "read_only": 1
   },
   {
    "fieldname": "delivery_note",
@@ -22,10 +24,20 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Delivery Note",
-   "options": "Delivery Note"
+   "options": "Delivery Note",
+   "read_only": 1
+  },
+  {
+   "fieldname": "purchase_order",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Purchase Order",
+   "options": "Purchase Order",
+   "read_only": 1
   }
  ],
- "modified": "2023-10-20 23:34:56.649132",
+ "modified": "2023-10-23 22:20:37.676456",
  "modified_by": "Administrator",
  "module": "Rubirosa",
  "name": "Multisped Transfer Record",

@@ -65,7 +65,7 @@ P*|
     {{- item.get("vat") or "" }}|{# 15 #}
     {{- (item.get("print_code") or "")[:1] }}|{# 16 #}
     {{- (item.get("gift") or "")[:1] }}|{# 17 #}
-    {{- (item.get("best_before_date") or "")[:10] }}|{# 18 #}
+    {%- if dn.get("best_before_date") %}{{ frappe.utils.get_datetime(dn.get("best_before_date")).strftime("%d.%m.%Y") }}{% endif %}|{# 18 #}
     {{- (item.get("batch") or "")[:20] }}{# 19 #}
 {%- endfor %}
 {%- endfor %}

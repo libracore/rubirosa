@@ -395,6 +395,85 @@ def get_dns_data():
         
     return data
 
+def generate_purchase_order(debug=False):    
+    # fetch data
+    purchase_orders, purchase_order_data = get_purchase_order_data()
+
+    # fetch Multisped Settings and select tagert path
+    settings = frappe.get_doc("Multisped Settings")
+    local_file = os.path.join("/tmp", "WA{date}{nn:02d}.txt".format(date=date.today().strftime("%y%m%d"), nn=(get_transfer_file_count() + 1)))
+    
+    # create delivery note transfer file   
+    po_content = frappe.render_template('rubirosa/templates/xml/multisped_purchase_order.html', {'items': purchase_order_data})
+    
+    # create output file
+    f = codecs.open(local_file, "w", encoding="utf-8", errors="ignore")
+    f.write(po_content)
+    f.close()
+
+    # push the file to the target system
+    write_file(local_file, settings.in_folder)
+    
+    # update delivery note record table
+    mark_records_transmitted(purchase_orders, 'purchase_order')
+    
+    # cleanup (unless in debug mode)
+    if not debug:
+        os.remove(local_file)
+    
+    # create log
+    create_multisped_log("Purchase Orders transferred {0}".format(local_file.replace("/tmp", "")), po_content)
+    return 
+
+@frappe.whitelist()
+def get_purchase_order_data():
+    sql_query = """
+    SELECT
+        `tabPurchase Order`.`name` AS `name`,
+        `tabPurchase Order`.`schedule_date` AS `schedule_date`
+    FROM
+        `tabPurchase Order`
+    LEFT JOIN `tabMultisped Transfer Record` AS `mtr` ON `tabPurchase Order`.`name` = `mtr`.`purchase_order`
+    WHERE
+        `tabPurchase Order`.`docstatus` = 1
+        AND `mtr`.`purchase_order` IS NULL
+    ORDER BY
+        `tabPurchase Order`.`creation` DESC
+    """
+    purchase_orders = frappe.db.sql(sql_query, as_dict=True)
+    
+    output = []
+    for d in purchase_orders:
+        # fetch all items
+        items = frappe.db.sql("""
+            SELECT * 
+            FROM `tabPurchase Order Item`
+            WHERE `parent` = "{purchase_order}"
+            ORDER BY `idx` ASC;""".format(purchase_order=d.get('name')), as_dict=True)
+        
+        for item in items:
+            attributes = get_attributes(item.get('item_code'))
+            _item = {
+                'purchase_order': d.get('name'),
+                'pos': format_multisped_number(item.get('idx')),
+                'purchase_receipt': d.get('name'),
+                'shipping_date': d.get('schedule_date'),
+                'item_number': get_multisped_item_code(item.get('item_code'), 20),
+                'status': None,
+                'attribute_1': attributes.get(attribute_codes['attribute_1']),
+                'attribute_2': attributes.get(attribute_codes['attribute_2']),
+                'qty': format_multisped_number(item.get('qty')),
+                'uom': item.get('uom'),
+                'batch': item.get('batch_no'),
+                'serial_no': item.get('serial_no'),
+                'booking_code': None,
+                'remarks': item.get('item_code'),
+                'best_before_date': None
+            }
+            output.append(_item)
+                    
+    return purchase_orders, output
+
 def get_attributes(item_code):
     item_doc = frappe.get_doc("Item", item_code)
     attributes = {}

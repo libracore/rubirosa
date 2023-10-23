@@ -1,0 +1,17 @@
+{%- for item in items %}
+    {{- (item.get("purchase_order"))[:50] }}|{# 1 #}
+    {{- (item.get("pos")) }}|{# 2 #}
+    {{- (item.get("purchase_receipt") or item.get("purchase_order"))[:50] }}|{# 3 #}
+    {{- frappe.utils.get_datetime(item.get("shipping_date")).strftime("%d.%m.%Y") }}|{# 3 #}
+    {{- (item.get("item_number") or "")[:20] }}|{# 5 #}
+    {{- (item.get("state") or "")[:20] }}|{# 6 #}
+    {{- (item.get("attribute_1") or "")[:50] }}|{# 7 #}
+    {{- (item.get("attribute_2") or "")[:50] }}|{# 8 #}
+    {{- (item.get("qty") or 0) }}|{# 9 #}
+    {{- (item.get("uom") or "")[:5] }}|{# 10 #}
+    {{- (item.get("batch_no") or "")[:20] }}|{# 11 #}
+    {{- (item.get("serial_no") or "")[:20] }}|{# 12 #}
+    {{- (item.get("booking_code") or "")[:20] }}|{# 13 #}
+    {{- (item.get("remarks") or "")[:50] }}|{# 14 #}
+    {%- if item.get("best_before_date") %}{{ frappe.utils.get_datetime(item.get("best_before_date")).strftime("%d.%m.%Y") }}{% endif %}{# 15 #}
+{% endfor %}
