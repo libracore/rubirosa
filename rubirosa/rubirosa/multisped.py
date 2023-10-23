@@ -135,8 +135,8 @@ def generate_items_transfer_file(debug=False):
     # create items transfer file   
     item_content = frappe.render_template('rubirosa/templates/xml/multisped_items.html', {'items': items})
     
-    # write to file (note: as the file is in ascii, there might be conversion data loss!)
-    f = codecs.open(local_file, "w", encoding="ascii", errors="ignore")
+    # write to file
+    f = codecs.open(local_file, "w", encoding="utf-8", errors="ignore")
     f.write(item_content)
     f.close()
 
@@ -201,8 +201,8 @@ def generate_stock_transfer_file(debug=False):
     # create items transfer file   
     item_content = frappe.render_template('rubirosa/templates/xml/multisped_stock.html', {'items': stock})
     
-    # write to file (note: as the file is in ascii, there might be conversion data loss!)
-    f = codecs.open(local_file, "w", encoding="ascii", errors="ignore")
+    # write to file
+    f = codecs.open(local_file, "w", encoding="utf-8", errors="ignore")
     f.write(item_content)
     f.close()
 
@@ -306,8 +306,8 @@ def generate_shipping_order(debug=False):
     # create delivery note transfer file   
     dns_content = frappe.render_template('rubirosa/templates/xml/multisped_dns.html', {'dns': dns})
     
-    # create output file (note: ascii encoding, potential data loss)
-    f = codecs.open(local_file, "w", encoding="ascii", errors="ignore")
+    # create output file
+    f = codecs.open(local_file, "w", encoding="utf-8", errors="ignore")
     f.write(dns_content)
     f.close()
 
