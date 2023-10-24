@@ -3,12 +3,6 @@ document.addEventListener("DOMContentLoaded", function(event) {
     // process command line arguments
     get_arguments();
     
-    //Pop Up
-    var uploadInput = document.getElementById('upload');
-    uploadInput.addEventListener('change', function () {
-        readURL(this);
-    });
-    
 });
 
 function get_arguments() {
@@ -18,7 +12,7 @@ function get_arguments() {
     if (currentUser !== "Guest") {
 		
 		//TEST USER
-		currentUser = "jakehollinger@gmail.com";
+		currentUser = "davestoll@bluewin.ch";
 		
 		loadPlatform(currentUser);
 	} else {
@@ -47,22 +41,61 @@ function loadPlatform(user) {
             var marketing_material = response.message.marketing_material;
             var so_counter = 0;
             var sinv_counter = 0;
-            var user_orders = document.querySelector(".user-orders");
-            var user_invoices = document.querySelector(".user-invoices");
+            var user_orders = document.querySelector(".so-accordion");
+            var user_invoices = document.querySelector(".sinv-accordion");
             
             get_marketing_material(marketing_material);
             
             user_info.forEach(function (info, x) {
 				
 				if (info.sales_orders) {
-					
 					so_counter = so_counter + 1;
-					user_orders.innerHTML += `<li class="list-group-item so-li">${info.sales_orders}</li>`;
+					user_orders.innerHTML += `
+						<div class="card orders" >
+							<div class="card-header so-li" data-toggle="collapse" data-target="#${info.sales_orders}" aria-expanded="true" aria-controls="collapseOne" id="heading${info.sales_orders}" onclick="handleClick(this)">
+								<h5 class="mb-0 so-header">
+									<i class="fa fa-circle fa-1" aria-hidden="true" style="${info.delivery_status == 'Fully Delivered' ? 'font-size: 12px; color: #98d85b;' : 'font-size: 12px; color: red;'}"></i>
+									<button class="btn btn-link so-li-button" >
+										 ${info.sales_orders}
+									</button>
+								</h5>
+							</div>
+
+							<div id="${info.sales_orders}" class="collapse" aria-labelledby="heading{info.sales_orders}" data-parent="#accordion">
+								<div class="card-body so-body">
+									Delivery Date: <br> <p style="font-weight: bold;"> ${info.delivery_date}</p> <br> Delivery Status: <br> <p style="font-weight: bold;">${info.delivery_status}</p> <br>
+									<button class="more-info">
+										<a href="/api/method/frappe.utils.print_format.download_pdf?doctype=Sales Order&name=${info.sales_orders}&format=rubirosa Sales Order&no_letterhead=0&_lang=de" target="_blank"> More </a>
+									</button>
+								</div>
+							</div>
+						</div>
+					`;
 					
 				} else if (info.sales_invoices) {
 					
 					sinv_counter = sinv_counter + 1;
-					user_invoices.innerHTML += `<li class="list-group-item sinv-li"> <a href="/api/method/erpnextswiss.erpnextswiss.guest_print.get_pdf_as_guest?doctype=Sales Invoice&name=${info.sales_invoices}&format=rubirosa Sales Invoice (consolidated)&no_letterhead=0" target="_blank" class="">${info.sales_invoices}</a></li>`;
+					user_invoices.innerHTML += `
+						<div class="card invoices" >
+							<div class="card-header so-li" data-toggle="collapse" data-target="#${info.sales_invoices}" aria-expanded="true" aria-controls="collapseOne" id="heading${info.sales_invoices}" onclick="handleClick(this)">
+								<h5 class="mb-0 so-header">
+									<i class="fa fa-circle fa-1" aria-hidden="true" style="${info.status == 'Paid' ? 'font-size: 12px; color: #98d85b;' : 'font-size: 12px; color: red;'}"></i>
+									<button class="btn btn-link so-li-button" >
+										 ${info.sales_invoices}
+									</button>
+								</h5>
+							</div>
+
+							<div id="${info.sales_invoices}" class="collapse" aria-labelledby="heading${info.sales_invoices}" data-parent="#accordionTwo">
+								<div class="card-body so-body">
+									Payment Due Date: <br> <p style="font-weight: bold;"> ${info.due_date}</p> <br> Delivery Status: <br> <p style="font-weight: bold;">${info.status}</p> <br>
+									<button class="more-info" >
+										<a href="/api/method/frappe.utils.print_format.download_pdf?doctype=Sales Invoice&name=${info.sales_invoices}&format=rubirosa Sales Invoice&no_letterhead=0&_lang=de" target="_blank"> More </a>
+									</button>
+								</div>
+							</div>
+						</div>
+					`;
 					
 				}
 				
@@ -71,8 +104,25 @@ function loadPlatform(user) {
 	});
 }
 
+function handleClick(e) {
+	var hasCardActiveClass = e.classList.contains('card-active');
+	var elementsWithCardActive = document.querySelectorAll('.card-active');
+	elementsWithCardActive.forEach(element => {
+		
+        if (element !== e && element.parentNode.classList[1] === e.parentNode.classList[1]) {
+            element.classList.remove('card-active');
+        }
+    });
+    
+    if (!hasCardActiveClass) {
+        e.classList.add('card-active');
+    } else {
+		e.classList.remove('card-active');
+	}
+}
+
 function get_marketing_material(mm) {
-			
+	//~ console.log("mm", mm)	
 	// List of displayed Marketing Materials
 	var mm_list = [];
 	var unique_seasons = [];
@@ -81,77 +131,16 @@ function get_marketing_material(mm) {
 	var materialli = document.querySelector(".material");
 		
 	mm.forEach(function (material, x) {
-			console.log("material", material.item_code)
+		//~ console.log("material", material)
 		if (!mm_list.includes(material.name)) {	
-			console.log("variant_of", material.variant_of)
 			mm_list.push(material.name);
-			console.log("mm_list", mm_list)
 			if (material.image) {
 				mm_counter = mm_counter + 1;
-				materialli.innerHTML += `<li class="list-group-item marketingli"><img class='marketingImage' src="${material.image}"/> <br> <p class="image-title">${material.season} - ${material.item_code}</p> <p class="image-text">${material.content}</p></li>`;
+				materialli.innerHTML += `<li class="list-group-item marketingli"><img class='marketingImage' src="${material.image}"/> <br> <p class="image-title">${ material.season ? material.season : 'Rubirosa' } - ${material.item_code ? material.item_code : ""}</p> <p class="image-text">${material.content ? material.content : '' }</p></li>`;
+			} else {
+				materialli.innerHTML += `<li class="list-group-item marketingli"><p class="image-title">${ material.season ? material.season : 'Rubirosa' } - ${material.item_code}</p> <p class="image-text">${material.content ? material.content : '' }</p></li>`;
 			}
 		} 
 	});
 			
-}
-
-
-function uploadMedia() {
-	var popUpDiv = document.getElementById("modal");
-	popUpDiv.style.display = "block";
-
-}
-
-function popUpConfirm() {
-	var fileName = document.getElementById( 'upload-label' ).textContent;
-	var content = document.getElementById('textarea').value;
-	
-	frappe.call({
-        "method": 'rubirosa.rubirosa.assets.create_marketing_material',
-        "args": {
-            "file_name": fileName,
-            "content": content
-        },
-        "callback": function (response) {
-            if (response.message) {
-                console.log('Marketing Material created successfully:', response.message);
-            } 
-        }
-    });
-    popUpCancel();
-}
-
-
-function popUpCancel() {
-	var infoArea = document.getElementById( 'upload-label' );
-	var textarea = document.getElementById('textarea');
-	var imageDisplay = document.getElementById('imageResult');
-	var popUpDiv = document.getElementById("modal");
-	
-	imageDisplay.src = "";
-	textarea.value = "";
-	infoArea.textContent = "Choose a File";
-    popUpDiv.style.display = "none";
-}
-
-
-function readURL(input) {
-
-	showFileName( input );
-    if (input.files && input.files[0]) {
-        var reader = new FileReader();
-
-        reader.onload = function (e) {
-            document.getElementById('imageResult').src = e.target.result;
-        };
-        reader.readAsDataURL(input.files[0]);
-    }
-}
-
-
-/*  HOW UPLOADED IMAGE NAME*/
-function showFileName( input ) {
-	var infoArea = document.getElementById( 'upload-label' );
-	var fileName = input.files[0].name;
-	infoArea.textContent =  fileName;
 }

@@ -4,8 +4,8 @@
 	<div class="card-deck">
 		<div class="card">
 			
-			<div class="card-body">
-				<div class="upload-section"><h5 class="card-title">Marketing Material </h5> <div class='upload-button' onclick="uploadMedia()"><img class='upload-image' src="/public/images/arrow.png"/></div></div>
+			<div class="card-body card-column">
+				<h5 class="card-title">Marketing Material </h5>
 				<div class="card-text">
 					<ul class="list-group material"></ul>
 				</div>
@@ -14,52 +14,23 @@
 		</div>
 		<div class="card">
 			
-			<div class="card-body">
+			<div class="card-body card-column">
 				<h5 class="card-title">Orders</h5>
 				<div class="card-text">
-					<ul class="list-group user-orders"></ul>
+					<div id="accordion" class="so-accordion"></div>
 				</div>
 			</div>
 		</div>
 		<div class="card">
 			
-			<div class="card-body">
+			<div class="card-body card-column">
 				<h5 class="card-title">Invoices</h5>
 				<div class="card-text">
-					<ul class="list-group user-invoices"></ul>
+					<div id="accordionTwo" class="sinv-accordion"></div>
 				</div>
 			</div>
 		</div>
 	</div>
 	
 	<div class="users_only_message">Please Login to see the content of this page</div>
-	<div id="modal">
-		<div class="popUp"> 
-			<div class="popUpContent"> 
-				<p class="popUpTittle">SIE SIND BEREITS ANGEMELDET FÜR</p>
-				<div class="popUpTable">                     				
-					<div style="padding-right: 30px; " >
-						<!-- Upload image input-->
-						<div class="input-group mb-3 px-2 py-2 bg-white shadow-sm" style="margin-top: 9px;">
-							<input id="upload" type="file" onchange="readURL(this);" class="form-control border-0" >
-							<label id="upload-label" for="upload" class="font-weight-light text-muted" >Choose a File</label>
-							<div class="input-group-append">
-								<label for="upload" class="btn btn-light m-0 px-4 upload-icon"> <i class="fa fa-cloud-upload text-muted"></i></label>
-							</div>
-						</div>
-						<label for="exampleFormControlTextarea1" class="form-label">Add a Small Text</label>
-						<textarea class="form-control" id="textarea" rows="3"></textarea>
-						<div class="popUpBtnDiv"> 
-							<button class="popUpCancel" onclick="popUpCancel()">CANCEL</button> <button class="popUpConfirm" onclick="popUpConfirm()">UPLOAD</button> 
-						</div>
-					</div>
-					<div style="width: 60%; " >
-						<!-- Uploaded image area-->
-						<div class="image-area "><img id="imageResult" src="#" alt="" class="img-fluid rounded shadow-sm mx-auto d-block"></div>
-					</div>
-				</div>
-				
-			</div>
-		</div>
-	</div>
 

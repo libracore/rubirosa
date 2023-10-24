@@ -3,7 +3,8 @@ a {
 	color: #7d7d7d !important;
 }
 .page_content {
-	height: 100% !important;
+	height: 65.5vh;
+	margin: 0px -15px 0px -15px;
 }
 
 .platform-title {
@@ -12,8 +13,12 @@ a {
     text-align: center;
 }
 
+.card-deck {
+	height: 100%;
+}
+
 .card {
-	height: 600px;
+	height: 95%;
 }
 
 .card-title, .platform-title {
@@ -26,21 +31,11 @@ a {
 	height: 30px;
 }
 
-.card-body {
+.card-column {
 	overflow-y: scroll;
 	scrollbar-width: thin;
 	scrollbar-color: transparent transparent;
     text-align: center;
-}
-
-.upload-section {
-	display: flex;
-	justify-content: end;
-}
-
-.upload-button {
-	cursor: pointer;
-	padding-left: 20px;
 }
 
 .users_only_message {
@@ -52,20 +47,58 @@ a {
 	letter-spacing: 4px;
 }
 
+.card-header { 
+	border: none;
+	background: none;
+}
+
+.so-body {
+	border-top: 1px solid rgba(0, 0, 0, 0.125);
+	text-align: left;
+	text-transform: uppercase;
+	font-size: 12px;
+	letter-spacing: 4px;
+}
+
 .list-group-item  {
 	text-align: right;
 	color: #7d7d7d !important;
 	
 }
 
-.so-li:hover, .sinv-li:hover{
+.so-header{
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.so-li-button, sinv-li-button {
+	text-decoration: none !important;
+	color: #7d7d7d !important;
+	padding: 0px;
+}
+
+.so-li, .sinv-li{
+	text-align: right;
+}
+
+
+.so-li:hover, .sinv-li:hover, .more-info:hover, .card-active{
 	color: #fff !important;
     background-color: #000 !important;
     cursor: pointer;
 }
 
-.so-li:hover a, .sinv-li:hover a{
+.so-li:hover button, .sinv-li:hover a, .card-active .so-li-button{
 	color: #fff !important;
+}
+
+.more-info{
+	border: 1px solid rgba(0, 0, 0, 0.125);
+	background: none;
+	font-size: 12px;
+	letter-spacing: 2px;
+	padding: 7px;
 }
 
 .marketingli {
@@ -89,136 +122,4 @@ a {
 .image-text {
 	font-size: 13px;
 	text-align: left;
-}
-
-
-#modal {
-	display: none;
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	background: rgba(0,0,0,0.4);
-	z-index: 2;
-}
-
-
-.popUp {
-	width: 730px;
-	background-color: white;
-	padding: 25px;
-	margin: 10% auto;
-}
-
-.popUpContent {
-	display: flex;
-	flex-direction: column;
-}
-
-.popUpTittle {
-	font-size: 18px;
-	letter-spacing: 2px;
-	margin: 0px 0px 4px 0px;
-}
-
-.popUpText {
-	font-size: 13px;
-	margin: 0px;
-	text-transform: uppercase;
-}
-
-.popUpTable {
-	display: flex;
-	width: 100%;
-	font-size: 13px;
-	margin: 20px 0px 20px 0px;
-	text-transform: uppercase;
-}
-
-.popUpImg {
-	width: 5%;
-}
-
-.popUpBtnDiv {
-	display: flex;
-	margin-top: 20px;
-  
-}
-
-.popUpCancel {
-	font-size: 12px;
-	color: #515151;
-	border: 1px solid #979797;
-	background: white;
-	padding: 5px;
-	text-align: center;
-	margin-right: 8px; 
-	width: 98px;
-	height: 36px;
-	text-decoration: none;
-}
-
-.popUpConfirm {
-	font-size: 12px;
-	color: white;
-	border: 1px #CECBBF solid;
-	background: #CECBBF;
-	padding: 5px;
-	text-align: center;
-	width: 114px;
-	height: 36px;
-	text-decoration: none;
-}
-
-.form-label {
-	letter-spacing: 3px;
-}
-
-.form-control {
-	border-radius: 0px;
-}
-
-
-#upload {
-    opacity: 0;
-}
-
-#upload-label {
-    position: absolute;
-    top: 50%;
-    left: 1rem;
-    transform: translateY(-50%);
-}
-
-.image-area {
-    border: 2px dashed rgba(232, 222, 222, 0.7);
-    padding: 1rem;
-    position: relative;
-    min-height: 273.3px;
-	text-align: center;
-}
-
-.image-area::before {
-    content: 'No Image';
-    color: rgba(232, 222, 222, 0.7);
-    font-weight: bold;
-    text-transform: uppercase;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 0.8rem;
-    z-index: 1;
-    
-}
-
-.image-area img {
-    z-index: 2;
-    position: relative;
-}
-
-.upload-icon {
-	cursor: pointer;
-	border-radius: 0px;
 }
