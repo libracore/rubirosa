@@ -27,6 +27,7 @@ carrier_codes = {
     'GLS Express': '22',
     'Post Österreich': '100',
     'Post Österreich + Retourenetikett': '102',
+    'Abholer Paket': '40'
 }
 
 attribute_codes = {
