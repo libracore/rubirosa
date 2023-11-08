@@ -361,6 +361,7 @@ def get_dns_data():
     WHERE
         `tabDelivery Note`.`docstatus` = 1
         AND `mtr`.`delivery_note` IS NULL
+        AND `tabDelivery Note`.`is_return` = 0
     ORDER BY
         `tabDelivery Note`.`creation` DESC
     """
