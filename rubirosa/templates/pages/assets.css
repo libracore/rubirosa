@@ -38,6 +38,13 @@ a {
     text-align: center;
 }
 
+.key-date {
+	font-size: 10px;
+	text-align: right;
+	padding-right: 3px;
+	margin-bottom: 0px;
+}
+
 .users_only_message {
 	display: none;
 	font-size: 23px;
@@ -50,6 +57,15 @@ a {
 .card-header { 
 	border: none;
 	background: none;
+}
+
+.no-info-so, .no-info-sinv, .no-info-material {
+	margin-top: 185px;
+	text-transform: uppercase;
+	letter-spacing: 4px;
+	font-size: 13px;
+	height: 30px;
+	color: #bbb7b7;
 }
 
 .so-body {
@@ -83,14 +99,23 @@ a {
 }
 
 
-.so-li:hover, .sinv-li:hover, .more-info:hover, .card-active{
+.so-li:hover, .sinv-li:hover, .more-info:hover, .card-active, .popUpCancel:hover{
 	color: #fff !important;
     background-color: #000 !important;
     cursor: pointer;
 }
 
-.so-li:hover button, .sinv-li:hover a, .card-active .so-li-button{
+.so-li:hover button, .sinv-li:hover a, .card-active .so-li-button, .more-info:hover a{
 	color: #fff !important;
+}
+
+.delivery-ul {
+	padding-left: 12px !important;
+	padding-top: 0px !important;
+}
+
+.delivery-ul p {
+	margin: 3px !important;
 }
 
 .more-info{
@@ -99,6 +124,25 @@ a {
 	font-size: 12px;
 	letter-spacing: 2px;
 	padding: 7px;
+	outline: none !important;
+}
+
+.more-info:active {
+	text-decoration: none;
+}
+
+.upload-section {
+	display: flex;
+	justify-content: space-between;
+	padding-left: 35px;
+}
+
+.seeAll{
+	cursor: pointer;
+}
+
+.seeAll:hover, .seeAllActive{
+	color: #CECBBF !important;
 }
 
 .marketingli {
@@ -108,6 +152,10 @@ a {
 }
 .marketingImage {
 	height: 350px;
+}
+
+.marketingImage:hover {
+	cursor: pointer;
 }
 
 .image-title {
@@ -123,3 +171,56 @@ a {
 	font-size: 13px;
 	text-align: left;
 }
+
+
+#modal {
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(0,0,0,0.4);
+	z-index: 3;
+}
+
+
+.popUp {
+	width: 600px;
+	background-color: white;
+	padding: 0px 25px;
+	margin: 10% auto;
+	margin-top: 9% !important;
+}
+
+.popUpBtnDiv {
+	text-align: right;
+}
+
+.popUpContent {
+	display: flex;
+	flex-direction: column;
+}
+
+
+.popUpTable {
+	display: flex;
+	width: 100%;
+	margin: 20px 0px 25px 0px;
+	margin-top: 12px !important;
+}
+
+
+.popUpCancel {
+	font-size: 8px;
+	color: #515151;
+	border: 1px solid #979797;
+	background: white;
+	padding: 5px;
+	text-align: center;
+	width: 84px;
+	height: 25px;
+	text-decoration: none;
+	margin-top: 12px !important;
+}
+
