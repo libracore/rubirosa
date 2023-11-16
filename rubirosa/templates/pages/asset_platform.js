@@ -10,11 +10,7 @@ function get_arguments() {
 	var currentUser = frappe.session.user;
 
     if (currentUser !== "Guest") {
-		
-		//TEST USER
-		//~ currentUser = "toberhem@soer.de";
 		load_platform(currentUser);
-		
 	} else {
 		var page_title = document.querySelector(".platform-title");
 		var card_deck = document.querySelector(".card-deck");
@@ -28,9 +24,9 @@ function get_arguments() {
 }
 
 function load_platform(user) {
-	
+	console.log("load", user);
 	frappe.call({
-        'method': "rubirosa.rubirosa.assets.get_user_info",
+        'method': "rubirosa.rubirosa.asset_platform.get_user_info",
         'args': {
             'user': user,
         },
@@ -44,14 +40,12 @@ function load_platform(user) {
             var user_invoices = document.querySelector(".sinv-accordion");
             
             if (marketing_material.length > 0) {
-				console.log("mmmmm", marketing_material)
 				document.querySelector(".no-info-material").style.display = 'none';
 				get_marketing_material(marketing_material);
 			}
             
             user_info.forEach(function (info, x) {
 				if (info.sales_orders) {
-					//~ console.log("so", info)
 					document.querySelector(".no-info-so").style.display = 'none';
 					
 					so_counter = so_counter + 1;
@@ -201,7 +195,7 @@ function see_all() {
 	
 	if (showAllMaterials) {
 		frappe.call({
-			'method': "rubirosa.rubirosa.assets.get_marketing_material",
+			'method': "rubirosa.rubirosa.asset_platform.get_marketing_material",
 			'args': {
 			},
 			'callback': function (response) {
@@ -211,7 +205,7 @@ function see_all() {
 		});
 		showAllMaterials = false;
 	} else {
-		var user = frappe.session.user; //"toberhem@soer.de";  
+		var user = frappe.session.user; 
         load_platform(user);
         showAllMaterials = true;
 	}

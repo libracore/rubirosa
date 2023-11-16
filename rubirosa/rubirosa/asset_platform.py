@@ -10,15 +10,23 @@ import json
 
 @frappe.whitelist()
 def get_user_info(user):
-    orders = get_user_orders(user)
-    invoices = get_user_invoices(user)
+    
+    contact = frappe.get_value("Contact", {"email_id": user}, "name")
+    if not contact:
+        contact = frappe.get_value("Contact Email", {"email_id": user}, "parent")
+
+    customer = frappe.get_value("Dynamic Link", filters={ "parenttype": "Contact", "link_doctype": "Customer", "parent": contact}, fieldname="link_name")
+    
+    orders = get_user_orders(customer)
+    invoices = get_user_invoices(customer)
     marketing_material = get_marketing_material(orders)
 
     user_info = orders + invoices
 
     return {"user_info": user_info, "marketing_material": marketing_material}
     
-def get_user_orders(user):
+def get_user_orders(customer):
+
     sql_query = """
         SELECT 
         `tabSales Order`.`name` AS `sales_orders`,
@@ -27,14 +35,12 @@ def get_user_orders(user):
         `tabSales Order`.`per_delivered` AS `per_delivered`,
         `tabSales Order`.`transaction_date` AS `date`,
         '[]' AS `delivery_notes`
-        FROM `tabContact`
-        LEFT JOIN `tabDynamic Link` ON `tabContact`.`name` = `tabDynamic Link`.`parent`
-            AND `tabDynamic Link`.`link_doctype` = "Customer"
-        LEFT JOIN `tabSales Order` ON `tabDynamic Link`.`link_name` = `tabSales Order`.`customer` AND `tabSales Order`.`docstatus` = 1
-        WHERE `tabContact`.`email_id` = '{user}'
+        FROM `tabSales Order`
+        WHERE `tabSales Order`.`customer` = '{customer}'
+        AND `tabSales Order`.`docstatus` = 1
         ORDER BY `tabSales Order`.`creation` DESC
         LIMIT 20
-    """.format(user=user)
+    """.format(customer=customer)
     orders = frappe.db.sql(sql_query, as_dict = True)
     
     # Add the respective DN to the Order
@@ -51,32 +57,28 @@ def get_user_orders(user):
 def get_so_delivery_notes(sales_order):
     sql_query = """
         SELECT 
-            `tabDelivery Note`.`name` AS `delivery_note`
-        FROM `tabDelivery Note`
-        LEFT JOIN `tabDelivery Note Item` ON `tabDelivery Note`.`name` = `tabDelivery Note Item`.`parent`
+            `tabDelivery Note Item`.`parent` AS `delivery_note`
+        FROM `tabDelivery Note Item`
         WHERE `tabDelivery Note Item`.`against_sales_order` = "{sales_order}"
-        GROUP BY `tabDelivery Note`.`name`
+        GROUP BY `tabDelivery Note Item`.`parent`
     """.format(sales_order=sales_order)
     
     delivery_note_list = frappe.db.sql(sql_query, as_dict=True)
 
     return delivery_note_list
 
-def get_user_invoices(user):
+def get_user_invoices(customer):
     sql_query = """
         SELECT 
         `tabSales Invoice`.`name` AS `sales_invoices`,
         `tabSales Invoice`.`due_date` AS `due_date`,
         `tabSales Invoice`.`status` AS `status`,
         `tabSales Invoice`.`posting_date` AS `date`
-        FROM `tabContact`
-        LEFT JOIN `tabDynamic Link` ON `tabContact`.`name` = `tabDynamic Link`.`parent`
-            AND `tabDynamic Link`.`link_doctype` = "Customer"
-        LEFT JOIN `tabSales Invoice` ON `tabDynamic Link`.`link_name` = `tabSales Invoice`.`customer` AND `tabSales Invoice`.`docstatus` = 1
-        WHERE `tabContact`.`email_id` = '{user}'
+        FROM `tabSales Invoice`
+        WHERE `tabSales Invoice`.`customer` = '{customer}'
         ORDER BY `tabSales Invoice`.`creation` DESC
         LIMIT 20
-    """.format(user=user)
+    """.format(customer=customer)
     invoices = frappe.db.sql(sql_query, as_dict = True)
     
     return invoices
