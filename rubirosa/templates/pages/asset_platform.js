@@ -12,7 +12,7 @@ function get_arguments() {
     if (currentUser !== "Guest") {
 		load_platform(currentUser);
 	} else {
-		var page_title = document.querySelector(".platform-title");
+		var page_title = document.querySelector(".platform-intro");
 		var card_deck = document.querySelector(".card-deck");
 		var users_only_message = document.querySelector(".users_only_message");
 

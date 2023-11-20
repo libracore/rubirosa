@@ -7,6 +7,22 @@ a {
 	margin: 0px -15px 0px -15px;
 }
 
+.b2b-button{
+	color: #000;
+	background-color: #fff;
+	border-color: #000;
+	margin-bottom: 16px;
+	text-transform: uppercase;
+	font-size: 12px;
+	letter-spacing: 3px;
+}
+
+.b2b-button:hover {
+	color: white;
+	background-color: #CECBBF;
+	border-color: #CECBBF;
+}
+
 .platform-title {
 	margin-left: 5px;
 	font-size: 22px !important;
@@ -99,7 +115,7 @@ a {
 }
 
 
-.so-li:hover, .sinv-li:hover, .more-info:hover, .card-active, .popUpCancel:hover{
+.so-li:hover, .sinv-li:hover, .more-info:hover, .card-active, .popUpCancel:hover {
 	color: #fff !important;
     background-color: #000 !important;
     cursor: pointer;
