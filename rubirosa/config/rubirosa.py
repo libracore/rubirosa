@@ -18,6 +18,12 @@ def get_data():
                        "name": "Campaign",
                        "label": _("Campaign"),
                        "description": _("Campaign")
+                   },
+                   {
+                       "type": "doctype",
+                       "name": "Marketing Material",
+                       "label": _("Marketing Material"),
+                       "description": _("Marketing Material")
                    }
             ]
         },
