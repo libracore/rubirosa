@@ -14,6 +14,7 @@ from frappe.utils.password import get_decrypted_password
 from frappe.utils import flt
 from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
 from bs4 import BeautifulSoup
+from frappe import get_print   # for pdf creation
 
 carrier_codes = {
     'SwissPost Economy': '012',
@@ -321,10 +322,19 @@ def generate_shipping_order(debug=False):
     
     # transfer print files
     for dn in dns:
-        pdf_file = "/tmp/LS{0}.pdf".format(dn.get("name")
-        settings = frappe.get_doc("MS Direct Settings")
+        # delivery note
+        pdf_file = "/tmp/LS{0}.pdf".format(dn.get("name"))
         pdf = get_print(doctype="Delivery Note", name=dn.get("name"), print_format=settings.dn_print_format, as_pdf=True)
-        f = codecs.open(pdf_file), "wb")
+        f = codecs.open(pdf_file, "wb")
+        f.write(pdf)
+        f.close()
+        write_file(pdf_file, settings.in_folder)
+        if not debug:
+            os.remove(pdf_file)
+        # invoice
+        pdf_file = "/tmp/LS_INV_{0}.pdf".format(dn.get("name"))
+        pdf = get_print(doctype="Delivery Note", name=dn.get("name"), print_format=settings.sinv_print_format, as_pdf=True)
+        f = codecs.open(pdf_file, "wb")
         f.write(pdf)
         f.close()
         write_file(pdf_file, settings.in_folder)
