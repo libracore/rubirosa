@@ -1,0 +1,242 @@
+a {
+	text-decoration: none !important;
+	color: #7d7d7d !important;
+}
+.page_content {
+	height: 65.5vh;
+	margin: 0px -15px 0px -15px;
+}
+
+.b2b-button{
+	color: #000;
+	background-color: #fff;
+	border-color: #000;
+	margin-bottom: 16px;
+	text-transform: uppercase;
+	font-size: 12px;
+	letter-spacing: 3px;
+}
+
+.b2b-button:hover {
+	color: white;
+	background-color: #CECBBF;
+	border-color: #CECBBF;
+}
+
+.platform-title {
+	margin-left: 5px;
+	font-size: 22px !important;
+    text-align: center;
+}
+
+.card-deck {
+	height: 100%;
+}
+
+.card {
+	height: 95%;
+}
+
+.card-title, .platform-title {
+	text-transform: uppercase;
+	letter-spacing: 4px;
+}
+
+.card-title {
+	font-size: 15px;
+	height: 30px;
+}
+
+.card-column {
+	overflow-y: scroll;
+	scrollbar-width: thin;
+	scrollbar-color: transparent transparent;
+    text-align: center;
+}
+
+.key-date {
+	font-size: 10px;
+	text-align: right;
+	padding-right: 3px;
+	margin-bottom: 0px;
+}
+
+.users_only_message {
+	display: none;
+	font-size: 23px;
+	padding: 150px;
+	text-align: center;
+	text-transform: uppercase;
+	letter-spacing: 4px;
+}
+
+.card-header { 
+	border: none;
+	background: none;
+}
+
+.no-info-so, .no-info-sinv, .no-info-material {
+	margin-top: 185px;
+	text-transform: uppercase;
+	letter-spacing: 4px;
+	font-size: 13px;
+	height: 30px;
+	color: #bbb7b7;
+}
+
+.so-body {
+	border-top: 1px solid rgba(0, 0, 0, 0.125);
+	text-align: left;
+	text-transform: uppercase;
+	font-size: 12px;
+	letter-spacing: 4px;
+}
+
+.list-group-item  {
+	text-align: right;
+	color: #7d7d7d !important;
+	
+}
+
+.so-header{
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.so-li-button, sinv-li-button {
+	text-decoration: none !important;
+	color: #7d7d7d !important;
+	padding: 0px;
+}
+
+.so-li, .sinv-li{
+	text-align: right;
+}
+
+
+.so-li:hover, .sinv-li:hover, .more-info:hover, .card-active, .popUpCancel:hover {
+	color: #fff !important;
+    background-color: #000 !important;
+    cursor: pointer;
+}
+
+.so-li:hover button, .sinv-li:hover a, .card-active .so-li-button, .more-info:hover a{
+	color: #fff !important;
+}
+
+.delivery-ul {
+	padding-left: 12px !important;
+	padding-top: 0px !important;
+}
+
+.delivery-ul p {
+	margin: 3px !important;
+}
+
+.more-info{
+	border: 1px solid rgba(0, 0, 0, 0.125);
+	background: none;
+	font-size: 12px;
+	letter-spacing: 2px;
+	padding: 7px;
+	outline: none !important;
+}
+
+.more-info:active {
+	text-decoration: none;
+}
+
+.upload-section {
+	display: flex;
+	justify-content: space-between;
+	padding-left: 35px;
+}
+
+.seeAll{
+	cursor: pointer;
+}
+
+.seeAll:hover, .seeAllActive{
+	color: #CECBBF !important;
+}
+
+.marketingli {
+	border: none !important;
+	padding: 0px !important;
+	margin-bottom: 35px;
+}
+.marketingImage {
+	height: 350px;
+}
+
+.marketingImage:hover {
+	cursor: pointer;
+}
+
+.image-title {
+	text-align: left;
+	text-transform: uppercase;
+	font-size: 10px;
+	margin-top: 12px;
+	letter-spacing: 2px;
+	padding-left: 2px;
+}
+
+.image-text {
+	font-size: 13px;
+	text-align: left;
+}
+
+
+#modal {
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(0,0,0,0.4);
+	z-index: 3;
+}
+
+
+.popUp {
+	width: 600px;
+	background-color: white;
+	padding: 0px 25px;
+	margin: 10% auto;
+	margin-top: 9% !important;
+}
+
+.popUpBtnDiv {
+	text-align: right;
+}
+
+.popUpContent {
+	display: flex;
+	flex-direction: column;
+}
+
+
+.popUpTable {
+	display: flex;
+	width: 100%;
+	margin: 20px 0px 25px 0px;
+	margin-top: 12px !important;
+}
+
+
+.popUpCancel {
+	font-size: 8px;
+	color: #515151;
+	border: 1px solid #979797;
+	background: white;
+	padding: 5px;
+	text-align: center;
+	width: 84px;
+	height: 25px;
+	text-decoration: none;
+	margin-top: 12px !important;
+}
+

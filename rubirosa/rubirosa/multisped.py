@@ -13,6 +13,7 @@ import time
 from frappe.utils.password import get_decrypted_password
 from frappe.utils import flt
 from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+from bs4 import BeautifulSoup
 
 carrier_codes = {
     'SwissPost Economy': '012',
@@ -97,6 +98,9 @@ def get_items_data():
             
         # rewrite item code to multisped item code (20 digits only - hashed)
         d['item_number'] = get_multisped_item_code(d['item_code'], 20)
+        
+        # remove html content from description
+        d['description'] = BeautifulSoup(d['description'], "lxml").text
         
         # convert weight to comma-notation
         d['weight'] = format_multisped_number(d['weight'])
@@ -370,6 +374,7 @@ def get_dns_data():
     WHERE
         `tabDelivery Note`.`docstatus` = 1
         AND `mtr`.`delivery_note` IS NULL
+        AND `tabDelivery Note`.`is_return` = 0
     ORDER BY
         `tabDelivery Note`.`creation` DESC
     """

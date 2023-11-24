@@ -1,4 +1,4 @@
-# Copyright (c) 2013-2021, libracore (https://www.libracore.com) and contributors
+# Copyright (c) 2013-2023, libracore (https://www.libracore.com) and contributors
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
@@ -19,7 +19,9 @@ def execute(filters=None):
         {'fieldname': 'base_amount', 'label': _('Invoiced Amount (Exclusive Tax)'), 'fieldtype': 'Currency', 'width': 210}, 
         {'fieldname': 'amount', 'label': _('Amount'), 'fieldtype': 'Float', 'precision': 2, 'width': 80}, 
         {'fieldname': 'currency', 'label': _('Currency'), 'fieldtype': 'Data', 'width': 50}, 
-        {'fieldname': 'total_commission', 'label': 'Total Commission', 'fieldtype': 'Currency', 'width': 150}, 
+        {"fieldname": "freight", "label": _("Freight"), "fieldtype": "Float", "precision": 2, "width": 80},
+        {"fieldname": "commission_base", "label": _("Commission Base"), "fieldtype": "Float", "precision": 2, "width": 80},
+        {'fieldname': 'total_commission', 'label': 'Total Commission', 'fieldtype': 'Float', 'precision': 2, 'width': 150}, 
         {'fieldname': 'avg_commission', 'label': 'Average Commission Rate', 'fieldtype': 'Percent', 'width': 170}
     ]
     
@@ -45,7 +47,13 @@ def execute(filters=None):
             `tabSales Invoice`.`total_commission` AS `total_commission`,
             100 * `tabSales Invoice`.`total_commission` / `tabSales Invoice`.`base_net_total` AS `avg_commission`,
             `tabSales Invoice`.`customer_name` AS `customer_name`,
-            `tabSales Invoice`.`currency` AS `currency`
+            `tabSales Invoice`.`currency` AS `currency`,
+            IFNULL((SELECT SUM(`amount`)
+               FROM `tabSales Invoice Item` AS `tabFreight`
+               WHERE `tabFreight`.`parent` = `tabSales Invoice`.`name`
+                 AND (`tabFreight`.`item_name` LIKE "%Fracht%"
+                  OR `tabFreight`.`item_name` LIKE "%Shipping%")
+            ), 0) AS `freight`
         FROM `tabSales Invoice`
         LEFT JOIN `tabSales Partner` ON `tabSales Partner`.`name` = `tabSales Invoice`.`sales_partner`
         LEFT JOIN `tabSales Invoice Item` ON `tabSales Invoice Item`.`parent` = `tabSales Invoice`.`name` 
@@ -57,9 +65,15 @@ def execute(filters=None):
             AND `tabSales Invoice`.`posting_date` <= "{end_date}"
             AND IFNULL(`tabSales Invoice`.`base_net_total`, 0) != 0 
             AND IFNULL(`tabSales Invoice`.`total_commission`, 0) != 0
+            AND `tabSales Order`.`sales_season` IS NOT NULL
             {conditions}
         ORDER BY `tabSales Invoice`.`sales_partner` ASC, `tabSales Invoice`.`name` DESC
             ;""".format(
             start_date=filters.from_date, end_date=filters.end_date, conditions=conditions), as_dict = True)
+            
+    # base for commission and commission
+    for d in data:
+            d['commission_base'] = d['amount'] - d['freight']
+            d['total_commission'] = (d['avg_commission'] / 100) * (d['commission_base'])
 
     return columns, data

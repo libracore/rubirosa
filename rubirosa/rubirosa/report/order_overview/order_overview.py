@@ -1,4 +1,4 @@
-# Copyright (c) 2020-2022, libracore and contributors
+# Copyright (c) 2020-2023, libracore and contributors
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
@@ -25,6 +25,8 @@ def get_columns():
         {"label": _("Customer Group"), "fieldname": "customer_group", "fieldtype": "Link", "options": "Customer Group", "width": 100},
         {"label": _("Qty"), "fieldname": "qty", "fieldtype": "Float", "width": 100},
         {"label": _("Amount"), "fieldname": "order_amount", "fieldtype": "Currency", "width": 100},
+        {"label": _("Currency"), "fieldname": "so_currency", "fieldtype": "Data", "width": 50},
+        {"label": _("Amount"), "fieldname": "so_amount", "fieldtype": "Float", "precision": 2, "width": 80},
         {"label": _("Sales Order"), "fieldname": "sales_order", "fieldtype": "Link", "options": "Sales Order", "width": 100},
         {"label": _("Delivered"), "fieldname": "delivered", "fieldtype": "Percent", "width": 70},
         {"label": _("Purchase Order"), "fieldname": "purchase_order", "fieldtype": "Link", "options": "Purchase Order", "width": 100},
@@ -56,6 +58,8 @@ def get_data(filters):
                      `tabSales Order`.`per_delivered` AS `delivered`,
                      SUM(`tabSales Order Item`.`qty`) AS `qty`,
                      SUM(`tabSales Order Item`.`base_net_amount`) AS `order_amount`,
+                     SUM(`tabSales Order Item`.`net_amount`) AS `so_amount`,
+                     `tabSales Order`.`currency` AS `so_currency`,
                      (SELECT `tabPurchase Order Item`.`parent`
                       FROM `tabPurchase Order Item`
                       WHERE `tabPurchase Order Item`.`sales_order_trace` LIKE CONCAT("%", `tabSales Order`.`name`, "%")
