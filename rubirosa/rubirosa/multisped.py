@@ -315,8 +315,20 @@ def generate_shipping_order(debug=False):
     # push the file to the target system
     write_file(local_file, settings.in_folder)
     
+    # transfer print files
+    for dn in dns:
+        pdf_file = "/tmp/LS{0}.pdf".format(dn.get("name")
+        settings = frappe.get_doc("MS Direct Settings")
+        pdf = get_print(doctype="Delivery Note", name=dn.get("name"), print_format=settings.dn_print_format, as_pdf=True)
+        f = codecs.open(pdf_file), "wb")
+        f.write(pdf)
+        f.close()
+        write_file(pdf_file, settings.in_folder)
+        if not debug:
+            os.remove(pdf_file)
+    
     # update delivery note record table
-    mark_records_transmitted(dns,'delivery_note')
+    mark_records_transmitted(dns, 'delivery_note')
     
     # cleanup (unless in debug mode)
     if not debug:
@@ -367,8 +379,8 @@ def get_dns_data():
         # pull original document
         dn_doc = frappe.get_doc("Delivery Note", d['name'])
         # append items
-        d['items'] = dn_doc.as_dict()['items']
-        for i in d['items']:
+        d['items'] = []
+        for i in dn_doc.as_dict()['items']:
             i['item_number'] = get_multisped_item_code(i['item_code'], 20)
             i['qty'] = format_multisped_number(i['qty'])
             i['rate'] = format_multisped_number(i['rate'])
@@ -380,6 +392,9 @@ def get_dns_data():
             # set currency code
             i['currency_code'] = currency_codes[dn_doc.currency]
             
+            if frappe.get_cached_value("Item", i['item_code'], 'is_stock_item'):
+                d['items'].append(i)
+        
         # shorten invoice address and customer to hash
         if d['invoice_address']:
             d['invoice_address'] = get_multisped_item_code(d['invoice_address'], 10)
