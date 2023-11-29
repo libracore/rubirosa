@@ -11,7 +11,7 @@ import pysftp
 from datetime import date, datetime
 import time
 from frappe.utils.password import get_decrypted_password
-from frappe.utils import flt
+from frappe.utils import flt, get_bench_path
 from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
 from bs4 import BeautifulSoup
 from frappe import get_print   # for pdf creation
@@ -340,6 +340,10 @@ def generate_shipping_order(debug=False):
         merger = PdfFileMerger()
         merger.append(dn_file)
         merger.append(invoice_file)
+        # ** conditional additions **
+        # US: footwear declaration
+        if dn.get("shipping_country") == "United States (US)":
+            merger.append(get_bench_path() + '/apps/rubirosa/rubirosa/public/pdf/Footwear.pdf')
         merger.write(pdf_file)
         merger.close()
         write_file(pdf_file, settings.in_folder)
@@ -370,6 +374,7 @@ def get_dns_data():
         `shipping_addrs`.`pincode` AS `eplz`,
         `shipping_addrs`.`address_line1` AS `estrasse`,
         `shipping_addrs`.`city` AS `eort`,
+        `shipping_addrs`.`country` AS `shipping_country`,
         IF(`tabContact`.`phone`, `tabContact`.`phone`, `tabContact`.`mobile_no`) AS `avistelefon`,
         `tabContact`.`email_id` AS `avisemail`,
         `billing_addrs`.`country` AS `rlkz`,
