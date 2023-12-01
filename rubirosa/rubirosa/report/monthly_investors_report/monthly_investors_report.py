@@ -483,7 +483,7 @@ def get_qty(year, month, company, online=False, customer_group=None, territory=N
     
 def get_qty_ytd(year, month, company, online=False, customer_group=None, territory=None):
     if customer_group:
-        condition = """ AND `tabSales Invoice`.`customer_group` = "{0}" """.format(customer_group)
+        condition = """ AND `tabSales Invoice`.`customer_group` LIKE "%{0}%" """.format(customer_group)
     elif territory:
         condition = """ AND `tabSales Invoice`.`territory` = "{0}" """.format(territory)
     else:
