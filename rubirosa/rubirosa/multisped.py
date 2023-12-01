@@ -11,9 +11,11 @@ import pysftp
 from datetime import date, datetime
 import time
 from frappe.utils.password import get_decrypted_password
-from frappe.utils import flt
+from frappe.utils import flt, get_bench_path
 from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
 from bs4 import BeautifulSoup
+from frappe import get_print   # for pdf creation
+from PyPDF2 import PdfFileMerger
 
 carrier_codes = {
     'SwissPost Economy': '012',
@@ -321,14 +323,33 @@ def generate_shipping_order(debug=False):
     
     # transfer print files
     for dn in dns:
-        pdf_file = "/tmp/LS{0}.pdf".format(dn.get("name")
-        settings = frappe.get_doc("MS Direct Settings")
+        # delivery note
+        dn_file = "/tmp/LS_DN_{0}.pdf".format(dn.get("name"))
         pdf = get_print(doctype="Delivery Note", name=dn.get("name"), print_format=settings.dn_print_format, as_pdf=True)
-        f = codecs.open(pdf_file), "wb")
+        f = codecs.open(dn_file, "wb")
         f.write(pdf)
         f.close()
+        # invoice
+        invoice_file = "/tmp/LS_INV_{0}.pdf".format(dn.get("name"))
+        pdf = get_print(doctype="Delivery Note", name=dn.get("name"), print_format=settings.sinv_print_format, as_pdf=True)
+        f = codecs.open(invoice_file, "wb")
+        f.write(pdf)
+        f.close()
+        # merge the two
+        pdf_file = "/tmp/LS{0}.pdf".format(dn.get("name"))
+        merger = PdfFileMerger()
+        merger.append(dn_file)
+        merger.append(invoice_file)
+        # ** conditional additions **
+        # US: footwear declaration
+        if dn.get("shipping_country") == "United States (US)":
+            merger.append(get_bench_path() + '/apps/rubirosa/rubirosa/public/pdf/Footwear.pdf')
+        merger.write(pdf_file)
+        merger.close()
         write_file(pdf_file, settings.in_folder)
         if not debug:
+            os.remove(dn_file)
+            os.remove(invoice_file)
             os.remove(pdf_file)
     
     # update delivery note record table
@@ -353,6 +374,7 @@ def get_dns_data():
         `shipping_addrs`.`pincode` AS `eplz`,
         `shipping_addrs`.`address_line1` AS `estrasse`,
         `shipping_addrs`.`city` AS `eort`,
+        `shipping_addrs`.`country` AS `shipping_country`,
         IF(`tabContact`.`phone`, `tabContact`.`phone`, `tabContact`.`mobile_no`) AS `avistelefon`,
         `tabContact`.`email_id` AS `avisemail`,
         `billing_addrs`.`country` AS `rlkz`,
@@ -604,31 +626,32 @@ def parse_purchase_order_feedback(content):
     received_items = []
     for line in lines:
         fields = line.split("|")
-        received_item = {
-            'supplier_no': fields[field_map["Lieferantennummer"]],
-            'order_no': fields[field_map["Bestellnummer"]],
-            'delivery_note': fields[field_map["Lieferscheinnummer"]],
-            'delivery_date': datetime.strptime((fields[field_map["Lieferdatum"]]), "%d.%m.%Y") if fields[field_map["Lieferdatum"]] else None,
-            'order_details': fields[field_map["Bestellposition"]],
-            'item_code': find_item_code_from_multisped_code(fields[field_map["Artikelnummer"]]),
-            'item_state': fields[field_map["Teilezustand"]],
-            'attribute1': flt((fields[field_map["Merkmal1"]] or "").replace(",", ".")),
-            'attribute2': flt((fields[field_map["Merkmal2"]] or "").replace(",", ".")),
-            'parcel_no': fields[field_map["Palettennummer"]],
-            'qty': flt((fields[field_map["Menge"]] or "").replace(",", ".")),
-            'state_code': fields[field_map["ZC"]],
-            'order_key': fields[field_map["Buchungsschlüssel"]],
-            'uom': fields[field_map["Lagereinheit"]],
-            'batch_no': fields[field_map["Chargennummer"]],
-            'serial_no': fields[field_map["Serialnummer"]],
-            'remarks': fields[field_map["Bemerkung"]],
-            'best_before_date': datetime.strptime((fields[field_map["MHD"]]), "%d.%m.%Y") if fields[field_map["MHD"]] else None
-        }
-        received_items.append(received_item)
-        
+        if len(fields) >= 15:
+            received_item = {
+                'supplier_no': fields[field_map["Lieferantennummer"]],
+                'order_no': fields[field_map["Bestellnummer"]],
+                'delivery_note': fields[field_map["Lieferscheinnummer"]],
+                'delivery_date': datetime.strptime((fields[field_map["Lieferdatum"]]), "%d.%m.%Y") if fields[field_map["Lieferdatum"]] else None,
+                'order_details': fields[field_map["Bestellposition"]],
+                'item_code': find_item_code_from_multisped_code(fields[field_map["Artikelnummer"]]),
+                'item_state': fields[field_map["Teilezustand"]],
+                'attribute1': flt((fields[field_map["Merkmal1"]] or "").replace(",", ".")),
+                'attribute2': flt((fields[field_map["Merkmal2"]] or "").replace(",", ".")),
+                'parcel_no': fields[field_map["Palettennummer"]],
+                'qty': flt((fields[field_map["Menge"]] or "").replace(",", ".")),
+                'state_code': fields[field_map["ZC"]],
+                'order_key': fields[field_map["Buchungsschlüssel"]],
+                'uom': fields[field_map["Lagereinheit"]],
+                'batch_no': fields[field_map["Chargennummer"]],
+                'serial_no': fields[field_map["Serialnummer"]] if len(fields) >= 16 else None,
+                'remarks': fields[field_map["Bemerkung"]] if len(fields) >= 17 else None,
+                'best_before_date': (datetime.strptime((fields[field_map["MHD"]]), "%d.%m.%Y") if fields[field_map["MHD"]] else None) if len(fields) >= 18 else None
+            }
+            received_items.append(received_item)
+    
     # aggregate items by orders
     receipts_by_order = {}
-    for item in received_items.items():
+    for item in received_items:
         # add order if not already there
         if item['order_no'] not in receipts_by_order:
             receipts_by_order[item['order_no']] = {}
@@ -637,26 +660,35 @@ def parse_purchase_order_feedback(content):
             receipts_by_order[item['order_no']][item['item_code']] = item['qty']
         else:
             receipts_by_order[item['order_no']][item['item_code']] += item['qty']
-        
+
     # create purchase receipt based on receipts
     for order, items in receipts_by_order.items():
         # create downstream document
         purchase_receipt_content = make_purchase_receipt(order)
         # compile document
         purchase_receipt = frappe.get_doc(purchase_receipt_content)
+        purchase_order = frappe.get_doc("Purchase Order", order)        # base items on order, so that over-delivery is possible
         # set items to actually received items
-        received_items = []
-        for i in purchase_receipt.items:
+        purchase_receipt.items = []
+        for i in purchase_order.items:
             if i.item_code in items:
-                _item = i
-                _item.qty = items[i.item_code]
-                received_items.append(received_items)
-        # replace with received items
-        purchase_receipt.items = received_items
+                purchase_receipt.append("items", {
+                    'item_code': i.item_code,
+                    'item_name': i.item_name,
+                    'description': i.description,
+                    'rate': i.rate,
+                    'qty': items[i.item_code],
+                    'purchase_order': order,
+                    'purchase_order_item': i.name
+                })
+
         # insert
         purchase_receipt.insert(ignore_permissions=True)
-        #purchase_receipt.submit()          # uncomment when testing is complete
-        
+        try:
+            purchase_receipt.submit()
+        except Exception as err:
+            frappe.log_error( err, "Multisped urchase receipt failed" )
+            
     return received_items
 
 def parse_delivery_note_feedback(content):
@@ -760,19 +792,19 @@ def parse_stock_reconciliation_feedback(content):
     stock_levels = []
     for line in lines:
         fields = line.split("|")
-        if len(fields) >= 8:
+        if len(fields) >= 5:
             stock_level = {
                 'item_code': find_item_code_from_multisped_code(fields[field_map["Artikelnummer"]]),
                 'attribute1': fields[field_map["Farbe"]],
                 'attribute2': fields[field_map["Grösse"]],
                 'batch_no': fields[field_map["Lotnummer"]],
                 'qty': flt((fields[field_map["Menge"]] or "").replace(",", ".")),
-                'state_code': fields[field_map["Zustand"]],
-                'part_state': fields[field_map["Teilezustand"]],
-                'best_before_date': datetime.strptime((fields[field_map["MHD"]]), "%d.%m.%Y") if fields[field_map["MHD"]] else None
+                'state_code': fields[field_map["Zustand"]] if len(fields) >= 6 else None,
+                'part_state': fields[field_map["Teilezustand"]] if len(fields) >= 7 else None,
+                'best_before_date': (datetime.strptime((fields[field_map["MHD"]]), "%d.%m.%Y") if fields[field_map["MHD"]] else None) if len(fields) >= 8 else None
             }
             stock_levels.append(stock_level)
-        
+    
     # aggregate items by orders
     level_by_item = {}
     for item in stock_levels:
@@ -788,16 +820,22 @@ def parse_stock_reconciliation_feedback(content):
         'doctype': "Stock Reconciliation",
     })
     for item_code, qty in level_by_item.items():
-        stock_reconciliation.append("items", {
-            'item_code': item_code,
-            'warehouse': settings.warehouse,
-            'qty': qty
-        })
-        
+        if (frappe.db.exists("Item", item_code)) \
+            and frappe.get_value("Item", item_code, "is_stock_item") == 1 \
+            and frappe.get_value("Item", item_code, "disabled") == 0:
+                stock_reconciliation.append("items", {
+                    'item_code': item_code,
+                    'warehouse': settings.warehouse,
+                    'qty': qty
+                })
+    
     # insert
     stock_reconciliation.flags.ignore_validate = True
     stock_reconciliation.insert(ignore_permissions=True)
-    #stock_reconciliation.submit()          # uncomment when testing is complete
+    try:
+        stock_reconciliation.submit()
+    except Exception as err:
+        frappe.log_error( err, "Multisped stock reconciliation failed" )
    
     return
 

@@ -17,7 +17,11 @@
   "price_list",
   "warehouse",
   "column_break_host",
-  "last_item_sync"
+  "last_item_sync",
+  "sec_print",
+  "dn_print_format",
+  "col_print",
+  "sinv_print_format"
  ],
  "fields": [
   {
@@ -99,10 +103,31 @@
    "fieldtype": "Datetime",
    "label": "Last Item Sync",
    "read_only": 1
+  },
+  {
+   "fieldname": "sec_print",
+   "fieldtype": "Section Break",
+   "label": "Print"
+  },
+  {
+   "fieldname": "dn_print_format",
+   "fieldtype": "Link",
+   "label": "Delivery Note Print Format",
+   "options": "Print Format"
+  },
+  {
+   "fieldname": "col_print",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sinv_print_format",
+   "fieldtype": "Link",
+   "label": "Sales Invoice Print Format",
+   "options": "Print Format"
   }
  ],
  "issingle": 1,
- "modified": "2023-10-01 22:08:23.418436",
+ "modified": "2023-11-24 20:17:22.989558",
  "modified_by": "Administrator",
  "module": "Rubirosa",
  "name": "Multisped Settings",
