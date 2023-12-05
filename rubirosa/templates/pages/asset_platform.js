@@ -149,9 +149,9 @@ function get_marketing_material(mm) {
 		if (material.image) {
 			if (mm_counter < maxMaterialsToShow) {
 				mm_counter = mm_counter + 1;
-				materialli.innerHTML += `<li class="list-group-item marketingli" style="display:block; "><img class='marketingImage' src="${material.image}" onclick="image_click('${material.attachment_urls}')"/> <br> <p class="image-title">${ material.season ? material.season : 'Rubirosa' } - ${material.item_code ? material.item_code.split("-")[0] : ""}</p> <p class="image-text">${material.content ? material.content : '' }</p></li>`;
+				materialli.innerHTML += `<li class="list-group-item marketingli" style="display:block; "><img class='marketingImage' src="${material.image}" onclick="image_click('${material.attachment_urls ? material.attachment_urls : material.image }')"/> <br> <p class="image-title">${ material.season ? material.season : 'Rubirosa' } - ${material.item_code ? material.item_code.split("-")[0] : ""}</p> <p class="image-text">${material.content ? material.content : '' }</p></li>`;
 			} else {
-				materialli.innerHTML += `<li class="list-group-item marketingli" style="display:none; "><img class='marketingImage' src="${material.image}" onclick="image_click('${material.attachment_urls}')"/> <br> <p class="image-title">${ material.season ? material.season : 'Rubirosa' } - ${material.item_code ? material.item_code.split("-")[0] : ""}</p> <p class="image-text">${material.content ? material.content : '' }</p></li>`;
+				materialli.innerHTML += `<li class="list-group-item marketingli" style="display:none; "><img class='marketingImage' src="${material.image}" onclick="image_click('${material.attachment_urls ? material.attachment_urls : material.image }')"/> <br> <p class="image-title">${ material.season ? material.season : 'Rubirosa' } - ${material.item_code ? material.item_code.split("-")[0] : ""}</p> <p class="image-text">${material.content ? material.content : '' }</p></li>`;
 			}
 		}
 	});
@@ -185,6 +185,14 @@ function pop_up_cancel() {
 	var popUpDiv = document.getElementById("modal");
     popUpDiv.style.display = "none";
 }
+
+// When the user clicks anywhere outside of the modal, close it
+window.addEventListener('click', function (event) {
+	var modal = document.getElementById('modal');
+	if (event.target === modal) {
+		modal.style.display = 'none';
+    }
+});
 
 var showAllMaterials = true;
 
