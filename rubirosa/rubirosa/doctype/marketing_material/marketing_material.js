@@ -39,7 +39,6 @@ frappe.ui.form.on('Marketing Material', {
     
 });
 
-
 function push_notifications(frm, reason) {
 	frappe.call({
 		'method': "rubirosa.rubirosa.doctype.marketing_material.marketing_material.push_notifications",

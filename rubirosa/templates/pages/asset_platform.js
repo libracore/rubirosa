@@ -136,7 +136,7 @@ function handle_click(e) {
 
 var total_marketing_material;
 function get_marketing_material(mm) {
-	console.log("mm", mm)
+
 	var materialli = document.querySelector(".material");
 	materialli.innerHTML = "";
 	
@@ -181,7 +181,6 @@ function copy_to_clipboard(x) {
 	navigator.clipboard.writeText(copyText.value);
 	
 	setTimeout(function() {
-		console.log("time pass")
 		copyBtn.classList.remove('fa-check'); 
 		copyBtn.classList.add('fa-clone');
 	}, 1500);
@@ -194,7 +193,7 @@ function image_click(attachments) {
 	var popUpDiv = document.getElementById("modal");
 	var firstImage = true; 
 	user_orders.innerHTML = "";
-	console.log("leng", image_urls.length)
+
 	image_urls.forEach(function (image, x) {
 		var isActive = firstImage ? "active" : "";
 		user_orders.innerHTML += `
@@ -209,7 +208,7 @@ function image_click(attachments) {
 	popUpDiv.style.display = "block";
 	
 	if (image_urls.length == 1 ) {
-		console.log("leng", image_urls.length)
+
 		document.querySelector(".carousel-control-prev-icon").style.display = 'none';
 		document.querySelector(".carousel-control-next-icon").style.display = 'none';
 	} else {
@@ -219,7 +218,6 @@ function image_click(attachments) {
 }
 
 function download_all() {
-	console.log("attch", image_urls);
 	
 	image_urls.forEach(link => {
         var anchor = document.createElement('a');
