@@ -95,6 +95,7 @@ def get_marketing_material(orders=None):
             `tabMarketing Material`.`item_code`,
             `tabMarketing Material`.`content`,
             `tabMarketing Material`.`image`,
+            `tabMarketing Material`.`category`,
         GROUP_CONCAT(DISTINCT `tabFile`.`file_url`) AS `attachment_urls`
         FROM
             `tabMarketing Material`

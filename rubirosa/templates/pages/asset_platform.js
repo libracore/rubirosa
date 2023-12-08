@@ -136,7 +136,7 @@ function handle_click(e) {
 
 var total_marketing_material;
 function get_marketing_material(mm) {
-	
+	console.log("mm", mm)
 	var materialli = document.querySelector(".material");
 	materialli.innerHTML = "";
 	
@@ -149,9 +149,13 @@ function get_marketing_material(mm) {
 		if (material.image) {
 			if (mm_counter < maxMaterialsToShow) {
 				mm_counter = mm_counter + 1;
-				materialli.innerHTML += `<li class="list-group-item marketingli" style="display:block; "><img class='marketingImage' src="${material.image}" onclick="image_click('${material.attachment_urls ? material.attachment_urls : material.image }')"/> <br> <p class="image-title">${ material.season ? material.season : 'Rubirosa' } - ${material.item_code ? material.item_code.split("-")[0] : ""}</p> <p class="image-text">${material.content ? material.content : '' }</p></li>`;
+				var copy_section = "";
+				if (material.content) {
+					copy_section = `<div style="display: flex; justify-content: space-between;"> <p class="image-text" >${material.content ? material.content : '' }</p> <input style="visibility: hidden; width: 0px;" type="text" value="${material.content}" id="myInput${x}"> <button class="fa fa-clone copyBtn" id="copyBtn${x}" onclick="copy_to_clipboard(${x})"></button> </div> `;
+				} 
+				materialli.innerHTML += `<li class="list-group-item marketingli" style="display:block; ">  <div class="image-container"> <img class='marketingImage' src="${material.image}" onclick="image_click('${material.attachment_urls}')"/> ${ material.category ? '<div class="overlay">' + material.category + '</div>' : ''} </div><br> <p class="image-title">${ material.season ? material.season : 'Rubirosa' } - ${material.item_code ? material.item_code.split("-")[0] : ""}</p> ${copy_section}</li>`;
 			} else {
-				materialli.innerHTML += `<li class="list-group-item marketingli" style="display:none; "><img class='marketingImage' src="${material.image}" onclick="image_click('${material.attachment_urls ? material.attachment_urls : material.image }')"/> <br> <p class="image-title">${ material.season ? material.season : 'Rubirosa' } - ${material.item_code ? material.item_code.split("-")[0] : ""}</p> <p class="image-text">${material.content ? material.content : '' }</p></li>`;
+				materialli.innerHTML += `<li class="list-group-item marketingli" style="display:none;  ">  <div class="image-container"> <img class='marketingImage' src="${material.image}" onclick="image_click('${material.attachment_urls}')"/> ${ material.category ? '<div class="overlay">' + material.category + '</div>' : ''} </div> <br> <p class="image-title">${ material.season ? material.season : 'Rubirosa' } - ${material.item_code ? material.item_code.split("-")[0] : ""}</p> ${copy_section}</li>`;
 			}
 		}
 	});
@@ -161,13 +165,36 @@ function get_marketing_material(mm) {
 	}	
 }
 
+function copy_to_clipboard(x) {
+	// Get the text field
+	var copyText = document.getElementById("myInput" + x);
+	var copyBtn = document.getElementById("copyBtn" + x);
+	
+	copyBtn.classList.remove('fa-clone'); 
+	copyBtn.classList.add('fa-check'); 
+	
+	// Select the text field for mobile devices
+	copyText.select();
+	copyText.setSelectionRange(0, 99999);
+
+	// Copy the text inside the text field
+	navigator.clipboard.writeText(copyText.value);
+	
+	setTimeout(function() {
+		console.log("time pass")
+		copyBtn.classList.remove('fa-check'); 
+		copyBtn.classList.add('fa-clone');
+	}, 1500);
+}
+
+var image_urls = [];
 function image_click(attachments) {
-	var image_urls = attachments.split(",");
+	image_urls = attachments.split(",");
 	var user_orders = document.querySelector(".carousel-inner");
 	var popUpDiv = document.getElementById("modal");
 	var firstImage = true; 
 	user_orders.innerHTML = "";
-	
+	console.log("leng", image_urls.length)
 	image_urls.forEach(function (image, x) {
 		var isActive = firstImage ? "active" : "";
 		user_orders.innerHTML += `
@@ -176,9 +203,31 @@ function image_click(attachments) {
 			</div>`;
 		// After the first image, set the flag to false
 		firstImage = false;
+	
 	});
 	
 	popUpDiv.style.display = "block";
+	
+	if (image_urls.length == 1 ) {
+		console.log("leng", image_urls.length)
+		document.querySelector(".carousel-control-prev-icon").style.display = 'none';
+		document.querySelector(".carousel-control-next-icon").style.display = 'none';
+	} else {
+		document.querySelector(".carousel-control-prev-icon").style.display = 'inline-block';
+		document.querySelector(".carousel-control-next-icon").style.display = 'inline-block';
+	}
+}
+
+function download_all() {
+	console.log("attch", image_urls);
+	
+	image_urls.forEach(link => {
+        var anchor = document.createElement('a');
+        anchor.href = link;
+        anchor.download = link.split('/').pop();
+        anchor.click();
+        URL.revokeObjectURL(anchor.href);
+    });
 }
 
 function pop_up_cancel() {
