@@ -59,7 +59,7 @@ a {
 	letter-spacing: 3px;
 }
 
-.b2b-button:hover {
+.b2b-button:hover, .popUpDownload:hover {
 	color: white;
 	background-color: #CECBBF;
 	border-color: #CECBBF;
@@ -232,6 +232,9 @@ a {
 .image-text {
 	font-size: 13px;
 	text-align: left;
+	border: none;
+	color: #7d7d7d !important;
+	margin-bottom: 0px;
 }
 
 
@@ -273,8 +276,8 @@ a {
 }
 
 
-.popUpCancel {
-	font-size: 8px;
+.popUpCancel, .popUpDownload {
+	font-size: 8.2px;
 	color: #515151;
 	border: 1px solid #979797;
 	background: white;
@@ -284,5 +287,52 @@ a {
 	height: 25px;
 	text-decoration: none;
 	margin-top: 12px !important;
+}
+
+.carousel-control-prev, .carousel-control-next {
+	opacity: 1;
+	filter: contrast(0);
+}
+
+.carousel-control-next {
+    right: -12px !important;
+}
+
+.carousel-control-prev {
+    left: -15px !important;
+}
+
+.copyBtn {
+    background: none;
+    border: none;
+    text-decoration: none;
+	outline: none !important;
+	margin-top: -10px;
+	font-size: 14px;
+}
+
+.fa-check{
+	color: #ACE1AF;
+}
+
+.image-container {
+    position: relative;
+}
+
+.overlay {
+	display:flex;
+	justify-content: center;
+	align-items: center;
+    position: absolute;
+	top: 15px;
+	left: 15px;
+	width: 93px;
+	height: 25px;
+	color: white;
+	letter-spacing: 3px;
+	font-size: 10px;
+	text-transform: uppercase;
+    background-color: rgba(100, 100, 100, 0.5);
+    pointer-events: none; 
 }
 
