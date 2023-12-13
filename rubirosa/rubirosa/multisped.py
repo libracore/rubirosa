@@ -401,9 +401,9 @@ def get_dns_data():
         `tabDelivery Note`.`docstatus` = 1
         AND `mtr`.`delivery_note` IS NULL
         AND `tabDelivery Note`.`is_return` = 0
-        AND (SELECT `warehouse` 
-             FROM `tabDelivery Note Item`.`warehouse`
-             WHERE `tabDelivery Note Item`.`parent` = `tabDelviery Note`.`name`
+        AND (SELECT `tabDelivery Note Item`.`warehouse` 
+             FROM `tabDelivery Note Item`
+             WHERE `tabDelivery Note Item`.`parent` = `tabDelivery Note`.`name`
                AND `tabDelivery Note Item`.`idx` = 1
              LIMIT 1) = "Stock EU - RMG"
     ORDER BY
