@@ -2,9 +2,51 @@ a {
 	text-decoration: none !important;
 	color: #7d7d7d !important;
 }
+
+.web-footer{
+	display: none !important;
+}
+
+.small-footer {
+	height: 87.5px;
+	font-size: 11px;
+	background-color: #CECBBF;
+	margin-left: -390px;
+	margin-right: -390px;
+	padding-top: 6px;
+}
+
+.small-footer, .footer-first-div {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.footer-first-div {
+	width: 30%;
+} 
+
+.small-footer img {
+	width: 30%;
+	margin-right: -90px;
+}
+
+.small-footer p, .small-footer ul {
+	margin-bottom: 0px !important;
+}
+
+.small-footer ul {
+	margin-right: 55px !important;
+}
+
+.small-footer li {
+	width: 38px;
+	height: 38px;
+}
+
 .page_content {
-	height: 65.5vh;
-	margin: 0px -15px 0px -15px;
+	height: 69vh;
+	margin: -20px -15px 0px -15px;
 }
 
 .b2b-button{
@@ -17,7 +59,7 @@ a {
 	letter-spacing: 3px;
 }
 
-.b2b-button:hover {
+.b2b-button:hover, .popUpDownload:hover {
 	color: white;
 	background-color: #CECBBF;
 	border-color: #CECBBF;
@@ -25,7 +67,7 @@ a {
 
 .platform-title {
 	margin-left: 5px;
-	font-size: 22px !important;
+	font-size: 20px !important;
     text-align: center;
 }
 
@@ -49,8 +91,10 @@ a {
 
 .card-column {
 	overflow-y: scroll;
+/*
 	scrollbar-width: thin;
-	scrollbar-color: transparent transparent;
+*/
+	scrollbar-color: #95918d transparent;
     text-align: center;
 }
 
@@ -167,7 +211,9 @@ a {
 	margin-bottom: 35px;
 }
 .marketingImage {
-	height: 350px;
+
+	min-height: 350px;
+
 }
 
 .marketingImage:hover {
@@ -186,6 +232,9 @@ a {
 .image-text {
 	font-size: 13px;
 	text-align: left;
+	border: none;
+	color: #7d7d7d !important;
+	margin-bottom: 0px;
 }
 
 
@@ -202,7 +251,7 @@ a {
 
 
 .popUp {
-	width: 600px;
+	max-width: 600px;
 	background-color: white;
 	padding: 0px 25px;
 	margin: 10% auto;
@@ -227,8 +276,8 @@ a {
 }
 
 
-.popUpCancel {
-	font-size: 8px;
+.popUpCancel, .popUpDownload {
+	font-size: 8.2px;
 	color: #515151;
 	border: 1px solid #979797;
 	background: white;
@@ -238,5 +287,52 @@ a {
 	height: 25px;
 	text-decoration: none;
 	margin-top: 12px !important;
+}
+
+.carousel-control-prev, .carousel-control-next {
+	opacity: 1;
+	filter: contrast(0);
+}
+
+.carousel-control-next {
+    right: -12px !important;
+}
+
+.carousel-control-prev {
+    left: -15px !important;
+}
+
+.copyBtn {
+    background: none;
+    border: none;
+    text-decoration: none;
+	outline: none !important;
+	margin-top: -10px;
+	font-size: 14px;
+}
+
+.fa-check{
+	color: #ACE1AF;
+}
+
+.image-container {
+    position: relative;
+}
+
+.overlay {
+	display:flex;
+	justify-content: center;
+	align-items: center;
+    position: absolute;
+	top: 15px;
+	left: 15px;
+	width: 93px;
+	height: 25px;
+	color: white;
+	letter-spacing: 3px;
+	font-size: 10px;
+	text-transform: uppercase;
+    background-color: rgba(100, 100, 100, 0.5);
+    pointer-events: none; 
 }
 

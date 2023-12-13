@@ -1,22 +1,26 @@
 {
+ "allow_rename": 1,
  "creation": "2023-10-03 13:33:32.228028",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "image",
+  "title",
   "item_code",
   "content",
   "column_break_3",
   "type_of_media",
-  "season"
+  "season",
+  "category"
  ],
  "fields": [
   {
    "fieldname": "item_code",
    "fieldtype": "Link",
    "label": "Item",
-   "options": "Item"
+   "options": "Item",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_3",
@@ -25,12 +29,14 @@
   {
    "fieldname": "type_of_media",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Type of Media",
    "options": "Image\nVideo\nCatalog"
   },
   {
    "fieldname": "season",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Season",
    "options": "Monthly Distribution"
   },
@@ -43,9 +49,22 @@
    "fieldname": "content",
    "fieldtype": "Small Text",
    "label": "Content"
+  },
+  {
+   "fetch_from": "item_code.item_name",
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "read_only": 1
+  },
+  {
+   "fieldname": "category",
+   "fieldtype": "Select",
+   "label": "Category",
+   "options": "Still\nWebshop\nSocial"
   }
  ],
- "modified": "2023-10-06 16:23:39.320724",
+ "modified": "2023-12-08 13:39:29.878852",
  "modified_by": "Administrator",
  "module": "Rubirosa",
  "name": "Marketing Material",
@@ -66,5 +85,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "title",
  "track_changes": 1
 }
