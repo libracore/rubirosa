@@ -306,6 +306,10 @@ def generate_shipping_order(debug=False):
     # fetch data
     dns = get_dns_data()
 
+    if len(dns) == 0:
+        # skip if there are no records
+        return
+        
     # fetch Multisped Settings and select tagert path
     settings = frappe.get_doc("Multisped Settings")
     local_file = os.path.join("/tmp", "AI{date}{nn:02d}.txt".format(date=date.today().strftime("%y%m%d"), nn=(get_transfer_file_count() + 1)))
@@ -397,6 +401,11 @@ def get_dns_data():
         `tabDelivery Note`.`docstatus` = 1
         AND `mtr`.`delivery_note` IS NULL
         AND `tabDelivery Note`.`is_return` = 0
+        AND (SELECT `warehouse` 
+             FROM `tabDelivery Note Item`.`warehouse`
+             WHERE `tabDelivery Note Item`.`parent` = `tabDelviery Note`.`name`
+               AND `tabDelivery Note Item`.`idx` = 1
+             LIMIT 1) = "Stock EU - RMG"
     ORDER BY
         `tabDelivery Note`.`creation` DESC
     """
@@ -771,6 +780,7 @@ def parse_delivery_note_feedback(content):
     for dn in delivery_notes:
         dn_doc = frappe.get_doc("Delivery Note", dn['delivery_note'])
         dn_doc.sendungsnummer = dn['parcels'][0]['parcel']
+        dn_doc.shipping_status = "Shipped"
         dn_doc.save()
         
     frappe.db.commit()
