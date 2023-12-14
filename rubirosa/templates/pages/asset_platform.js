@@ -8,7 +8,8 @@ document.addEventListener("DOMContentLoaded", function(event) {
 function get_arguments() {
 	
 	var currentUser = frappe.session.user;
-
+	currentUser = "ivana.ristovic89@gmail.com";
+	
     if (currentUser !== "Guest") {
 		load_platform(currentUser);
 	} else {
@@ -23,6 +24,8 @@ function get_arguments() {
       
 }
 
+var showAllMaterials = true;
+var marketing_material = [];
 function load_platform(user) {
 	console.log("load", user);
 	frappe.call({
@@ -33,17 +36,14 @@ function load_platform(user) {
         'callback': function (response) {
 			
             var user_info = response.message.user_info;
-            var marketing_material = response.message.marketing_material;
+            marketing_material = response.message.marketing_material;
             var so_counter = 0;
             var sinv_counter = 0;
             var user_orders = document.querySelector(".so-accordion");
             var user_invoices = document.querySelector(".sinv-accordion");
             
-            if (marketing_material.length > 0) {
-				document.querySelector(".no-info-material").style.display = 'none';
-				get_marketing_material(marketing_material);
-			}
-            
+            see_all();
+                        
             user_info.forEach(function (info, x) {
 				if (info.sales_orders) {
 					document.querySelector(".no-info-so").style.display = 'none';
@@ -53,7 +53,7 @@ function load_platform(user) {
 					var dn_section = "";
 					if (Array.isArray(info.delivery_notes)) {
 						info.delivery_notes.forEach(function (dn, x) {
-							dn_section += `<li><a href="/api/method/frappe.utils.print_format.download_pdf?doctype=Delivery Note&name=${dn}&format=rubirosa Delivery Note&no_letterhead=0&_lang=de" target="_blank" style="font-weight: bold; color: #36414c !important; ">${dn}</a></li>`;
+							dn_section += `<li><a href="/api/method/frappe.utils.print_format.download_pdf?doctype=Delivery Note&name=${dn}&format=rubirosa Delivery Note&no_letterhead=0&_lang=${info.language}" target="_blank" style="font-weight: bold; color: #36414c !important; ">${dn}</a></li>`;
 						});
 					}
 					
@@ -75,7 +75,7 @@ function load_platform(user) {
 									Delivery Status: <br> <p style="font-weight: bold;">${info.delivery_status} (${info.per_delivered}%)</p> <br>
 									${info.delivery_status !== "Not Delivered" ? 'Delivery Notes: <br> <ul class="delivery-ul ' + info.sales_orders + '">' + dn_section + ' </ul> <br>' : ''}
 									<button class="more-info">
-										<a href="/api/method/frappe.utils.print_format.download_pdf?doctype=Sales Order&name=${info.sales_orders}&format=rubirosa Sales Order&no_letterhead=0&_lang=de" target="_blank"> More </a>
+										<a href="/api/method/frappe.utils.print_format.download_pdf?doctype=Sales Order&name=${info.sales_orders}&format=rubirosa Sales Order&no_letterhead=0&_lang=${info.language}" target="_blank"> More </a>
 									</button>
 								</div>
 							</div>
@@ -102,7 +102,7 @@ function load_platform(user) {
 								<div class="card-body so-body">
 									Payment Due Date: <br> <p style="font-weight: bold;"> ${info.due_date}</p> <br> Delivery Status: <br> <p style="font-weight: bold;">${info.status}</p> <br>
 									<button class="more-info" >
-										<a href="/api/method/frappe.utils.print_format.download_pdf?doctype=Sales Invoice&name=${info.sales_invoices}&format=rubirosa Sales Invoice (consolidated)&no_letterhead=0&_lang=de" target="_blank"> More </a>
+										<a href="/api/method/frappe.utils.print_format.download_pdf?doctype=Sales Invoice&name=${info.sales_invoices}&format=rubirosa Sales Invoice (consolidated)&no_letterhead=0&_lang=${info.language}" target="_blank"> More </a>
 									</button>
 								</div>
 							</div>
@@ -243,12 +243,11 @@ window.addEventListener('click', function (event) {
     }
 });
 
-var showAllMaterials = true;
-
 function see_all() {
 	document.querySelector(".no-info-material").style.display = 'none';
+	document.querySelector(".list-group").style.display = 'block';
 	var icon = document.querySelector('.seeAll');
-	icon.classList.toggle('seeAllActive');
+	
 	
 	if (showAllMaterials) {
 		frappe.call({
@@ -262,8 +261,13 @@ function see_all() {
 		});
 		showAllMaterials = false;
 	} else {
-		var user = frappe.session.user; 
-        load_platform(user);
+		icon.classList.toggle('seeAllActive');
+        if (marketing_material.length > 0) {
+			get_marketing_material(marketing_material);
+		} else {
+			document.querySelector(".no-info-material").style.display = 'block';
+			document.querySelector(".list-group").style.display = 'none';
+		}
         showAllMaterials = true;
 	}
 }

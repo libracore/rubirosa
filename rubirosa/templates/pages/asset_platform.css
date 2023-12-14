@@ -96,6 +96,7 @@ a {
 */
 	scrollbar-color: #95918d transparent;
     text-align: center;
+    z-index: 1;
 }
 
 .key-date {
