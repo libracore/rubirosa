@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 function get_arguments() {
 	
 	var currentUser = frappe.session.user;
-
+	
     if (currentUser !== "Guest") {
 		load_platform(currentUser);
 	} else {
@@ -23,6 +23,8 @@ function get_arguments() {
       
 }
 
+var showAllMaterials = true;
+var marketing_material = [];
 function load_platform(user) {
 	console.log("load", user);
 	frappe.call({
@@ -33,17 +35,14 @@ function load_platform(user) {
         'callback': function (response) {
 			
             var user_info = response.message.user_info;
-            var marketing_material = response.message.marketing_material;
+            marketing_material = response.message.marketing_material;
             var so_counter = 0;
             var sinv_counter = 0;
             var user_orders = document.querySelector(".so-accordion");
             var user_invoices = document.querySelector(".sinv-accordion");
             
-            if (marketing_material.length > 0) {
-				document.querySelector(".no-info-material").style.display = 'none';
-				get_marketing_material(marketing_material);
-			}
-            
+            see_all();
+                        
             user_info.forEach(function (info, x) {
 				if (info.sales_orders) {
 					document.querySelector(".no-info-so").style.display = 'none';
@@ -53,7 +52,7 @@ function load_platform(user) {
 					var dn_section = "";
 					if (Array.isArray(info.delivery_notes)) {
 						info.delivery_notes.forEach(function (dn, x) {
-							dn_section += `<li><a href="/api/method/frappe.utils.print_format.download_pdf?doctype=Delivery Note&name=${dn}&format=rubirosa Delivery Note&no_letterhead=0&_lang=de" target="_blank" style="font-weight: bold; color: #36414c !important; ">${dn}</a></li>`;
+							dn_section += `<li><a href="/api/method/frappe.utils.print_format.download_pdf?doctype=Delivery Note&name=${dn}&format=rubirosa Delivery Note&no_letterhead=0&_lang=${info.language}" target="_blank" style="font-weight: bold; color: #36414c !important; ">${dn}</a></li>`;
 						});
 					}
 					
@@ -75,7 +74,7 @@ function load_platform(user) {
 									Delivery Status: <br> <p style="font-weight: bold;">${info.delivery_status} (${info.per_delivered}%)</p> <br>
 									${info.delivery_status !== "Not Delivered" ? 'Delivery Notes: <br> <ul class="delivery-ul ' + info.sales_orders + '">' + dn_section + ' </ul> <br>' : ''}
 									<button class="more-info">
-										<a href="/api/method/frappe.utils.print_format.download_pdf?doctype=Sales Order&name=${info.sales_orders}&format=rubirosa Sales Order&no_letterhead=0&_lang=de" target="_blank"> More </a>
+										<a href="/api/method/frappe.utils.print_format.download_pdf?doctype=Sales Order&name=${info.sales_orders}&format=rubirosa Sales Order&no_letterhead=0&_lang=${info.language}" target="_blank"> More </a>
 									</button>
 								</div>
 							</div>
@@ -102,7 +101,7 @@ function load_platform(user) {
 								<div class="card-body so-body">
 									Payment Due Date: <br> <p style="font-weight: bold;"> ${info.due_date}</p> <br> Delivery Status: <br> <p style="font-weight: bold;">${info.status}</p> <br>
 									<button class="more-info" >
-										<a href="/api/method/frappe.utils.print_format.download_pdf?doctype=Sales Invoice&name=${info.sales_invoices}&format=rubirosa Sales Invoice (consolidated)&no_letterhead=0&_lang=de" target="_blank"> More </a>
+										<a href="/api/method/frappe.utils.print_format.download_pdf?doctype=Sales Invoice&name=${info.sales_invoices}&format=rubirosa Sales Invoice (consolidated)&no_letterhead=0&_lang=${info.language}" target="_blank"> More </a>
 									</button>
 								</div>
 							</div>
@@ -144,25 +143,27 @@ function get_marketing_material(mm) {
 	var maxMaterialsToShow = 10;
 	var mm_counter = 0;
 	total_marketing_material = mm.length;
+	console.log("total_marketing_material", total_marketing_material);
 	
 	mm.forEach(function (material, x) {
 		if (material.image) {
+			var copy_section = "";
+			if (material.content) {
+				copy_section = `<div style="display: flex; justify-content: space-between;"> <p class="image-text" >${material.content ? material.content : '' }</p> <input style="visibility: hidden; width: 0px;" type="text" value="${material.content}" id="myInput${x}"> <button class="fa fa-clone copyBtn" id="copyBtn${x}" onclick="copy_to_clipboard(${x})"></button> </div> `;
+			} 
 			if (mm_counter < maxMaterialsToShow) {
 				mm_counter = mm_counter + 1;
-				var copy_section = "";
-				if (material.content) {
-					copy_section = `<div style="display: flex; justify-content: space-between;"> <p class="image-text" >${material.content ? material.content : '' }</p> <input style="visibility: hidden; width: 0px;" type="text" value="${material.content}" id="myInput${x}"> <button class="fa fa-clone copyBtn" id="copyBtn${x}" onclick="copy_to_clipboard(${x})"></button> </div> `;
-				} 
 				materialli.innerHTML += `<li class="list-group-item marketingli" style="display:block; ">  <div class="image-container"> <img class='marketingImage' src="${material.image}" onclick="image_click('${material.attachment_urls}')"/> ${ material.category ? '<div class="overlay">' + material.category + '</div>' : ''} </div><br> <p class="image-title">${ material.season ? material.season : 'Rubirosa' } - ${material.item_code ? material.item_code.split("-")[0] : ""}</p> ${copy_section}</li>`;
 			} else {
-				materialli.innerHTML += `<li class="list-group-item marketingli" style="display:none;  ">  <div class="image-container"> <img class='marketingImage' src="${material.image}" onclick="image_click('${material.attachment_urls}')"/> ${ material.category ? '<div class="overlay">' + material.category + '</div>' : ''} </div> <br> <p class="image-title">${ material.season ? material.season : 'Rubirosa' } - ${material.item_code ? material.item_code.split("-")[0] : ""}</p> ${copy_section}</li>`;
+				materialli.innerHTML += `<li class="list-group-item marketingli" style="display:none;  ">  <div class="image-container"> <img class='marketingImage' src="${material.image}" onclick="image_click('${material.attachment_urls}')"/> ${ material.category ? '<div class="overlay">' + material.category + '</div>' : ''} </div><br> <p class="image-title">${ material.season ? material.season : 'Rubirosa' } - ${material.item_code ? material.item_code.split("-")[0] : ""}</p> ${copy_section}</li>`;
 			}
 		}
 	});
 	
 	if (mm_counter < total_marketing_material) {
+		
 		materialli.innerHTML += `<li class="list-group-item marketingli" style="text-align: center !important; "><button class="more-info" style="width: 100% !important; " onclick="load_more()">More</button></li>`
-	}	
+	}
 }
 
 function copy_to_clipboard(x) {
@@ -241,12 +242,11 @@ window.addEventListener('click', function (event) {
     }
 });
 
-var showAllMaterials = true;
-
 function see_all() {
 	document.querySelector(".no-info-material").style.display = 'none';
+	document.querySelector(".list-group").style.display = 'block';
 	var icon = document.querySelector('.seeAll');
-	icon.classList.toggle('seeAllActive');
+	
 	
 	if (showAllMaterials) {
 		frappe.call({
@@ -260,12 +260,19 @@ function see_all() {
 		});
 		showAllMaterials = false;
 	} else {
-		var user = frappe.session.user; 
-        load_platform(user);
+		icon.classList.toggle('seeAllActive');
+        if (marketing_material.length > 0) {
+			get_marketing_material(marketing_material);
+		} else {
+			document.querySelector(".no-info-material").style.display = 'block';
+			document.querySelector(".list-group").style.display = 'none';
+		}
         showAllMaterials = true;
 	}
 }
 
+var mm_counter_flag = 0;
+var mm_total_flag;
 
 function load_more() {
     // Find all hidden and shown marketingli elements
@@ -275,12 +282,14 @@ function load_more() {
     // Display the next 2 hidden m materials
     for (var i = 0; i < Math.min(2, hiddenMaterials.length); i++) {
         hiddenMaterials[i].style.display = 'block';
-        mm_counter++; 
+        mm_counter_flag++
+        mm_total_flag = mm_counter + mm_counter_flag;
     }
     
+    console.log("mm_total_flag", mm_total_flag);
+    
     // Check if there are more materials to load
-    if ((mm_counter == total_marketing_material) || (total_marketing_material - mm_counter == hiddenMaterials.length )) {
-        // No more materials to load, hide the "More" button
-        document.querySelector('.more-info').style.display = 'none';
+    if (mm_total_flag == total_marketing_material) {
+		document.querySelector('.more-info').style.display = 'none';
     }
 }

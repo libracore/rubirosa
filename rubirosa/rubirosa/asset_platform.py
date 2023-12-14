@@ -34,6 +34,7 @@ def get_user_orders(customer):
         `tabSales Order`.`delivery_status` AS `delivery_status`,
         `tabSales Order`.`per_delivered` AS `per_delivered`,
         `tabSales Order`.`transaction_date` AS `date`,
+        `tabSales Order`.`language` AS `language`,
         '[]' AS `delivery_notes`
         FROM `tabSales Order`
         WHERE `tabSales Order`.`customer` = '{customer}'
@@ -73,7 +74,8 @@ def get_user_invoices(customer):
         `tabSales Invoice`.`name` AS `sales_invoices`,
         `tabSales Invoice`.`due_date` AS `due_date`,
         `tabSales Invoice`.`status` AS `status`,
-        `tabSales Invoice`.`posting_date` AS `date`
+        `tabSales Invoice`.`posting_date` AS `date`,
+        `tabSales Invoice`.`language` AS `language`
         FROM `tabSales Invoice`
         WHERE `tabSales Invoice`.`customer` = '{customer}'
         ORDER BY `tabSales Invoice`.`creation` DESC
