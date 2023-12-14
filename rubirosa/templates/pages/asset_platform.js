@@ -8,7 +8,6 @@ document.addEventListener("DOMContentLoaded", function(event) {
 function get_arguments() {
 	
 	var currentUser = frappe.session.user;
-	currentUser = "ivana.ristovic89@gmail.com";
 	
     if (currentUser !== "Guest") {
 		load_platform(currentUser);
