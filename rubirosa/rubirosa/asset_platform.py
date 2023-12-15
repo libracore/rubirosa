@@ -140,7 +140,6 @@ def get_marketing_material(orders=None):
             {select_maketing_material}
             GROUP BY `tabMarketing Material`.`name`
             ORDER BY `tabMarketing Material`.`creation` DESC
-            LIMIT 20
             """.format(select_maketing_material=select_maketing_material)
 
         marketing_material = frappe.db.sql(sql_query, as_dict=True)
