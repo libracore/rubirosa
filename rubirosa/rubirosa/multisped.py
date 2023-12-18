@@ -443,7 +443,7 @@ def get_dns_data():
             d['rlkz'] = frappe.get_cached_value("Country", d['rlkz'], "code")
         
         # define carrier
-        d['carrier'] = carrier_codes(dn_doc.shipping_method) if dn_doc.shipping_method in carrier_codes else carrier_codes['SwissPost Economy']
+        d['carrier'] = carrier_codes[dn_doc.shipping_method] if dn_doc.shipping_method in carrier_codes else carrier_codes['SwissPost Economy']
         
     return data
 
