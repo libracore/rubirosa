@@ -451,30 +451,31 @@ def generate_purchase_order(debug=False):
     # fetch data
     purchase_orders, purchase_order_data = get_purchase_order_data()
 
-    # fetch Multisped Settings and select tagert path
-    settings = frappe.get_doc("Multisped Settings")
-    local_file = os.path.join("/tmp", "WA{date}{nn:02d}.txt".format(date=date.today().strftime("%y%m%d"), nn=(get_transfer_file_count() + 1)))
-    
-    # create delivery note transfer file   
-    po_content = frappe.render_template('rubirosa/templates/xml/multisped_purchase_order.html', {'items': purchase_order_data})
-    
-    # create output file
-    f = codecs.open(local_file, "w", encoding="utf-8", errors="ignore")
-    f.write(po_content)
-    f.close()
+    if len(purchase_orders) > 0:
+        # fetch Multisped Settings and select tagert path
+        settings = frappe.get_doc("Multisped Settings")
+        local_file = os.path.join("/tmp", "WA{date}{nn:02d}.txt".format(date=date.today().strftime("%y%m%d"), nn=(get_transfer_file_count() + 1)))
+        
+        # create delivery note transfer file   
+        po_content = frappe.render_template('rubirosa/templates/xml/multisped_purchase_order.html', {'items': purchase_order_data})
+        
+        # create output file
+        f = codecs.open(local_file, "w", encoding="utf-8", errors="ignore")
+        f.write(po_content)
+        f.close()
 
-    # push the file to the target system
-    write_file(local_file, settings.in_folder)
-    
-    # update delivery note record table
-    mark_records_transmitted(purchase_orders, 'purchase_order')
-    
-    # cleanup (unless in debug mode)
-    if not debug:
-        os.remove(local_file)
-    
-    # create log
-    create_multisped_log("Purchase Orders transferred {0}".format(local_file.replace("/tmp", "")), po_content)
+        # push the file to the target system
+        write_file(local_file, settings.in_folder)
+        
+        # update delivery note record table
+        mark_records_transmitted(purchase_orders, 'purchase_order')
+        
+        # cleanup (unless in debug mode)
+        if not debug:
+            os.remove(local_file)
+        
+        # create log
+        create_multisped_log("Purchase Orders transferred {0}".format(local_file.replace("/tmp", "")), po_content)
     return 
 
 @frappe.whitelist()
