@@ -75,6 +75,12 @@ def get_data():
             "items": [
                    {
                        "type": "doctype",
+                       "name": "Shipment",
+                       "label": _("Shipment"),
+                       "description": _("Shipment")
+                   },
+                   {
+                       "type": "doctype",
                        "name": "WooCommerce Settings",
                        "label": _("WooCommerce Settings"),
                        "description": _("WooCommerce Settings")
@@ -87,27 +93,21 @@ def get_data():
                    },
                    {
                        "type": "doctype",
-                       "name": "MS Direct Settings",
-                       "label": _("MS Direct Settings"),
-                       "description": _("MS Direct Settings")
-                   },
-                   {
-                       "type": "doctype",
-                       "name": "MS Direct Log",
-                       "label": _("MS Direct Log"),
-                       "description": _("MS Direct Log")
-                   },
-                   {
-                       "type": "doctype",
-                       "name": "MS Direct Transfer File",
-                       "label": _("MS Direct Transfer File"),
-                       "description": _("MS Direct Transfer File")
-                   },
-                   {
-                       "type": "doctype",
                        "name": "Multisped Settings",
                        "label": _("Multisped Settings"),
                        "description": _("Multisped Settings")
+                   },
+                   {
+                       "type": "doctype",
+                       "name": "Multisped Log",
+                       "label": _("Multisped Log"),
+                       "description": _("Multisped Log")
+                   },
+                   {
+                       "type": "doctype",
+                       "name": "Multisped Transfer Record",
+                       "label": _("Multisped Transfer Record"),
+                       "description": _("Multisped Transfer Record")
                    }
             ]
         },
