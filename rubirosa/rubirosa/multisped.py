@@ -694,10 +694,11 @@ def parse_purchase_order_feedback(content):
 
         # insert
         purchase_receipt.insert(ignore_permissions=True)
+        frappe.db.commit()
         try:
             purchase_receipt.submit()
         except Exception as err:
-            frappe.log_error( err, "Multisped urchase receipt failed" )
+            frappe.log_error( err, "Multisped purchase receipt failed" )
             
     return received_items
 
