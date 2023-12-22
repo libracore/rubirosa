@@ -86,7 +86,7 @@ def get_user_invoices(customer):
     return invoices
 
 @frappe.whitelist()
-def get_marketing_material(orders=None):
+def get_marketing_material(orders=None, limit=20, offset=0):
     # Create a list to store unique marketing materials
     unique_marketing_materials = []
 
@@ -117,8 +117,8 @@ def get_marketing_material(orders=None):
                     )
                 GROUP BY `tabMarketing Material`.`name`
                 ORDER BY `tabMarketing Material`.`creation` DESC
-                LIMIT 20
-                """.format(order=order['sales_orders'], select_maketing_material=select_maketing_material)
+                LIMIT {limit} OFFSET {offset}
+                """.format(order=order['sales_orders'], select_maketing_material=select_maketing_material, limit=limit, offset=offset)
              
             marketing_material = frappe.db.sql(sql_query, as_dict=True)
          
@@ -140,7 +140,8 @@ def get_marketing_material(orders=None):
             {select_maketing_material}
             GROUP BY `tabMarketing Material`.`name`
             ORDER BY `tabMarketing Material`.`creation` DESC
-            """.format(select_maketing_material=select_maketing_material)
+            LIMIT {limit} OFFSET {offset}
+            """.format(select_maketing_material=select_maketing_material, limit=limit, offset=offset)
 
         marketing_material = frappe.db.sql(sql_query, as_dict=True)
          
