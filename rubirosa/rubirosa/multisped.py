@@ -13,6 +13,7 @@ import time
 from frappe.utils.password import get_decrypted_password
 from frappe.utils import flt, get_bench_path
 from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+from erpnext.stock.delivery_note.delivery_note import make_sales_return
 from bs4 import BeautifulSoup
 from frappe import get_print   # for pdf creation
 from PyPDF2 import PdfFileMerger
@@ -673,32 +674,60 @@ def parse_purchase_order_feedback(content):
 
     # create purchase receipt based on receipts
     for order, items in receipts_by_order.items():
-        # create downstream document
-        purchase_receipt_content = make_purchase_receipt(order)
-        # compile document
-        purchase_receipt = frappe.get_doc(purchase_receipt_content)
-        purchase_order = frappe.get_doc("Purchase Order", order)        # base items on order, so that over-delivery is possible
-        # set items to actually received items
-        purchase_receipt.items = []
-        for i in purchase_order.items:
-            if i.item_code in items:
-                purchase_receipt.append("items", {
-                    'item_code': i.item_code,
-                    'item_name': i.item_name,
-                    'description': i.description,
-                    'rate': i.rate,
-                    'qty': items[i.item_code],
-                    'purchase_order': order,
-                    'purchase_order_item': i.name
-                })
+        if order.startswith("R-"):
+            # this is a delivery return
+            # create downstream document
+            delivery_return_content = make_sales_return(order[2:])
+            # compile document
+            delivery_return = frappe.get_doc(delivery_return_content)
+            delivery_note = frappe.get_doc("Delivery Note", order)
+            # set items to actually received items
+            delivery_return.items = []
+            for i in delivery_note.items:
+                if i.item_code in items:
+                    delivery_return.append("items", {
+                        'item_code': i.item_code,
+                        'item_name': i.item_name,
+                        'description': i.description,
+                        'rate': i.rate,
+                        'qty': items[i.item_code]
+                    })
 
-        # insert
-        purchase_receipt.insert(ignore_permissions=True)
-        frappe.db.commit()
-        try:
-            purchase_receipt.submit()
-        except Exception as err:
-            frappe.log_error( err, "Multisped purchase receipt failed" )
+            # insert
+            delivery_return.insert(ignore_permissions=True)
+            frappe.db.commit()
+            try:
+                delivery_return.submit()
+            except Exception as err:
+                frappe.log_error( err, "Multisped delivery return failed" )
+        else:
+            # purchase receipt
+            # create downstream document
+            purchase_receipt_content = make_purchase_receipt(order)
+            # compile document
+            purchase_receipt = frappe.get_doc(purchase_receipt_content)
+            purchase_order = frappe.get_doc("Purchase Order", order)        # base items on order, so that over-delivery is possible
+            # set items to actually received items
+            purchase_receipt.items = []
+            for i in purchase_order.items:
+                if i.item_code in items:
+                    purchase_receipt.append("items", {
+                        'item_code': i.item_code,
+                        'item_name': i.item_name,
+                        'description': i.description,
+                        'rate': i.rate,
+                        'qty': items[i.item_code],
+                        'purchase_order': order,
+                        'purchase_order_item': i.name
+                    })
+
+            # insert
+            purchase_receipt.insert(ignore_permissions=True)
+            frappe.db.commit()
+            try:
+                purchase_receipt.submit()
+            except Exception as err:
+                frappe.log_error( err, "Multisped purchase receipt failed" )
             
     return received_items
 
