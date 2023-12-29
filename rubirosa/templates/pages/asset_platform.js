@@ -134,10 +134,19 @@ function handle_click(e) {
 }
 
 var total_marketing_material;
-function get_marketing_material(mm) {
+var limit = 5;
+var offset = 20;
+function get_marketing_material(mm, user_mm) {
 
 	var materialli = document.querySelector(".material");
-	materialli.innerHTML = "";
+	if (user_mm) {
+		materialli.innerHTML = "";
+	}
+	
+	// Remove the moreBtn when adding more Marketing Material
+	if (materialli.lastChild) {
+        materialli.removeChild(materialli.lastChild);
+    }
 	
 	// Amount of Marketing Material shown 
 	var maxMaterialsToShow = 10;
@@ -151,18 +160,17 @@ function get_marketing_material(mm) {
 			if (material.content) {
 				copy_section = `<div style="display: flex; justify-content: space-between;"> <p class="image-text" >${material.content ? material.content : '' }</p> <input style="visibility: hidden; width: 0px;" type="text" value="${material.content}" id="myInput${x}"> <button class="fa fa-clone copyBtn" id="copyBtn${x}" onclick="copy_to_clipboard(${x})"></button> </div> `;
 			} 
-			if (mm_counter < maxMaterialsToShow) {
-				mm_counter = mm_counter + 1;
-				materialli.innerHTML += `<li class="list-group-item marketingli" style="display:block; ">  <div class="image-container"> <img class='marketingImage' src="${material.image}" onclick="image_click('${material.attachment_urls}')"/> ${ material.category ? '<div class="overlay">' + material.category + '</div>' : ''} </div><br> <p class="image-title">${ material.season ? material.season : 'Rubirosa' } - ${material.item_code ? material.item_code.split("-")[0] : ""}</p> ${copy_section}</li>`;
-			} else {
-				materialli.innerHTML += `<li class="list-group-item marketingli" style="display:none;  ">  <div class="image-container"> <img class='marketingImage' src="${material.image}" onclick="image_click('${material.attachment_urls}')"/> ${ material.category ? '<div class="overlay">' + material.category + '</div>' : ''} </div><br> <p class="image-title">${ material.season ? material.season : 'Rubirosa' } - ${material.item_code ? material.item_code.split("-")[0] : ""}</p> ${copy_section}</li>`;
-			}
+			mm_counter = mm_counter + 1;
+			materialli.innerHTML += `<li class="list-group-item marketingli" style="display:block; ">  <div class="image-container"> <img class='marketingImage' src="${material.image}" onclick="image_click('${material.attachment_urls}')"/> ${ material.category ? '<div class="overlay">' + material.category + '</div>' : ''} </div><br> <p class="image-title">${ material.season ? material.season : 'Rubirosa' } - ${material.item_code ? material.item_code.split("-")[0] : ""}</p> ${copy_section}</li>`;
 		}
 	});
 	
-	if (mm_counter < total_marketing_material) {
-		
-		materialli.innerHTML += `<li class="list-group-item marketingli" style="text-align: center !important; "><button class="more-info" style="width: 100% !important; " onclick="load_more()">More</button></li>`
+	//Setting the exact displayed amount
+	offset = materialli.childNodes.length;
+	
+	//if the fetch total_marketing_material is less than the limit that means that there wont be more to showcase 
+	if (total_marketing_material >= limit ) {
+		materialli.innerHTML += `<li class="list-group-item marketingli" style="text-align: center !important; "><button class="more-info" style="width: 100% !important; " onclick="load_more()">More</button></li>`;
 	}
 }
 
@@ -262,7 +270,7 @@ function see_all() {
 	} else {
 		icon.classList.toggle('seeAllActive');
         if (marketing_material.length > 0) {
-			get_marketing_material(marketing_material);
+			get_marketing_material(marketing_material, true);
 		} else {
 			document.querySelector(".no-info-material").style.display = 'block';
 			document.querySelector(".list-group").style.display = 'none';
@@ -271,25 +279,15 @@ function see_all() {
 	}
 }
 
-var mm_counter_flag = 0;
-var mm_total_flag;
-
+// Uses the limit and offset to track what has been displayed and calls another batch of 5
 function load_more() {
-    // Find all hidden and shown marketingli elements
-    var hiddenMaterials = document.querySelectorAll('.marketingli[style*="display:none"]');
-	var mm_counter = document.querySelectorAll('.marketingli[style*="display:block"]').length;
-	
-    // Display the next 2 hidden m materials
-    for (var i = 0; i < Math.min(2, hiddenMaterials.length); i++) {
-        hiddenMaterials[i].style.display = 'block';
-        mm_counter_flag++
-        mm_total_flag = mm_counter + mm_counter_flag;
-    }
-    
-    console.log("mm_total_flag", mm_total_flag);
-    
-    // Check if there are more materials to load
-    if (mm_total_flag == total_marketing_material) {
-		document.querySelector('.more-info').style.display = 'none';
-    }
+    frappe.call({
+		'method': "rubirosa.rubirosa.asset_platform.get_marketing_material",
+		'args': { 'offset': offset, 'limit': limit },
+		'callback': function (response) {
+			var more_marketing_material = response.message;
+			get_marketing_material(more_marketing_material);
+			console.log("offset", offset);
+		}
+	});
 }
