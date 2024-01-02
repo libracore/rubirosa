@@ -13,7 +13,7 @@ import time
 from frappe.utils.password import get_decrypted_password
 from frappe.utils import flt, get_bench_path
 from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
-from erpnext.stock.delivery_note.delivery_note import make_sales_return
+from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
 from bs4 import BeautifulSoup
 from frappe import get_print   # for pdf creation
 from PyPDF2 import PdfFileMerger
