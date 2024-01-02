@@ -374,10 +374,12 @@ def get_dns_data():
     SELECT
         `tabDelivery Note`.`name` AS `name`,
         `tabDelivery Note`.`customer` AS `customer`,
+        `tabDelivery Note`.`customer_name` AS `customer_name`,
         `tabDelivery Note`.`customer_address` AS `invoice_address`,
         `shipping_addrs`.`country` AS `elkz`,
         `shipping_addrs`.`pincode` AS `eplz`,
-        `shipping_addrs`.`address_line1` AS `estrasse`,
+        IFNULL(`shipping_addrs`.`address_line2`, `shipping_addrs`.`address_line1`, `shipping_addrs`.`address_line1`) AS `estrasse`,  /* if address_line2 is available, use this as street */
+        IF(`shipping_addrs`.`address_line2` IS NOT NULL, `shipping_addrs`.`address_line1`, NULL) AS `customer_name2`, /* use address line 1 as customer_2 */
         `shipping_addrs`.`city` AS `eort`,
         `shipping_addrs`.`country` AS `shipping_country`,
         IF(`tabContact`.`phone`, `tabContact`.`phone`, `tabContact`.`mobile_no`) AS `avistelefon`,

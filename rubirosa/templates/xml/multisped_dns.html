@@ -3,7 +3,7 @@ K*|
     {{- (dn.customer_id) }}|{# 1 #}
     {{- (dn.invoice_address or "")[:10] }}|{# 2 #}
     {{- (dn.get("tenant") or "")[:10] }}|{# 3 #}
-    {{- (dn.customer_name or dn.customer or "")[:40] }}|{# 3 #}
+    {{- (dn.customer_name or dn.customer or "")[:40] }}|{# 4 #}
     {{- (dn.get("customer_name2") or "")[:40] }}|{# 5 #}
     {{- (dn.get("customer_name3") or "")[:40] }}|{# 6 #}
     {{- (dn.get("elkz") or "")[:3] }}|{# 7 #}
