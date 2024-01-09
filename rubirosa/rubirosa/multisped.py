@@ -378,8 +378,8 @@ def get_dns_data():
         `tabDelivery Note`.`customer_address` AS `invoice_address`,
         `shipping_addrs`.`country` AS `elkz`,
         `shipping_addrs`.`pincode` AS `eplz`,
-        IFNULL(`shipping_addrs`.`address_line2`, `shipping_addrs`.`address_line1`, `shipping_addrs`.`address_line1`) AS `estrasse`,  /* if address_line2 is available, use this as street */
-        IF(`shipping_addrs`.`address_line2` IS NOT NULL, `shipping_addrs`.`address_line1`, NULL) AS `customer_name2`, /* use address line 1 as customer_2 */
+        `shipping_addrs`.`address_line1` AS `estrasse`, 
+        `shipping_addrs`.`address_line2` AS `customer_name2`, 
         `shipping_addrs`.`city` AS `eort`,
         `shipping_addrs`.`country` AS `shipping_country`,
         IF(`tabContact`.`phone`, `tabContact`.`phone`, `tabContact`.`mobile_no`) AS `avistelefon`,
@@ -439,6 +439,12 @@ def get_dns_data():
             d['invoice_address'] = get_multisped_item_code(d['invoice_address'], 10)
         d['customer_id'] = int(time.mktime((frappe.get_value("Customer", d['customer'], "creation")).timetuple()))
         
+        # address rewrite when address line 2 is available
+        if d['customer_name2']:
+            street = d['customer_name2']
+            d['customer_name2'] = d['estrasse']
+            d['estrasse'] = d['customer_name2']
+            
         # rewrite country name to country code
         if d['elkz']:
             d['elkz'] = frappe.get_cached_value("Country", d['elkz'], "code")
