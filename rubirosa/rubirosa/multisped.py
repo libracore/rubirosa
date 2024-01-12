@@ -118,7 +118,8 @@ def get_items_data():
             d['attribute_2'] = attributes[attribute_codes['attribute_2']]
         except:
             # attributes not found - skip
-            continue
+            d['attribute_1'] = "n/a"
+            d['attribute_2'] = "n/a"
             
         # check that there is a sales price and rewrite to comma-notation
         if d['vk']:
