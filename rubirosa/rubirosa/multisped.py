@@ -114,8 +114,8 @@ def get_items_data():
         # attributes
         attributes = get_attributes(d['item_code'])
         try:
-            d['attribute_1'] = attributes[attribute_codes['attribute_1']]
-            d['attribute_2'] = attributes[attribute_codes['attribute_2']]
+            d['attribute_1'] = attributes.get(attribute_codes['attribute_1']) or "n/a"
+            d['attribute_2'] = attributes.get(attribute_codes['attribute_2']) or "n/a"
         except:
             # attributes not found - skip
             d['attribute_1'] = "n/a"
@@ -427,8 +427,9 @@ def get_dns_data():
             i['quantity_ordered'] = format_multisped_number(i['quantity_ordered'])
             # find atttributes
             attributes = get_attributes(i['item_code'])
-            i['attribute_1'] = attributes.get(attribute_codes['attribute_1'])
-            i['attribute_2'] = attributes.get(attribute_codes['attribute_2'])
+            i['attribute_1'] = attributes.get(attribute_codes['attribute_1']) or "n/a"
+            i['attribute_2'] = attributes.get(attribute_codes['attribute_2']) or "n/a"
+            
             # set currency code
             i['currency_code'] = currency_codes[dn_doc.currency]
             
@@ -523,8 +524,8 @@ def get_purchase_order_data():
                 'shipping_date': d.get('schedule_date'),
                 'item_number': get_multisped_item_code(item.get('item_code'), 20),
                 'status': None,
-                'attribute_1': attributes.get(attribute_codes['attribute_1']),
-                'attribute_2': attributes.get(attribute_codes['attribute_2']),
+                'attribute_1': attributes.get(attribute_codes['attribute_1']) or "n/a",
+                'attribute_2': attributes.get(attribute_codes['attribute_2']) or "n/a",
                 'qty': format_multisped_number(item.get('qty')),
                 'uom': item.get('uom'),
                 'batch': item.get('batch_no'),
