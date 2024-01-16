@@ -433,6 +433,9 @@ def get_dns_data():
             # set currency code
             i['currency_code'] = currency_codes[dn_doc.currency]
             
+            # set part status
+            i['item_state'] = i.get('teilezustand')
+            
             if frappe.get_cached_value("Item", i['item_code'], 'is_stock_item'):
                 d['items'].append(i)
         
