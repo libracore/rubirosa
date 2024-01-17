@@ -34,4 +34,7 @@ A*|
     {{- (item.get("text_3") or "")[:255] }}|{# 32 #}
     {{- (item.get("text_4") or "")[:255] }}|{# 33 #}
     {{- (item.get("text_5") or "")[:255] }}{# 34 #}
+T*|{{ (item.get("item_number") or "")[:20] }}|
+T*|{{ (item.get("item_number") or "")[:20] }}|Muster Rechts
+T*|{{ (item.get("item_number") or "")[:20] }}|Muster Links
 {% endfor %}
