@@ -103,7 +103,7 @@ def get_items_data():
         d['item_number'] = get_multisped_item_code(d['item_code'], 20)
         
         # remove html content from description
-        d['description'] = BeautifulSoup(d['description'], "lxml").text
+        d['description'] = BeautifulSoup(d['description'], "lxml").text.replace("\n", "").replace("\r", "")        # make sure to prevent line breaks
         
         # convert weight to comma-notation
         d['weight'] = format_multisped_number(d['weight'])
