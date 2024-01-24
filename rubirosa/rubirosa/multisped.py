@@ -715,6 +715,9 @@ def parse_purchase_order_feedback(content):
                 frappe.log_error( err, "Multisped delivery return failed" )
         else:
             # purchase receipt
+            # check purchase order
+            if not frappe.db.exists("Purchase Order", order):
+                continue
             # create downstream document
             purchase_receipt_content = make_purchase_receipt(order)
             # compile document
