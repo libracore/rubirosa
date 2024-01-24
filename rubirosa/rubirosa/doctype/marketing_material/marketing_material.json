@@ -64,7 +64,7 @@
    "options": "Still\nWebshop\nSocial"
   }
  ],
- "modified": "2023-12-08 13:39:29.878852",
+ "modified": "2024-01-24 17:13:29.878852",
  "modified_by": "Administrator",
  "module": "Rubirosa",
  "name": "Marketing Material",
@@ -79,6 +79,18 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
    "share": 1,
    "write": 1
   }
