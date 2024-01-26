@@ -828,7 +828,13 @@ def parse_delivery_note_feedback(content):
         dn_doc = frappe.get_doc("Delivery Note", dn['delivery_note'])
         dn_doc.sendungsnummer = dn['parcels'][0]['parcel']
         dn_doc.shipping_status = "Shipped"
-        dn_doc.shipping_details = "{0} Packstücke, {1} kg".format(dn['total_colli'], dn['total_weight'])
+        packaging = []
+        parcels = dn.get("parcels")
+        if parcels:
+            for p in parcels:
+                packaging.append(p.get("packaging"))
+        dn_doc.shipping_details = "{0} Packstücke, {1} kg ({2})".format(
+            dn['total_colli'], dn['total_weight'], ", ".join(packaging))
         dn_doc.save()
         
     frappe.db.commit()
