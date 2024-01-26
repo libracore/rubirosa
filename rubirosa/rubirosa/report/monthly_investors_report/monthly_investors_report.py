@@ -202,7 +202,7 @@ def get_data(filters):
         'this_year': get_currency_str(get_turnover_ytd(filters.year, filters.month, accounts, filters.company))
     })
     
-    accounts = ["4401", "4402", "4403", "4404", "4405", "4406", "4407", "4409", "4470"]
+    accounts = ["4401", "4402", "4403", "4404", "4405", "4406", "4407", "4409", "4410", "4470"]
     data.append({
         'description': '-Related Costs (Samples, Transport, etc.) (CHF)',
         'month_last_year': get_currency_str(get_turnover(filters.year - 1, filters.month, accounts, filters.company)),
