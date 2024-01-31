@@ -448,7 +448,7 @@ def get_dns_data():
         if d['customer_name2']:
             street = d['customer_name2']
             d['customer_name2'] = d['estrasse']
-            d['estrasse'] = d['customer_name2']
+            d['estrasse'] = street
             
         # rewrite country name to country code
         if d['elkz']:
