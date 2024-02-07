@@ -5,18 +5,17 @@ frappe.listview_settings['Item'] = {
     onload: function(listview) {
         listview.page.add_menu_item(__("Create EAN"), function() {
             var selected = listview.get_checked_items();
-            create_bulk_ean(selected, "764022079");
+            create_bulk_ean(selected);
         });
     }
 };
 
-function create_bulk_ean(selected, prefix) {
+function create_bulk_ean(selected) {
     console.log(selected);
     frappe.call({
         "method": "rubirosa.rubirosa.gtin.create_bulk_ean",
         "args": {
-            "selected": selected,
-            "prefix": prefix
+            "selected": selected
         },
         "callback": function(response) {
             frappe.show_alert( __("Created") );
