@@ -503,6 +503,7 @@ def get_purchase_order_data():
     LEFT JOIN `tabMultisped Transfer Record` AS `mtr` ON `tabPurchase Order`.`name` = `mtr`.`purchase_order`
     WHERE
         `tabPurchase Order`.`docstatus` = 1
+        AND `tabPurchase Order`.`set_warehouse` = "Stock EU - RMG"
         AND `mtr`.`purchase_order` IS NULL
     ORDER BY
         `tabPurchase Order`.`creation` DESC
