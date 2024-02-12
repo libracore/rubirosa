@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 function get_arguments() {
 	
 	var currentUser = frappe.session.user;
+	input = document.getElementById("myInput").value = "";
 	
     if (currentUser !== "Guest") {
 		load_platform(currentUser);
@@ -24,7 +25,8 @@ function get_arguments() {
 }
 
 var showAllMaterials = true;
-var marketing_material = [];
+var loadAll = false;
+var orders = "";
 function load_platform(user) {
 	console.log("load", user);
 	frappe.call({
@@ -35,18 +37,16 @@ function load_platform(user) {
         'callback': function (response) {
 			
             var user_info = response.message.user_info;
-            marketing_material = response.message.marketing_material;
             var so_counter = 0;
             var sinv_counter = 0;
             var user_orders = document.querySelector(".so-accordion");
             var user_invoices = document.querySelector(".sinv-accordion");
-            
-            see_all();
                         
             user_info.forEach(function (info, x) {
 				if (info.sales_orders) {
 					document.querySelector(".no-info-so").style.display = 'none';
-					
+					//~ orders.push(info.sales_orders);
+					orders += `${info.sales_orders},`;
 					so_counter = so_counter + 1;
 					
 					var dn_section = "";
@@ -111,6 +111,8 @@ function load_platform(user) {
 				}
 				
 			});
+			
+			see_all();
 		}
 	});
 	
@@ -134,12 +136,13 @@ function handle_click(e) {
 }
 
 var total_marketing_material;
-var limit = 5;
 var offset = 20;
-function get_marketing_material(mm, user_mm) {
-
+function get_marketing_material(mm, clean) {
+	
 	var materialli = document.querySelector(".material");
-	if (user_mm) {
+	
+	// If true, clean the feed to display Images accordingly
+	if (clean) {
 		materialli.innerHTML = "";
 	}
 	
@@ -148,11 +151,7 @@ function get_marketing_material(mm, user_mm) {
         materialli.removeChild(materialli.lastChild);
     }
 	
-	// Amount of Marketing Material shown 
-	var maxMaterialsToShow = 10;
 	var mm_counter = 0;
-	total_marketing_material = mm.length;
-	console.log("total_marketing_material", total_marketing_material);
 	
 	mm.forEach(function (material, x) {
 		if (material.image) {
@@ -167,9 +166,11 @@ function get_marketing_material(mm, user_mm) {
 	
 	//Setting the exact displayed amount
 	offset = materialli.childNodes.length;
-	
+	console.log("total_marketing_material", total_marketing_material);
+	console.log("offset", offset);
+
 	//if the fetch total_marketing_material is less than the limit that means that there wont be more to showcase 
-	if (total_marketing_material >= limit ) {
+	if (total_marketing_material > offset) { 
 		materialli.innerHTML += `<li class="list-group-item marketingli" style="text-align: center !important; "><button class="more-info" style="width: 100% !important; " onclick="load_more()">More</button></li>`;
 	}
 }
@@ -217,7 +218,6 @@ function image_click(attachments) {
 	popUpDiv.style.display = "block";
 	
 	if (image_urls.length == 1 ) {
-
 		document.querySelector(".carousel-control-prev-icon").style.display = 'none';
 		document.querySelector(".carousel-control-next-icon").style.display = 'none';
 	} else {
@@ -254,40 +254,130 @@ function see_all() {
 	document.querySelector(".no-info-material").style.display = 'none';
 	document.querySelector(".list-group").style.display = 'block';
 	var icon = document.querySelector('.seeAll');
-	
+	icon.classList.toggle('seeAllActive');
 	
 	if (showAllMaterials) {
 		frappe.call({
 			'method': "rubirosa.rubirosa.asset_platform.get_marketing_material",
-			'args': {
-			},
 			'callback': function (response) {
 				var all_marketing_material = response.message;
-				get_marketing_material(all_marketing_material);
+				total_marketing_material = all_marketing_material[1][0].total_records;
+				get_marketing_material(all_marketing_material[0], true);
 			}
 		});
+		
 		showAllMaterials = false;
+		loadAll = true;
+		
 	} else {
-		icon.classList.toggle('seeAllActive');
-        if (marketing_material.length > 0) {
-			get_marketing_material(marketing_material, true);
-		} else {
-			document.querySelector(".no-info-material").style.display = 'block';
-			document.querySelector(".list-group").style.display = 'none';
-		}
+        
+		frappe.call({
+			'method': "rubirosa.rubirosa.asset_platform.get_marketing_material",
+			'args': { 'orders': orders },
+			'callback': function (response) {
+				var all_marketing_material = response.message;
+				if (all_marketing_material[1] > 0) {
+					total_marketing_material = all_marketing_material[1][0].total_records;
+					get_marketing_material(all_marketing_material[0], true);
+				} else {
+					document.querySelector(".no-info-material").style.display = 'block';
+					document.querySelector(".list-group").style.display = 'none';
+				}
+			}
+		});
+		
         showAllMaterials = true;
+        loadAll = false;
 	}
+
 }
 
 // Uses the limit and offset to track what has been displayed and calls another batch of 5
 function load_more() {
-    frappe.call({
-		'method': "rubirosa.rubirosa.asset_platform.get_marketing_material",
-		'args': { 'offset': offset, 'limit': limit },
-		'callback': function (response) {
-			var more_marketing_material = response.message;
-			get_marketing_material(more_marketing_material);
-			console.log("offset", offset);
+	var limit = 5;
+	if (loadAll) {
+		frappe.call({
+			'method': "rubirosa.rubirosa.asset_platform.get_marketing_material",
+			'args': { 'offset': offset, 'limit': limit },
+			'callback': function (response) {
+				var more_marketing_material = response.message;
+				get_marketing_material(more_marketing_material[0]);
+			}
+		});
+	} else {
+		frappe.call({
+			'method': "rubirosa.rubirosa.asset_platform.get_marketing_material",
+			'args': { 'orders': orders, 'offset': offset, 'limit': limit },
+			'callback': function (response) {
+				var more_marketing_material = response.message;
+				get_marketing_material(more_marketing_material[0]);
+			}
+		});
+	}
+    
+}
+
+// Function to filter materials based on search query
+function filterMaddterials() {
+    var searchInput = document.getElementById('searchInput').value.trim().toLowerCase();
+    var filteredMaterials = marketing_material.filter(function(material) {
+        // Check if the search query matches any part of the material content
+        return material.content.toLowerCase().includes(searchInput);
+    });
+    
+    // If search input is empty, display all materials
+    if (searchInput === "") {
+        get_marketing_material(marketing_material, true);
+    } else {
+        get_marketing_material(filteredMaterials, true);
+    }
+}
+
+function filterMaterials() {
+
+    var input, filter, ul, li, a, i, txtValue;
+    var anyVisibleChildNode = false;
+    input = document.getElementById("myInput");
+    filter = input.value.toUpperCase();
+    ul = document.querySelector(".material");
+    li = ul.getElementsByTagName("li");
+
+    var loadMoreButton = ul.lastChild;
+    loadMoreButton.style.display = 'none'; 
+
+    for (i = 0; i < li.length; i++) {
+		if (li[i].children[3]) {
+			a = li[i].children[3].children[0];
+			txtValue = a.textContent || a.innerText;
+			
+		} else if (li[i].children[2]) {		
+			a = li[i].children[2];
+			txtValue = a.textContent || a.innerText;
 		}
-	});
+		
+		if (txtValue && txtValue.toUpperCase().indexOf(filter) > -1) {
+			li[i].style.display = "block";
+		} else {
+			li[i].style.display = "none";
+		}
+		
+    }
+    
+    for (i = 0; i < li.length; i++) {
+        var computedStyle = window.getComputedStyle(li[i]);
+        if (computedStyle.display !== 'none') {
+            anyVisibleChildNode = true;
+            break;
+        } 
+    }
+    
+    if (!anyVisibleChildNode) {
+		document.querySelector(".no-info-material").style.display = 'block';
+	} else {
+		document.querySelector(".no-info-material").style.display = 'none';
+	}
+    
+    if (input.value == "") {
+		loadMoreButton.style.display = 'block';
+	}
 }
