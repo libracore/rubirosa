@@ -9,7 +9,7 @@ function get_arguments() {
 	
 	var currentUser = frappe.session.user;
 	input = document.getElementById("myInput").value = "";
-	
+
     if (currentUser !== "Guest") {
 		load_platform(currentUser);
 	} else {
@@ -276,7 +276,7 @@ function see_all() {
 			'args': { 'orders': orders },
 			'callback': function (response) {
 				var all_marketing_material = response.message;
-				if (all_marketing_material[1] > 0) {
+				if (all_marketing_material[1] != 0) {
 					total_marketing_material = all_marketing_material[1][0].total_records;
 					get_marketing_material(all_marketing_material[0], true);
 				} else {
