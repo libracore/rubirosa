@@ -19,11 +19,10 @@ def get_user_info(user):
     
     orders = get_user_orders(customer)
     invoices = get_user_invoices(customer)
-    marketing_material = get_marketing_material(orders)
 
     user_info = orders + invoices
 
-    return {"user_info": user_info, "marketing_material": marketing_material}
+    return {"user_info": user_info }
     
 def get_user_orders(customer):
 
@@ -89,7 +88,9 @@ def get_user_invoices(customer):
 def get_marketing_material(orders=None, limit=20, offset=0):
     # Create a list to store unique marketing materials
     unique_marketing_materials = []
-
+    total_unique_marketing_materials_ids = []
+    total_unique_marketing_materials = 0
+    
     select_maketing_material = """
         SELECT
             `tabMarketing Material`.`name`,
@@ -102,10 +103,11 @@ def get_marketing_material(orders=None, limit=20, offset=0):
         FROM
             `tabMarketing Material`
         LEFT JOIN `tabFile` ON `tabFile`.`attached_to_name` = `tabMarketing Material`.`name` AND `tabFile`.`attached_to_doctype` = 'Marketing Material' """
-            
-    if orders is not None:    
+
+    if orders is not None:
+        orders = orders.split(",")[:-1]
         for order in orders:
-            sql_query = """
+            orders_query = """
                 {select_maketing_material}
                 LEFT JOIN `tabSales Order` ON `tabSales Order`.`name` = "{order}"
                 LEFT JOIN `tabSales Order Item` ON `tabSales Order Item`.`parent` = `tabSales Order`.`name`
@@ -116,13 +118,25 @@ def get_marketing_material(orders=None, limit=20, offset=0):
                         OR `tabMarketing Material`.`item_code` LIKE CONCAT(LEFT(`tabSales Order Item`.`item_code`, LENGTH(`tabSales Order Item`.`item_code`) - 6), '%')
                     )
                 GROUP BY `tabMarketing Material`.`name`
-                ORDER BY `tabMarketing Material`.`creation` DESC
+                ORDER BY `tabMarketing Material`.`creation` DESC """.format(order=order, select_maketing_material=select_maketing_material)
+                
+            sql_query = """
+				{orders_query}
                 LIMIT {limit} OFFSET {offset}
-                """.format(order=order['sales_orders'], select_maketing_material=select_maketing_material, limit=limit, offset=offset)
-             
+                """.format(orders_query=orders_query, limit=limit, offset=offset)
+
+            total_orders_marketing_materials = frappe.db.sql(orders_query, as_dict=True)
             marketing_material = frappe.db.sql(sql_query, as_dict=True)
-         
+            
             if marketing_material:
+
+                for material in total_orders_marketing_materials:
+                    if material['name'] not in [m['name'] for m in total_unique_marketing_materials_ids]:
+                        # Creating a dictionary for each Marketing Material
+                        marketing_dict = {'name': material['name'] }
+                        total_unique_marketing_materials_ids.append(marketing_dict)
+                total_unique_marketing_materials = len(total_unique_marketing_materials_ids)
+
                 for material in marketing_material:
                     if material['name'] not in [m['name'] for m in unique_marketing_materials]:
                         # Creating a dictionary for each Marketing Material
@@ -134,18 +148,25 @@ def get_marketing_material(orders=None, limit=20, offset=0):
                             'image': material['image'],
                             'attachment_urls': material['attachment_urls']
                         }
-                        unique_marketing_materials.append(marketing_dict) 
+                        unique_marketing_materials.append(marketing_dict)
+
     else:
-        sql_query = """
+        all_mm_query = """
             {select_maketing_material}
             GROUP BY `tabMarketing Material`.`name`
             ORDER BY `tabMarketing Material`.`creation` DESC
+            """.format(select_maketing_material=select_maketing_material)
+			
+        sql_query = """
+			{all_mm_query}
             LIMIT {limit} OFFSET {offset}
-            """.format(select_maketing_material=select_maketing_material, limit=limit, offset=offset)
+            """.format(all_mm_query=all_mm_query, limit=limit, offset=offset)
 
+        total_mm_sql_query = frappe.db.sql(all_mm_query, as_dict=True) 
         marketing_material = frappe.db.sql(sql_query, as_dict=True)
          
         if marketing_material:
             unique_marketing_materials = marketing_material
-
-    return unique_marketing_materials
+            total_unique_marketing_materials = len(total_mm_sql_query)
+            
+    return unique_marketing_materials, total_unique_marketing_materials
