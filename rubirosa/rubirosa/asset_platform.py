@@ -88,6 +88,7 @@ def get_user_invoices(customer):
 def get_marketing_material(orders=None, limit=20, offset=0):
     # Create a list to store unique marketing materials
     unique_marketing_materials = []
+    total_unique_marketing_materials_ids = []
     total_unique_marketing_materials = 0
     
     select_maketing_material = """
@@ -123,13 +124,19 @@ def get_marketing_material(orders=None, limit=20, offset=0):
 				{orders_query}
                 LIMIT {limit} OFFSET {offset}
                 """.format(orders_query=orders_query, limit=limit, offset=offset)
-                
-            total_mm_sql_query =  """ SELECT COUNT(*) AS total_records FROM ( {orders_query} ) AS subquery """.format(orders_query=orders_query)
-            
-            total_unique_marketing_materials = frappe.db.sql(total_mm_sql_query, as_dict=True)
+
+            total_orders_marketing_materials = frappe.db.sql(orders_query, as_dict=True)
             marketing_material = frappe.db.sql(sql_query, as_dict=True)
-         
+            
             if marketing_material:
+
+                for material in total_orders_marketing_materials:
+                    if material['name'] not in [m['name'] for m in total_unique_marketing_materials_ids]:
+                        # Creating a dictionary for each Marketing Material
+                        marketing_dict = {'name': material['name'] }
+                        total_unique_marketing_materials_ids.append(marketing_dict)
+                total_unique_marketing_materials = len(total_unique_marketing_materials_ids)
+
                 for material in marketing_material:
                     if material['name'] not in [m['name'] for m in unique_marketing_materials]:
                         # Creating a dictionary for each Marketing Material
@@ -142,7 +149,7 @@ def get_marketing_material(orders=None, limit=20, offset=0):
                             'attachment_urls': material['attachment_urls']
                         }
                         unique_marketing_materials.append(marketing_dict)
-        
+
     else:
         all_mm_query = """
             {select_maketing_material}
@@ -154,14 +161,12 @@ def get_marketing_material(orders=None, limit=20, offset=0):
 			{all_mm_query}
             LIMIT {limit} OFFSET {offset}
             """.format(all_mm_query=all_mm_query, limit=limit, offset=offset)
-            
-        total_mm_sql_query =  """ SELECT COUNT(*) AS total_records FROM ( {all_mm_query} ) AS subquery """.format(all_mm_query=all_mm_query)
 
-        total_unique_marketing_materials = frappe.db.sql(total_mm_sql_query, as_dict=True)  
+        total_mm_sql_query = frappe.db.sql(all_mm_query, as_dict=True) 
         marketing_material = frappe.db.sql(sql_query, as_dict=True)
          
         if marketing_material:
             unique_marketing_materials = marketing_material
-           
-
+            total_unique_marketing_materials = len(total_mm_sql_query)
+            
     return unique_marketing_materials, total_unique_marketing_materials
