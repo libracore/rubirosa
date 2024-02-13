@@ -276,12 +276,21 @@ function see_all() {
 			'args': { 'orders': orders },
 			'callback': function (response) {
 				var all_marketing_material = response.message;
-				if (all_marketing_material[1] != 0) {
-					total_marketing_material = all_marketing_material[1][0].total_records;
-					get_marketing_material(all_marketing_material[0], true);
-				} else {
+				console.log("all_marketing_material", all_marketing_material[1])
+				if (all_marketing_material[1] == 0) {
+					
 					document.querySelector(".no-info-material").style.display = 'block';
 					document.querySelector(".list-group").style.display = 'none';
+					
+				} else {
+					if (all_marketing_material[1][0].total_records > 0) {
+						console.log("if > 0 ")
+						total_marketing_material = all_marketing_material[1][0].total_records;
+						get_marketing_material(all_marketing_material[0], true);
+					} else {
+						document.querySelector(".no-info-material").style.display = 'block';
+						document.querySelector(".list-group").style.display = 'none';
+					}
 				}
 			}
 		});
