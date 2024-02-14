@@ -210,3 +210,63 @@ def get_purchase_receipt_items(purchase_receipt):
         WHERE `tabPurchase Receipt Item`.`parent` = "{prec}";
     """.format(prec=purchase_receipt), as_dict=True)
     return content
+
+"""
+Get data for customer map
+"""
+@frappe.whitelist()
+def get_gps_coordinates(street, location):
+    url = "https://nominatim.openstreetmap.org/search?q={street},{location}&format=json&polygon=1&addressdetails=0".format(street=street, location=location)
+    response = requests.get(url)
+    data = response.json()
+    gps_coordinates = None
+    if len(data) > 0:
+        gps_coordinates = {'lat': data[0]['lat'], 'lon': data[0]['lon']}
+    return gps_coordinates
+
+@frappe.whitelist()
+def get_geographic_environment(customer_name=None, radius=1, address=None):
+    data = None
+    if frappe.db.exists("Customer", customer_name):
+        obj = frappe.get_doc("Customer", customer_name)
+        data = {
+            'customer': customer_name,
+            'gps_lat': obj.gps_latitude,
+            'gps_long': obj.gps_longitude
+        }
+    elif address:
+        # find gps from address
+        gps = get_gps_coordinates(address, "")
+        if gps:
+            data = {
+                'object': address,
+                'gps_lat': gps['lat'],
+                'gps_long': gps['lon']
+            }
+
+    # default of no center is defined
+    if not data:
+        data = {
+            'object': "rubirosa",
+            'gps_lat': 46.984338787480695,
+            'gps_long': 8.411922818855178
+        }
+
+    data['environment'] = frappe.db.sql("""
+        SELECT 
+            `tabCustomer`.`name` AS `customer`, 
+            `tabCustomer`.`gps_latitude` AS `gps_lat`, 
+            `tabCustomer`.`gps_longitude` AS `gps_long`
+        FROM `tabCustomer`
+        WHERE 
+            `tabCustomer`.`gps_latitude` >= ({gps_lat} - {lat_offset})
+            AND `tabCustomer`.`gps_latitude` <= ({gps_lat} + {lat_offset})
+            AND `tabCustomer`.`gps_longitude` >= ({gps_long} - {long_offset})
+            AND `tabCustomer`.`gps_longitude` <= ({gps_long} + {long_offset})
+            AND `tabCustomer`.`name` != "{reference}"
+            ;
+    """.format(reference=customer_name, gps_lat=data['gps_lat'], lat_offset=float(radius),
+        gps_long=data['gps_long'], long_offset=(2 * float(radius))
+    ), as_dict=True)
+
+    return data
