@@ -89,6 +89,15 @@ a {
 	height: 30px;
 }
 
+#myInput {
+	width: 100%;
+	margin-bottom: 24px;
+	padding-left: 17px;
+	outline: none;
+	font-size: 13.7px;
+	opacity: 0.6;
+}
+
 .card-column {
 	overflow-y: scroll;
 /*
@@ -200,11 +209,18 @@ a {
 
 .seeAll{
 	cursor: pointer;
+	color: #CECBBF;
 }
 
-.seeAll:hover, .seeAllActive{
+.seeAll:hover {
 	color: #CECBBF !important;
 }
+
+.seeAllActive{
+	color: black !important;
+}
+
+
 
 .marketingli {
 	border: none !important;
