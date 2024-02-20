@@ -1,0 +1,31 @@
+{
+ "custom_fields": [],
+ "custom_perms": [],
+ "doctype": "Dynamic Link",
+ "property_setters": [
+  {
+   "_assign": null,
+   "_comments": null,
+   "_liked_by": null,
+   "_user_tags": null,
+   "creation": "2018-04-10 08:47:11.260902",
+   "default_value": null,
+   "doc_type": "Dynamic Link",
+   "docstatus": 0,
+   "doctype_or_field": "DocField",
+   "field_name": "link_name",
+   "idx": 0,
+   "modified": "2018-04-10 08:47:11.260902",
+   "modified_by": "Administrator",
+   "name": "Dynamic Link-link_name-width",
+   "owner": "Administrator",
+   "parent": null,
+   "parentfield": null,
+   "parenttype": null,
+   "property": "width",
+   "property_type": null,
+   "value": "215"
+  }
+ ],
+ "sync_on_migrate": 1
+}

@@ -5,6 +5,7 @@ import frappe
 from frappe import _
 from datetime import datetime
 from frappe.utils.background_jobs import enqueue
+import requests
 """
    :params:
    item_code_pattern: "CAI%": item_code mask to find items
@@ -215,58 +216,51 @@ def get_purchase_receipt_items(purchase_receipt):
 Get data for customer map
 """
 @frappe.whitelist()
-def get_gps_coordinates(street, location):
-    url = "https://nominatim.openstreetmap.org/search?q={street},{location}&format=json&polygon=1&addressdetails=0".format(street=street, location=location)
+def get_gps_coordinates(doc, event):
+    url = "https://nominatim.openstreetmap.org/search?q={street},{location}&format=json&polygon=1&addressdetails=0".format(street=doc.address_line1, location=doc.city)
     response = requests.get(url)
     data = response.json()
-    gps_coordinates = None
     if len(data) > 0:
-        gps_coordinates = {'lat': data[0]['lat'], 'lon': data[0]['lon']}
-    return gps_coordinates
+        doc.gps_latitude = data[0]['lat']
+        doc.gps_longitude = data[0]['lon']
+    return
 
 @frappe.whitelist()
-def get_geographic_environment(customer_name=None, radius=1, address=None):
-    data = None
-    if frappe.db.exists("Customer", customer_name):
-        obj = frappe.get_doc("Customer", customer_name)
-        data = {
-            'customer': customer_name,
-            'gps_lat': obj.gps_latitude,
-            'gps_long': obj.gps_longitude
-        }
-    elif address:
-        # find gps from address
-        gps = get_gps_coordinates(address, "")
-        if gps:
-            data = {
-                'object': address,
-                'gps_lat': gps['lat'],
-                'gps_long': gps['lon']
-            }
-
-    # default of no center is defined
-    if not data:
-        data = {
-            'object': "rubirosa",
-            'gps_lat': 46.984338787480695,
-            'gps_long': 8.411922818855178
-        }
-
-    data['environment'] = frappe.db.sql("""
-        SELECT 
-            `tabCustomer`.`name` AS `customer`, 
-            `tabCustomer`.`gps_latitude` AS `gps_lat`, 
-            `tabCustomer`.`gps_longitude` AS `gps_long`
-        FROM `tabCustomer`
-        WHERE 
-            `tabCustomer`.`gps_latitude` >= ({gps_lat} - {lat_offset})
-            AND `tabCustomer`.`gps_latitude` <= ({gps_lat} + {lat_offset})
-            AND `tabCustomer`.`gps_longitude` >= ({gps_long} - {long_offset})
-            AND `tabCustomer`.`gps_longitude` <= ({gps_long} + {long_offset})
-            AND `tabCustomer`.`name` != "{reference}"
-            ;
-    """.format(reference=customer_name, gps_lat=data['gps_lat'], lat_offset=float(radius),
-        gps_long=data['gps_long'], long_offset=(2 * float(radius))
-    ), as_dict=True)
-
+def get_locations():
+    data = {
+        'object': "rubirosa",
+        'gps_lat': 47.4113807,
+        'gps_long': 9.275177907194573
+    }
+    query = """
+        SELECT
+            `raw`.`customer_name` AS `customer`,
+            `raw`.`customer_group` AS `customer_group`,
+            `tabAddress`.`gps_latitude` AS `gps_lat`, 
+            `tabAddress`.`gps_longitude` AS `gps_long`
+        FROM (
+            SELECT 
+                `cust`.`name` AS `customer_name`,
+                `cust`.`customer_group`,
+                (SELECT `tDLA`.`parent` 
+                FROM `tabDynamic Link` AS `tDLA`
+                LEFT JOIN `tabAddress` AS `tA` ON `tDLA`.`parent` = `tA`.`name`
+                WHERE `tDLA`.`link_name` = `cust`.`name`
+                AND `tDLA`.`parenttype` = "Address"
+                ORDER BY `tA`.`is_primary_address` DESC
+                LIMIT 1) AS `address`
+            FROM `tabCustomer` AS `cust`
+            WHERE
+            (`cust`.`customer_group` = 'Retail Customer Men'
+            OR `cust`.`customer_group` = 'Retail Customer Women'
+            OR `cust`.`customer_group` = 'Retail Customer Women + Men'
+            OR `cust`.`customer_group` LIKE '%Potentials%')
+            AND `cust`.`disabled` = 0
+            AND `customer_name` != 'Test'
+        ) AS `raw`
+        LEFT JOIN `tabAddress` ON `tabAddress`.`name` = `raw`.`address`
+        ;
+    """
+    data['locations'] = frappe.db.sql(query, as_dict = True)
+    print(data)
     return data

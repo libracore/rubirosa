@@ -44,9 +44,9 @@ frappe.customer_overview = {
     render_map: function(address=null) {
         // fetch object
         var customer_name = frappe.customer_overview.get_arguments();
-        var gps_lat = 46.984338787480695;
-        var gps_long = 8.411922818855178;
-        var initial_zoom = 13;
+        var gps_lat = 47.4113807;
+        var gps_long = 9.275177907194573;
+        var initial_zoom = 10;
         var geo = null;
         var radius = 0.1;
         if ((!customer_name) && (!address)) {
@@ -71,13 +71,9 @@ frappe.customer_overview = {
 
         document.getElementById("overlay-text").innerHTML = "<p>Objekte suchen...</p>";
 
+        //get retail customers and potentials
         frappe.call({
-            'method': 'rubirosa.rubirosa.utils.get_geographic_environment',
-            'args': { 
-                'customer_name': customer_name,
-                'radius': radius,
-                'address': address
-            },
+            'method': 'rubirosa.rubirosa.utils.get_locations',
             'callback': function(r) {
                 if (r.message) {
                     geo = r.message;
@@ -86,23 +82,32 @@ frappe.customer_overview = {
                     map.panTo(new L.LatLng(gps_lat, gps_long));
                 }
 
-                document.getElementById("overlay-text").innerHTML = "<p>" + geo.environment.length + " Objekte platzieren...</p>";
+                document.getElementById("overlay-text").innerHTML = "<p>" + geo.locations.length + " Objekte platzieren...</p>";
 
                 // add marker for the reference object
                 L.marker([gps_lat, gps_long], {'icon': red_icon}).addTo(map)
                     .bindPopup(get_popup_str(customer_name));
                 // add other markers
                 if (geo) {
-                    console.log(geo);
-                    for (var i = 0; i < geo.environment.length; i++) {
-
-                        // set icon color
-                        var icon = blue_icon
-                        
-                        L.marker([geo.environment[i].gps_lat, geo.environment[i].gps_long],
-                            {'icon': icon}).addTo(map)
-                            .bindPopup(get_popup_str(geo.environment[i].customer));
-
+                    for (var i = 0; i < geo.locations.length; i++) {
+                        // Check if lat and lon are not null
+                        if (geo.locations[i].gps_lat !== null && geo.locations[i].gps_long !== null) {
+                            var icon;
+                            if (geo.locations[i].customer_group.includes('Potentials')) {
+                                // set icon color
+                                icon = grey_icon;
+                            } else {
+                                // set icon color
+                                icon = green_icon;
+                            }
+                            
+                            L.marker([geo.locations[i].gps_lat, geo.locations[i].gps_long], { 'icon': icon })
+                                .addTo(map)
+                                .bindPopup(get_popup_str(geo.locations[i].customer));
+                            console.log(i);
+                        } else {
+                            console.log("Skipping location with null lat/lon:", geo.locations[i]);
+                        }
                     }
                 }
 
@@ -111,7 +116,7 @@ frappe.customer_overview = {
                 frappe.customer_overview.end_wait();
                 frappe.show_alert(geo.environment.length + " Objekte geladen");
             }
-        }); 
+        });
     },
     get_arguments: function() {
         var arguments = window.location.toString().split("?");
