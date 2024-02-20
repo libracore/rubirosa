@@ -1,0 +1,2 @@
+execute:import unidecode # new requirement
+rubirosa.patches.gps_coordinates_address.gps_coordinates_address
