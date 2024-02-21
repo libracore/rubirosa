@@ -1,25 +1,23 @@
 import frappe
 from frappe import _
 from rubirosa.rubirosa.utils import get_gps_coordinates
+from frappe.modules.utils import sync_customizations
 
 def execute():
-    frappe.reload_doc("rubirosa", "doctype", "Address")
+    sync_customizations("rubirosa")
     print("Update Coordinates")
     loop = 1
-    query = """
-        SELECT * FROM `tabAddress`
-        """
-    addresses = frappe.db.sql(query, as_dict=True)
+    addresses = frappe.get_all("Address", fields=['name'])
     total = len(addresses)
-    for address in addresses:
+    for a in addresses:
         print("{0} von {1}".format(loop, total))
         try:
-            coordinates = get_gps_coordinates(address, "event")
-            frappe.db.set_value("Address", address.name, "gps_latitude", coordinates[0])
-            frappe.db.set_value("Address", address.name, "gps_longitude", coordinates[1])
+            address = frappe.get_doc("Address", a['name'])
+            coordinates = get_gps_coordinates(address, "patch")
+            address.save()
             frappe.db.commit()
         except Exception as err:
-            print(err)
+            print("{0}: {1}".format(a['name'], err))
         loop += 1
     return
     

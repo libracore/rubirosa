@@ -223,7 +223,7 @@ def get_gps_coordinates(doc, event):
     if len(data) > 0:
         doc.gps_latitude = data[0]['lat']
         doc.gps_longitude = data[0]['lon']
-    return [data[0]['lat'],data[0]['lon']]
+    return
 
 @frappe.whitelist()
 def get_locations():
@@ -262,5 +262,5 @@ def get_locations():
         ;
     """
     data['locations'] = frappe.db.sql(query, as_dict = True)
-    print(data)
+    #print(data)
     return data
