@@ -217,12 +217,14 @@ Get data for customer map
 """
 @frappe.whitelist()
 def get_gps_coordinates(doc, event):
-    url = "https://nominatim.openstreetmap.org/search?q={street},{location}&format=json&polygon=1&addressdetails=0".format(street=doc.address_line1, location=doc.city)
-    response = requests.get(url)
-    data = response.json()
-    if len(data) > 0:
-        doc.gps_latitude = data[0]['lat']
-        doc.gps_longitude = data[0]['lon']
+    # only locate if object has no coordinates
+    if not doc.gps_latitude and not doc.gps_longitude:
+        url = "https://nominatim.openstreetmap.org/search?q={street},{location}&format=json&polygon=1&addressdetails=0".format(street=doc.address_line1, location=doc.city)
+        response = requests.get(url)
+        data = response.json()
+        if len(data) > 0:
+            doc.gps_latitude = data[0]['lat']
+            doc.gps_longitude = data[0]['lon']
     return
 
 @frappe.whitelist()
