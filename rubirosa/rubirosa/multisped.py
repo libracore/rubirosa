@@ -393,7 +393,8 @@ def get_dns_data():
         `tabDelivery Note`.`posting_date` AS `posting_date`,
         `tabDelivery Note`.`po_no` AS `auftragsnummer`,
         "Order" AS `auftragsart`,
-        `tabDelivery Note`.`woocommerce_order_id` AS `auftragskennz`
+        `tabDelivery Note`.`woocommerce_order_id` AS `auftragskennz`,
+        `tabDelivery Note`.`tax_id` AS `tax_id`
     FROM
         `tabDelivery Note`
     LEFT JOIN `tabMultisped Transfer Record` AS `mtr` ON `tabDelivery Note`.`name` = `mtr`.`delivery_note`
@@ -459,6 +460,18 @@ def get_dns_data():
         # define carrier
         d['carrier'] = carrier_codes[dn_doc.shipping_method] if dn_doc.shipping_method in carrier_codes else carrier_codes['SwissPost Economy']
         
+        # extend sales invoice if available
+        sinvs = frappe.db.sql("""
+            SELECT `parent`
+            FROM `tabSales Invoice Item`
+            WHERE `delivery_note` = "{dn}"
+            ORDER BY `modified` DESC
+            LIMIT 1;""".format(dn=d['name']), as_dict=True)
+        if len(sinvs) > 0:
+            d['sales_invoice'] = sinvs[0]['parent']
+        else:
+            d['sales_invoice'] = d['name']
+            
     return data
 
 def generate_purchase_order(debug=False):    
