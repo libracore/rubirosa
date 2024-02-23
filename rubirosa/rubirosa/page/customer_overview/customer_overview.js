@@ -61,7 +61,7 @@ frappe.customer_overview = {
 
         // create map     
         document.getElementById('map-container').innerHTML = "<div id='map' style='width: 100%; height: 800px;'></div>";
-        var map = L.map('map').setView([gps_lat, gps_long], initial_zoom);
+        var map = L.map('map').setView([gps_lat, gps_long], initial_zoom)
         // create layer
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -81,12 +81,13 @@ frappe.customer_overview = {
                     gps_long = geo.gps_long;
                     map.panTo(new L.LatLng(gps_lat, gps_long));
                 }
-
                 document.getElementById("overlay-text").innerHTML = "<p>" + geo.locations.length + " Objekte platzieren...</p>";
+                
+                customer = {customer: customer_name, address: geo.address, city: geo.city, plz: geo.plz, country: geo.country, gps_lat: gps_lat, gps_long: gps_long, radius: radius};
 
                 // add marker for the reference object
                 L.marker([gps_lat, gps_long], {'icon': red_icon}).addTo(map)
-                    .bindPopup(get_popup_str(customer_name));
+                    .bindPopup(get_popup_str(customer));
                 // add other markers
                 if (geo) {
                     for (var i = 0; i < geo.locations.length; i++) {
@@ -100,11 +101,10 @@ frappe.customer_overview = {
                                 // set icon color
                                 icon = green_icon;
                             }
-                            
+                            // add marker including customer name, link to customer form and address
                             L.marker([geo.locations[i].gps_lat, geo.locations[i].gps_long], { 'icon': icon })
                                 .addTo(map)
-                                .bindPopup(get_popup_str(geo.locations[i].customer));
-                            console.log(i);
+                                .bindPopup(get_popup_str(geo.locations[i]));
                         } else {
                             console.log("Skipping location with null lat/lon:", geo.locations[i]);
                         }
@@ -142,10 +142,14 @@ frappe.customer_overview = {
     }
 }
 
-function get_popup_str(customer_name) {
-    html = "<b><a href=\"/desk#Form/Customer/" 
-        + (customer_name || "rubirosa") + "\" target=\"_blank\">" 
-        + (customer_name || "rubirosa") + "</a></b>";
-
+function get_popup_str(customer) {
+    html = "<b><a href=\"/desk#Form/Customer/"
+        + (customer.customer || "rubirosa") + "\" target=\"_blank\">"
+        + (customer.customer || "rubirosa") + "</a></b>"
+        + "<br><strong>Addresse:</strong> "
+        + (customer.address + (customer.address2 ? ", " + customer.address2 : "") + ", " + customer.plz + " " + customer.city + ", " + customer.country || "Address not available");
+ 
+    html += '<br><a id="viewSalesOrders" onclick="frappe.set_route(\'List\', \'Sales Order\', {\'customer\': \'' + customer.customer + '\'})">Sales Orders</a>';
+        
     return html;
 }

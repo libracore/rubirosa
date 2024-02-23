@@ -231,6 +231,10 @@ def get_gps_coordinates(doc, event):
 def get_locations():
     data = {
         'object': "rubirosa",
+        'address': "Lagerstrasse 4", 
+        'city': "Gossau SG",
+        'plz': 9200,
+        'country': "Schweiz",
         'gps_lat': 47.4113807,
         'gps_long': 9.275177907194573
     }
@@ -238,6 +242,11 @@ def get_locations():
         SELECT
             `raw`.`customer_name` AS `customer`,
             `raw`.`customer_group` AS `customer_group`,
+            `tabAddress`.`address_line1` AS `address`,
+            `tabAddress`.`address_line2` AS `address2`,
+            `tabAddress`.`city` AS `city`,
+            `tabAddress`.`pincode` AS `plz`,
+            `tabAddress`.`country` AS `country`,
             `tabAddress`.`gps_latitude` AS `gps_lat`, 
             `tabAddress`.`gps_longitude` AS `gps_long`
         FROM (

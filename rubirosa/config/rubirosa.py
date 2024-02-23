@@ -24,6 +24,12 @@ def get_data():
                        "name": "Marketing Material",
                        "label": _("Marketing Material"),
                        "description": _("Marketing Material")
+                   },
+                   {
+                       "type": "page",
+                       "name": "customer-overview",
+                       "label": _("Customer Overview"),
+                        "description": _("Customer Overview")
                    }
             ]
         },
