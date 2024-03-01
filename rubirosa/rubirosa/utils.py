@@ -5,6 +5,7 @@ import frappe
 from frappe import _
 from datetime import datetime
 from frappe.utils.background_jobs import enqueue
+import requests
 """
    :params:
    item_code_pattern: "CAI%": item_code mask to find items
@@ -210,3 +211,67 @@ def get_purchase_receipt_items(purchase_receipt):
         WHERE `tabPurchase Receipt Item`.`parent` = "{prec}";
     """.format(prec=purchase_receipt), as_dict=True)
     return content
+
+"""
+Get data for customer map
+"""
+@frappe.whitelist()
+def get_gps_coordinates(doc, event):
+    # only locate if object has no coordinates
+    if not doc.gps_latitude and not doc.gps_longitude:
+        url = "https://nominatim.openstreetmap.org/search?q={street},{location}&format=json&polygon=1&addressdetails=0".format(street=doc.address_line1, location=doc.city)
+        response = requests.get(url)
+        data = response.json()
+        if len(data) > 0:
+            doc.gps_latitude = data[0]['lat']
+            doc.gps_longitude = data[0]['lon']
+    return
+
+@frappe.whitelist()
+def get_locations():
+    data = {
+        'object': "rubirosa",
+        'address': "Lagerstrasse 4", 
+        'city': "Gossau SG",
+        'plz': 9200,
+        'country': "Schweiz",
+        'gps_lat': 47.4113807,
+        'gps_long': 9.275177907194573
+    }
+    query = """
+        SELECT
+            `raw`.`customer_name` AS `customer`,
+            `raw`.`customer_group` AS `customer_group`,
+            `tabAddress`.`address_line1` AS `address`,
+            `tabAddress`.`address_line2` AS `address2`,
+            `tabAddress`.`city` AS `city`,
+            `tabAddress`.`pincode` AS `plz`,
+            `tabAddress`.`country` AS `country`,
+            `tabAddress`.`gps_latitude` AS `gps_lat`, 
+            `tabAddress`.`gps_longitude` AS `gps_long`
+        FROM (
+            SELECT 
+                `cust`.`name` AS `customer_name`,
+                `cust`.`customer_group`,
+                (SELECT `tDLA`.`parent` 
+                FROM `tabDynamic Link` AS `tDLA`
+                LEFT JOIN `tabAddress` AS `tA` ON `tDLA`.`parent` = `tA`.`name`
+                WHERE `tDLA`.`link_name` = `cust`.`name`
+                AND `tDLA`.`parenttype` = "Address"
+                ORDER BY `tA`.`is_primary_address` DESC
+                LIMIT 1) AS `address`
+            FROM `tabCustomer` AS `cust`
+            WHERE
+            (`cust`.`customer_group` = 'Retail Customer Men'
+            OR `cust`.`customer_group` = 'Retail Customer Women'
+            OR `cust`.`customer_group` = 'Retail Customer Women + Men'
+            OR `cust`.`customer_group` LIKE '%Potentials%')
+            AND `cust`.`disabled` = 0
+            AND `customer_name` != 'Test'
+        ) AS `raw`
+        LEFT JOIN `tabAddress` ON `tabAddress`.`name` = `raw`.`address`
+        ;
+    """
+    data['locations'] = frappe.db.sql(query, as_dict = True)
+    #print(data)
+    return data

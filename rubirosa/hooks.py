@@ -97,13 +97,13 @@ jenv = {
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
+doc_events = {
+ 	"Address": {
+ 		"before_save": "rubirosa.rubirosa.utils.get_gps_coordinates"
 # 		"on_cancel": "method",
 # 		"on_trash": "method"
-#	}
-# }
+	}
+ }
 
 # Scheduled Tasks
 # ---------------
