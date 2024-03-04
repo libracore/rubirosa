@@ -240,8 +240,8 @@ def get_locations():
     }
     query = """
         SELECT
-            `raw`.`customer_name` AS `customer`,
-            `raw`.`customer_group` AS `customer_group`,
+            `tabCustomer`.`customer_name` AS `customer`,
+            `tabCustomer`.`customer_group` AS `customer_group`,
             `tabAddress`.`address_line1` AS `address`,
             `tabAddress`.`address_line2` AS `address2`,
             `tabAddress`.`city` AS `city`,
@@ -249,27 +249,18 @@ def get_locations():
             `tabAddress`.`country` AS `country`,
             `tabAddress`.`gps_latitude` AS `gps_lat`, 
             `tabAddress`.`gps_longitude` AS `gps_long`
-        FROM (
-            SELECT 
-                `cust`.`name` AS `customer_name`,
-                `cust`.`customer_group`,
-                (SELECT `tDLA`.`parent` 
-                FROM `tabDynamic Link` AS `tDLA`
-                LEFT JOIN `tabAddress` AS `tA` ON `tDLA`.`parent` = `tA`.`name`
-                WHERE `tDLA`.`link_name` = `cust`.`name`
-                AND `tDLA`.`parenttype` = "Address"
-                ORDER BY `tA`.`is_primary_address` DESC
-                LIMIT 1) AS `address`
-            FROM `tabCustomer` AS `cust`
-            WHERE
-            (`cust`.`customer_group` = 'Retail Customer Men'
-            OR `cust`.`customer_group` = 'Retail Customer Women'
-            OR `cust`.`customer_group` = 'Retail Customer Women + Men'
-            OR `cust`.`customer_group` LIKE '%Potentials%')
-            AND `cust`.`disabled` = 0
+        FROM `tabAddress`
+        LEFT JOIN `tabDynamic Link` AS `tDL` ON `tDL`.`parent` = `tabAddress`.`name` AND `tDL`.`parenttype` = "Address" AND `tDL`.`link_doctype` = "Customer"
+        LEFT JOIN `tabCustomer` ON `tabCustomer`.`name` = `tDL`.`link_name`
+        WHERE
+            `tabAddress`.`gps_latitude` IS NOT NULL
+            AND `tabAddress`.`gps_longitude` IS NOT NULL
+            AND (`tabCustomer`.`customer_group` = 'Retail Customer Men'
+            OR `tabCustomer`.`customer_group` = 'Retail Customer Women'
+            OR `tabCustomer`.`customer_group` = 'Retail Customer Women + Men'
+            OR `tabCustomer`.`customer_group` LIKE '%Potentials%')
+            AND `tabCustomer`.`disabled` = 0
             AND `customer_name` != 'Test'
-        ) AS `raw`
-        LEFT JOIN `tabAddress` ON `tabAddress`.`name` = `raw`.`address`
         ;
     """
     data['locations'] = frappe.db.sql(query, as_dict = True)
