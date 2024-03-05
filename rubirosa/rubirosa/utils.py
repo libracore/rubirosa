@@ -219,7 +219,7 @@ Get data for customer map
 def get_gps_coordinates(doc, event):
     # only locate if object has no coordinates
     if not doc.gps_latitude and not doc.gps_longitude:
-        url = "https://nominatim.openstreetmap.org/search?q={street},{location}&format=json&polygon=1&addressdetails=0".format(street=doc.address_line1, location=doc.city)
+        url = "https://nominatim.openstreetmap.org/search?q={street},{location},{country}&format=json&polygon=1&addressdetails=0".format(street=doc.address_line1, location="{0} {1}".format(doc.pincode or "", doc.city or ""), country=doc.country)
         response = requests.get(url)
         data = response.json()
         if len(data) > 0:
