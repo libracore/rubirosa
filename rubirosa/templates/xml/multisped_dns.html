@@ -45,7 +45,7 @@ K*|
     {{- (dn.get("text2") or "")[:255] }}|{# 43 #}
     {{- (dn.get("text2") or "")[:255] }}|{# 44 #}
     {{- (dn.get("vas_code") or "")[:255] }}|{# 45 #}
-    {{- (dn.get("freight_cost") or "")[:10] }}|{# 46 #}
+    {{- (dn.get("freight_cost") or "") }}|{# 46 #}
     {{- (dn.get("tax_id") or "") or "" }}|{# 47 #}
     {{- (dn.get("sales_invoice") or "")[:10] }}{# 48 #}
 {%- for item in dn['items'] %}
