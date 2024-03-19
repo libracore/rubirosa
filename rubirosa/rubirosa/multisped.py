@@ -460,6 +460,13 @@ def get_dns_data():
         # define carrier
         d['carrier'] = carrier_codes[dn_doc.shipping_method] if dn_doc.shipping_method in carrier_codes else carrier_codes['SwissPost Economy']
         
+        # extend shipping cost if available
+        d['freight_cost'] = 0
+        if dn_doc.taxes:
+            for t in dn_doc.taxes:
+                if "Shipping" in t.account_head:
+                    d['freight_cost'] += t.tax_amount
+        
         # extend sales invoice if available
         sinvs = frappe.db.sql("""
             SELECT `parent`
